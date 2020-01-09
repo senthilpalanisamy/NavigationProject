@@ -5,6 +5,7 @@
 
 #include<iosfwd> // contains forward definitions for iostream objects
 #include<stdlib.h>
+#include<iostream>
 
 namespace rigid2d
 {
