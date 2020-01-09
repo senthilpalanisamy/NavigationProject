@@ -21,6 +21,14 @@ int main(void)
   cin>>v;
   cout<<"printing v\n";
   cout<<v;
-
-
+  rigid2d::Transform2D Tab; 
+  rigid2d::Transform2D Tbd; 
+  cout<<Tab<<"\n";
+  rigid2d::Transform2D Tbc(1.7); 
+  cout<<Tbc<<"\n";
+  rigid2d::Transform2D Tcd(rigid2d::Vector2D{1.0, 2.0}); 
+  //cout<<Tcd<<"\n";
+  Tbd *= Tbc;
+  Tbd *= Tcd;
+  cout<<Tbd;
 }

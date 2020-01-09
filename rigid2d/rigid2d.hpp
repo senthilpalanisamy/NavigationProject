@@ -6,6 +6,11 @@
 #include<iosfwd> // contains forward definitions for iostream objects
 #include<stdlib.h>
 #include<iostream>
+#include<math.h>
+
+//#include <boost/numeric/ublas/matrix.hpp>
+
+
 
 namespace rigid2d
 {
@@ -123,6 +128,7 @@ namespace rigid2d
         /// directly initialize, useful for forming the inverse
         Transform2D(double theta, double ctheta, double stheta, double x, double y);
         double theta, ctheta, stheta, x, y; // angle, sin, cos, x, and y
+
     };
 
 
