@@ -8,6 +8,7 @@
 #include<iostream>
 #include<math.h>
 
+
 //#include <boost/numeric/ublas/matrix.hpp>
 
 
@@ -74,6 +75,7 @@ namespace rigid2d
 
     };
 
+
     /// \brief output a 2 dimensional vector as [xcomponent ycomponent]
     /// os - stream to output to
     /// v - the vector to print
@@ -88,6 +90,25 @@ namespace rigid2d
     /// https://en.cppreference.com/w/cpp/io/basic_istream/peek
     /// https://en.cppreference.com/w/cpp/io/basic_istream/get
     std::istream & operator>>(std::istream & is, Vector2D & v);
+
+    /// \brief A 2-Dimensional Twist vector
+    struct Twist2D
+    {
+       float wz=0.0, vx=0.0, vy=0.0;
+    };
+
+    /// \brief output a 2 dimensional twist vector as [omegaz linearx lineary]
+    /// os - stream to output to
+    /// v - twist vector to print
+    std::ostream & operator<<(std::ostream & os, const Twist2D & v);
+
+    /// \brief input a 2 dimensional twist vector
+    /// is - stream from which to read
+    /// v [out] - output 2 dimensional twist vector [omegaz linearx lineary]
+    std::istream & operator>>(std::istream & is, Twist2D & v);
+
+
+
 
     /// \brief a rigid body transformation in 2 dimensions
     class Transform2D
@@ -114,6 +135,7 @@ namespace rigid2d
         /// \param v - the vector to transform
         /// \return a vector in the new coordinate system
         Vector2D operator()(Vector2D v) const;
+        Twist2D operator()(Twist2D v) const;
 
         /// \brief invert the transformation
         /// \return the inverse transformation. 

@@ -18,6 +18,23 @@ std::istream & operator>>(std::istream & is, Vector2D & v)
 
 }
 
+std::ostream & operator<<(std::ostream & os, const Twist2D & v)
+{
+
+ os<<v.wz<<"  "<<v.vx<<"  "<<v.vy<<"\n"; 
+ return os;
+}
+
+
+std::istream & operator>>(std::istream & is, Twist2D & v)
+{
+  is>>v.wz;
+  is>>v.vx;
+  is>>v.vy;
+  return is;
+
+}
+
 Transform2D::Transform2D()
     {
       theta = 0.0;
@@ -62,6 +79,15 @@ Vector2D Transform2D::operator()(Vector2D v) const
   v.y = this->stheta * old_x + this->ctheta * v.y + this-> y;
   return v;
 
+}
+
+
+Twist2D Transform2D::operator()(Twist2D v) const
+{
+float old_twistvx = v.vx;
+v.vx = v.wz * this->y + this->ctheta * v.vx - this->stheta * v.vy;
+v.vy = -this->x * v.wz + this-> stheta * old_twistvx + this->ctheta * v.vy;
+return v;
 }
 
 Transform2D Transform2D::inv() const{
