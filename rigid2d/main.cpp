@@ -1,4 +1,8 @@
-
+/// \file
+///// \brief This file is just a way to interface with the core rigid2d library
+///// and test the implementation. In particular, this file accepts inputs for transforms
+///// points and twists in any user defined frame, and converts them those points 
+///// and frames to all other existing frames and displays them
 #include<iostream>
 #include"rigid2d.hpp"
 #include <vector>
