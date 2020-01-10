@@ -68,6 +68,10 @@ namespace rigid2d
     {
         double x = 0.0;
         double y = 0.0;
+
+    Vector2D operator/(const float divisor);
+    void normalise();
+
     };
 
     /// \brief output a 2 dimensional vector as [xcomponent ycomponent]

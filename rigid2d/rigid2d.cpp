@@ -89,4 +89,21 @@ std::ostream & operator<<(std::ostream & os, const Transform2D & tf)
   return os;
 }
 
+
+Vector2D Vector2D::operator/(const float divisor)
+{
+  struct Vector2D divided_vec = {0.0, 0.0};
+  divided_vec.x = this->x / divisor;
+  divided_vec.y = this->y / divisor;
+  return divided_vec;
+
+}
+
+void Vector2D::normalise()
+{
+  float length = pow(pow(this->x, 2) + pow(this->y, 2), 0.5);
+  *this = *this / length;
+
+}
+
 }

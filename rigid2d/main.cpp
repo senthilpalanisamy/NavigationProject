@@ -31,4 +31,9 @@ int main(void)
   Tbd *= Tbc;
   Tbd *= Tcd;
   cout<<Tbd;
+  struct rigid2d::Vector2D v3 = {4.0, 5.0};
+  cout<<"\nnormalising\n";
+  v3.normalise();
+  cout<<v3.x<<"   "<<v3.y;
+
 }
