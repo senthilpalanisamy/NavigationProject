@@ -1,0 +1,18 @@
+
+Enter Transformation Tab: order - dtheta, dx, dy:
+Enter Transformation Tbc: order - dtheta, dx, dy:
+Enter the frame for vector and twist:
+Enter the vector x,y:
+
+Enter a Twist: order wz vx vy:point in frame  a  is  :-1.01721  5.84676
+
+twist in frame  a  is  :7  44.6093  -9.56613
+
+point in frame  b  is  :0.765258  4.077
+
+twist in frame  b  is  :7  16.4871  -17.4709
+
+point in frame  c  is  :1  2
+
+twist in frame  c  is  :7  8  9
+

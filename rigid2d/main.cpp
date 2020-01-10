@@ -15,8 +15,6 @@ int main(void)
   char frame;
   rigid2d::Twist2D Tw;
 
-  cout<<"\nThe entered twist is:";
-  cout<<Tw;
 
 
   cout<<"\nEnter Transformation Tab: order - dtheta, dx, dy:";

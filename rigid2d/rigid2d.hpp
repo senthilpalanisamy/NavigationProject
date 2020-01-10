@@ -8,7 +8,6 @@
 #include<iostream>
 #include<math.h>
 
-
 //#include <boost/numeric/ublas/matrix.hpp>
 
 
