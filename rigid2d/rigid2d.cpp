@@ -40,8 +40,8 @@ Transform2D::Transform2D(const Vector2D & trans)
 Transform2D::Transform2D(double radians)
 {
       theta = radians;
-      ctheta = cos(rad2deg(radians));
-      stheta = sin(rad2deg(radians));
+      ctheta = cos(radians);
+      stheta = sin(radians);
       x = 0;
       y = 0;
 }
@@ -49,16 +49,17 @@ Transform2D::Transform2D(double radians)
 Transform2D::Transform2D(const Vector2D & trans, double radians)
 {
       theta = radians;
-      ctheta = cos(rad2deg(radians));
-      stheta = sin(rad2deg(radians));
+      ctheta = cos(radians);
+      stheta = sin(radians);
       x = trans.x;
       y = trans.y;
 }
 
 Vector2D Transform2D::operator()(Vector2D v) const
 {
-  v.x = this->ctheta * v.x +- this->stheta * v.y + this-> x;
-  v.y = this->stheta * v.x + this->ctheta * v.y + this-> y;
+  float old_x = v.x;
+  v.x = this->ctheta * v.x - this->stheta * v.y + this-> x;
+  v.y = this->stheta * old_x + this->ctheta * v.y + this-> y;
   return v;
 
 }
@@ -69,17 +70,20 @@ Transform2D Transform2D::inv() const{
   inv_transform.ctheta = this->ctheta;
   inv_transform.stheta = -this->stheta;
   inv_transform.x = -this->ctheta * this->x - this->stheta * this->y;
-  inv_transform.y = this->stheta * this->x + this-> ctheta * this->y;
+  inv_transform.y = this->stheta * this->x - this-> ctheta * this->y;
   return inv_transform;
 }
 
 Transform2D & Transform2D::operator*=(const Transform2D & rhs)
 {
-  this->ctheta = this->ctheta * rhs.ctheta - this->stheta * rhs.stheta;
-  this->stheta = this->ctheta * rhs.stheta + this->stheta * rhs.ctheta;
-  this->x = this->ctheta * rhs.x - this->stheta * rhs.y + this->x;
-  this->y = this->stheta * rhs.x + this-> ctheta * rhs.y + this->y;
+
   this->theta = this->theta + rhs.theta;
+  float prev_c_theta = this->ctheta;
+  float prev_s_theta = this->stheta;
+  this->ctheta = cos(this->theta);
+  this->stheta = sin(this->theta);
+  this->x = prev_c_theta * rhs.x - prev_s_theta * rhs.y + this->x;
+  this->y = prev_s_theta * rhs.x + prev_c_theta * rhs.y + this->y;
   return *this;
 }
 
@@ -87,6 +91,17 @@ std::ostream & operator<<(std::ostream & os, const Transform2D & tf)
 {
   os<<"dtheta:"<<tf.theta<<"  dx:"<<tf.x<<"  dy:"<<tf.y;
   return os;
+}
+
+std::istream & operator>>(std::istream & is, Transform2D & tf)
+{
+  is >> tf.theta;
+  is>>tf.x;
+  is>>tf.y;
+  tf.ctheta =  cos(tf.theta);
+  tf.stheta =  sin(tf.theta);
+  return is;
+
 }
 
 

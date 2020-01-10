@@ -128,6 +128,7 @@ namespace rigid2d
         /// \brief \see operator<<(...) (declared outside this class)
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
+        friend std::istream & operator>>(std::istream & is, Transform2D & tf);
     private:
         /// directly initialize, useful for forming the inverse
         Transform2D(double theta, double ctheta, double stheta, double x, double y);
@@ -141,12 +142,11 @@ namespace rigid2d
     /// dtheta (degrees): 90 dx: 3 dy: 5
     /// \param os - an output stream
     /// \param tf - the transform to print
-    std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
+    //std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
 
     /// \brief Read a transformation from stdin
     /// Should be able to read input either as output by operator<< or
     /// as 3 numbers (degrees, dx, dy) separated by spaces or newlines
-    std::istream & operator>>(std::istream & is, Transform2D & tf);
 
     /// \brief multiply two transforms together, returning their composition
     /// \param lhs - the left hand operand
