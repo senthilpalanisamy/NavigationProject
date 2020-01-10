@@ -38,6 +38,15 @@ std::istream & operator>>(std::istream & is, Twist2D & v)
 
 }
 
+
+Transform2D operator*(Transform2D lhs, const Transform2D & rhs)
+{
+Transform2D result;
+result *= lhs;
+result *= rhs;
+return result;
+}
+
 Transform2D::Transform2D()
     {
       theta = 0.0;

@@ -27,9 +27,7 @@ int main(void)
 
   cout<<"\nEnter Transformation Tbc: order - dtheta, dx, dy:";
   cin>> Tbc;
-
-  Tac *= Tab;
-  Tac *= Tbc;
+  Tac = Tab * Tbc;
   Tca = Tac.inv();
   Tba = Tab.inv();
   Tcb = Tbc.inv();
