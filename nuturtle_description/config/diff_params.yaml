@@ -1,6 +1,8 @@
 ---
-wheel_width: 0.75
-wheel_radius: 2.5
-wheel_base: 3.0
-chasis_length: 10.0
-chasis_thickness: 3.0
+wheel_width: 0.75 # Thickness of the wheel
+wheel_radius: 2.5 # radius of the two differential wheels. 
+                  # The radius of the castor wheel is half of this
+wheel_base: 3.0   # Distance between the wheel centers
+chasis_length: 10.0 # Length of the robot's body
+chasis_thickness: 3.0 # z dimension of the robot body
+
