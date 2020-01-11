@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="differential_drive_robot">
+
+  <xacro:property name="robot_specs" value="${load_yaml('$(find nuturtle_description)/config/diff_params.yaml')}"/>
+  <material name="blue">
+    <color rgba="0 0 1 0.5"/>
+  </material>
+
+  <material name="red">
+    <color rgba="1 0 0 0.5"/>
+  </material>
+
+  <material name="black">
+    <color rgba="0 0 0 0.5"/>
+  </material>
+
+  <material name="transparent">
+    <color rgba="0 0 0 0.0"/>
+  </material>
+
+
+
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${robot_specs['chasis_length']} ${robot_specs['wheel_base'] - 2 * robot_specs['wheel_width']} ${robot_specs['chasis_thickness']}"/>
+      </geometry>
+      <origin xyz="${robot_specs['chasis_length']/2} 0 0" rpy="0 0 0"/>
+      <material name="red"/>
+    </visual>
+  </link>
+
+
+   <joint name="left_wheel_axle" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="0  ${(robot_specs['wheel_base'] - 2 * robot_specs['wheel_width'])/2} 0"/>
+    <axis xyz="0 1 0"/>
+   </joint>
+
+  <link name="left_wheel">
+    <visual>
+      <geometry>
+        <cylinder length="${robot_specs['wheel_width']}" radius="${robot_specs['wheel_radius']}"/>
+      </geometry>
+      <origin xyz="0 ${robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
+
+
+
+   <joint name="right_wheel_axle" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="0  ${-(robot_specs['wheel_base'] - 2 * robot_specs['wheel_width'])/2} 0"/>
+    <axis xyz="0 1 0"/>
+   </joint>
+
+  <link name="right_wheel">
+    <visual>
+      <geometry>
+        <cylinder length="${robot_specs['wheel_width']}" radius="${robot_specs['wheel_radius']}"/>
+      </geometry>
+      <origin xyz="0 ${-robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
+
+
+   <joint name="castor_axle" type="continuous">
+    <parent link="base_link"/>
+    <child link="castor"/>
+    <origin xyz="${robot_specs['chasis_length'] - robot_specs['wheel_radius']/4} 0 ${-robot_specs['chasis_thickness']/2-robot_specs['wheel_radius']/4}"/>
+    <axis xyz="0 -1 0"/>
+   </joint>
+
+
+  <link name="castor">
+    <visual>
+      <geometry>
+        <sphere radius="${robot_specs['wheel_radius']/4}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="black"/>
+    </visual>
+  </link>
+
+
+
+
+
+</robot>
+
