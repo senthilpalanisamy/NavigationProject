@@ -62,7 +62,9 @@ void Rect_Navigation::pose_callback(const turtlesim::Pose pose)
   tsim::ErrorPose  error_message;
   error_message.x_error = abs(pose.x - current_x);
   error_message.y_error = abs(pose.y - current_y);
-  error_message.theta_error= abs(pose.theta - current_angle);
+  float angle_diff = pose.theta - current_angle;
+  float angle_diff_wrapped = atan2(sin(angle_diff), cos(angle_diff));
+  error_message.theta_error= abs(angle_diff_wrapped);
   pose_error_publisher.publish(error_message);
 
 }
