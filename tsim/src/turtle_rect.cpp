@@ -60,9 +60,9 @@ void Rect_Navigation::pose_callback(const turtlesim::Pose pose)
 {
   ROS_INFO_STREAM("pose_x  "<<pose.x<<"  pose_y  "<<pose.y<<"pose theta"<<pose.theta);
   tsim::ErrorPose  error_message;
-  error_message.x_error = pose.x - current_x;
-  error_message.y_error = pose.y - current_y;
-  error_message.theta_error= pose.theta - current_angle;
+  error_message.x_error = abs(pose.x - current_x);
+  error_message.y_error = abs(pose.y - current_y);
+  error_message.theta_error= abs(pose.theta - current_angle);
   pose_error_publisher.publish(error_message);
 
 }
