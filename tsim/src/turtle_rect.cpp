@@ -42,6 +42,9 @@ Rect_Navigation::Rect_Navigation(int argc, char **argv)
   total_time = 0;
   reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
                                      this);
+  pose_error_publisher = n.advertise<tsim::ErrorPose>("/pose_error", 1000);
+  pose_subscriber = n.subscribe("/turtle1/pose", 1000, &Rect_Navigation::pose_callback,
+                                    this);
 }
 
 bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
@@ -51,6 +54,17 @@ bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
   //initialise_turtle();
   ROS_INFO_STREAM("Inside service\n");
   return true;
+}
+
+void Rect_Navigation::pose_callback(const turtlesim::Pose pose)
+{
+  ROS_INFO_STREAM("pose_x  "<<pose.x<<"  pose_y  "<<pose.y<<"pose theta"<<pose.theta);
+  tsim::ErrorPose  error_message;
+  error_message.x_error = pose.x - current_x;
+  error_message.y_error = pose.y - current_y;
+  error_message.theta_error= pose.theta - current_angle;
+  pose_error_publisher.publish(error_message);
+
 }
 
 Circular_Linked_List* Rect_Navigation::create_waypoints_list()
@@ -198,21 +212,6 @@ int main(int argc, char **argv){
   ros::spinOnce();
   }
 
-  //ros::init(argc, argv, "turtle_rect");
-  //int height, width, x, y;
-  //float frequency, rot_vel, trans_vel;
-
-  // ros::param::get("height", height);
-  // ros::param::get("width", width);
-  // ros::param::get("x", x);
-  // ros::param::get("y", y);
-  // ros::param::get("frequency", frequency);
-  // ros::param::get("rot_vel", rot_vel);
-  // ros::param::get("trans_vel", trans_vel);
-  // cout<<height<<"\n"<<width<<"\n"<<x<<"\n"<<y<<"\n"<<frequency<<"\n"<<rot_vel<<"\n"<<trans_vel<<"\n";
-  // ROS_INFO_STREAM("\n height:" <<height<<"\nwidth:" <<width <<"\nx"<<x<<"\ny"<<y
-  //                 <<"\nfrequency:"<<frequency<<"\nrotational velocity"<<rot_vel<<"\ntranslational velocity"<<trans_vel);
-  // ros::Rate loop_rate(frequency);
   return 0;
 }
 

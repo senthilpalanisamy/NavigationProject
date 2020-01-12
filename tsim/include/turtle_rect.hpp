@@ -6,6 +6,8 @@
 #include<turtlesim/SetPen.h>
 #include<turtlesim/TeleportAbsolute.h>
 #include <std_srvs/Empty.h>
+#include<tsim/ErrorPose.h>
+#include<turtlesim/Pose.h>
 
 namespace Turtle_Navigation
 {
@@ -38,7 +40,6 @@ namespace Turtle_Navigation
       bool reset_turtle_callback(std_srvs::Empty::Request& request,
                                   std_srvs::Empty::Response& response);
 
-      ros::ServiceServer reset_turtle;
       //float x, y;
     private:
       float height, width, x, y;
@@ -48,7 +49,11 @@ namespace Turtle_Navigation
       void update_current_pose();
       //ros::NodeHandle n;
       Circular_Linked_List* create_waypoints_list();
-      ros::Publisher velocity_publisher;
+      ros::Publisher velocity_publisher, pose_error_publisher;
+      ros::ServiceServer reset_turtle;
+      void pose_callback(const turtlesim::Pose pose);
+      ros::Subscriber pose_subscriber;
+     
   };
 
 }
