@@ -24,7 +24,6 @@ Rect_Navigation::Rect_Navigation(int argc, char **argv)
 {
 
   ros::init(argc, argv, "turtle_rect");
-
   ros::NodeHandle n;
   ros::param::get("height", height);
   ros::param::get("width", width);
@@ -38,18 +37,31 @@ Rect_Navigation::Rect_Navigation(int argc, char **argv)
                   <<"\nfrequency:"<<frequency<<"\nrotational velocity"<<rot_vel<<"\ntranslational velocity"<<trans_vel);
   state = INITIALISE;
   current_waypoint = create_waypoints_list();
+  //first_waypoint = current_waypoint;
   velocity_publisher = n.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 1000);
   total_time = 0;
+  reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
+                                     this);
+}
+
+bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
+                                            std_srvs::Empty::Response& response)
+{
+  state = RESET;
+  //initialise_turtle();
+  ROS_INFO_STREAM("Inside service\n");
+  return true;
 }
 
 Circular_Linked_List* Rect_Navigation::create_waypoints_list()
     {
 
     Circular_Linked_List* head = new Circular_Linked_List(NULL, x, y);
-    Circular_Linked_List* element2 = new Circular_Linked_List(head, x+width, y);
-    Circular_Linked_List* element3 = new Circular_Linked_List(element2, x+width, y+height);
+    //Circular_Linked_List* first_waypoint = new Circular_Linked_List(NULL, x, y);
+    first_waypoint = new Circular_Linked_List(head, x+width, y);
+    Circular_Linked_List* element3 = new Circular_Linked_List(first_waypoint, x+width, y+height);
     Circular_Linked_List* element4 = new Circular_Linked_List(element3, x, y+height);
-    return element2;
+    return first_waypoint;
     }
 
 
@@ -57,6 +69,10 @@ void Rect_Navigation::initialise_turtle()
 {
 
    ros::NodeHandle n;
+
+
+   // reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
+   //                                  this);
 
    ros::service::waitForService("turtle1/set_pen", 5000);
    ros::service::waitForService("turtle1/teleport_absolute", 5000);
@@ -82,6 +98,8 @@ void Rect_Navigation::initialise_turtle()
 
    goal_angle = 0;
    current_angle = 0;
+   current_x = x;
+   current_y = y;
    previous_time = ros::Time::now();
 
 }
@@ -99,17 +117,22 @@ void Rect_Navigation::update_current_pose()
                  //<<"previous_time"<<previous_time<<"current_time"<<ros::Time::now()
                  //<<"total_time"<<total_time<<"\n sine theta"<<sin(current_angle));
   current_angle = atan2(sin(current_angle), cos(current_angle));
+  ROS_INFO_STREAM("finished update pose");
 }
 
 void Rect_Navigation::follow_way_point()
 {
   geometry_msgs::Twist velocity_message;
   update_current_pose();
+
+  ROS_INFO_STREAM("accessing waypoint");
   float goal_angle = atan2(current_waypoint->y - current_y, current_waypoint->x - current_x);
+  ROS_INFO_STREAM("finished accessing waypoint");
   float angle_difference = current_angle - goal_angle;
   float angle_diff_wrapped = atan2(sin(angle_difference), cos(angle_difference));
   float distance_difference = pow(pow((current_waypoint->x - current_x), 2) +
                               pow((current_waypoint->y - current_y), 2), 0.5);
+
 
   if(abs(angle_diff_wrapped) >= 0.1)
   {
@@ -135,8 +158,9 @@ void Rect_Navigation::follow_way_point()
   }
   previous_time = ros::Time::now();
   previous_velocity = velocity_message;
+  ROS_INFO_STREAM("finished one cycle of following way point");
 }
- 
+
 
 void Rect_Navigation::execute_trajectory()
 {
@@ -147,13 +171,17 @@ void Rect_Navigation::execute_trajectory()
   case FOLLOW_WAYPOINT :follow_way_point();
                         break;
   case CHANGE_WAY_POINT:current_waypoint = current_waypoint->next_element;
-                        //ROS_INFO_STREAM(current_waypoint)
-                        // if(goal_angle >= 1.5)
-                        //   goal_angle = 0;
-                        // else
-                        //   goal_angle = 1.5708;
                         state = FOLLOW_WAYPOINT;
                         break;
+  case RESET: ROS_INFO_STREAM("started_reset");
+              initialise_turtle();
+              current_waypoint = first_waypoint;
+              current_x = x;
+              current_y = y;
+              current_angle = 0;
+              state = FOLLOW_WAYPOINT;
+              ROS_INFO_STREAM("Finished reset");
+              break;
 
 }
 
@@ -167,6 +195,7 @@ int main(int argc, char **argv){
   {
   Rect_Turtle.execute_trajectory();
   loop_rate.sleep();
+  ros::spinOnce();
   }
 
   //ros::init(argc, argv, "turtle_rect");

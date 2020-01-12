@@ -5,6 +5,7 @@
 #include<geometry_msgs/Twist.h> 
 #include<turtlesim/SetPen.h>
 #include<turtlesim/TeleportAbsolute.h>
+#include <std_srvs/Empty.h>
 
 namespace Turtle_Navigation
 {
@@ -26,7 +27,7 @@ namespace Turtle_Navigation
       void pose_callback();
       void execute_trajectory();
       void follow_way_point();
-      Circular_Linked_List* current_waypoint;
+      Circular_Linked_List *current_waypoint, *first_waypoint;
       //Circular_Linked_List current_element;
       Turtle_States state;
       double current_x, current_y, goal_angle, current_angle;
@@ -34,11 +35,18 @@ namespace Turtle_Navigation
       float frequency;
       geometry_msgs::Twist previous_velocity;
       ros::Time previous_time;
+      bool reset_turtle_callback(std_srvs::Empty::Request& request,
+                                  std_srvs::Empty::Response& response);
+
+      ros::ServiceServer reset_turtle;
+      //float x, y;
     private:
       float height, width, x, y;
+      //float height, width;
       float rot_vel, trans_vel;
       void initialise_turtle();
       void update_current_pose();
+      //ros::NodeHandle n;
       Circular_Linked_List* create_waypoints_list();
       ros::Publisher velocity_publisher;
   };
