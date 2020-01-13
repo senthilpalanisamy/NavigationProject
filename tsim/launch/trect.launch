@@ -1,0 +1,17 @@
+<launch>
+  <!-- This launch file launches the turtle from turtelism package and -->
+  <!-- loads parameters for describing the rectangular trajectory of the -->
+  <!-- turtle and launches node which does the turtle control and a rqt for visualisation -->
+  <rosparam command="load" file="$(find tsim)/config/rect_trajectory.yaml" />
+  <param name="x" value="3"/>
+  <param name="y" value="2"/>
+  <param name="width" value="4"/>
+  <param name="height" value="5"/>
+  <param name="trans_vel" value="2"/>
+  <param name="rot_vel" value="1"/>
+  <param name="frequency" value="100"/>
+  <arg name="plot_gui" default="True" doc="A rqt plot to visualise pose_error"/>
+  <node name="turtle_rect" pkg="tsim" type="turtle_rect" output="screen"/>
+  <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+  <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" args="/pose_error" if="$(arg plot_gui)"/>
+</launch>

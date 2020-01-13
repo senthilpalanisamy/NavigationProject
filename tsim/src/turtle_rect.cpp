@@ -39,7 +39,6 @@ Rect_Navigation::Rect_Navigation(int argc, char **argv)
   current_waypoint = create_waypoints_list();
   //first_waypoint = current_waypoint;
   velocity_publisher = n.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 1000);
-  total_time = 0;
   reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
                                      this);
   pose_error_publisher = n.advertise<tsim::ErrorPose>("/pose_error", 1000);
@@ -51,7 +50,6 @@ bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
                                             std_srvs::Empty::Response& response)
 {
   state = RESET;
-  //initialise_turtle();
   ROS_INFO_STREAM("Inside service\n");
   return true;
 }
@@ -87,8 +85,6 @@ void Rect_Navigation::initialise_turtle()
    ros::NodeHandle n;
 
 
-   // reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
-   //                                  this);
 
    ros::service::waitForService("turtle1/set_pen", 5000);
    ros::service::waitForService("turtle1/teleport_absolute", 5000);
@@ -124,14 +120,11 @@ void Rect_Navigation::update_current_pose()
 {
   ros::Duration time_duration = ros::Time::now() - previous_time;
   double time_elapsed = time_duration.toSec();
-  total_time += time_elapsed;
   ROS_INFO_STREAM("time elapsed:  "<<time_elapsed);
   current_angle += time_elapsed * previous_velocity.angular.z;
   current_x += time_elapsed * previous_velocity.linear.x * cos(current_angle);
   current_y += time_elapsed * previous_velocity.linear.x * sin(current_angle);
   ROS_INFO_STREAM("current_x:  " << current_x <<"current_y:  " <<current_y<<"current theta:  "<<current_angle);
-                 //<<"previous_time"<<previous_time<<"current_time"<<ros::Time::now()
-                 //<<"total_time"<<total_time<<"\n sine theta"<<sin(current_angle));
   current_angle = atan2(sin(current_angle), cos(current_angle));
   ROS_INFO_STREAM("finished update pose");
 }
