@@ -55,7 +55,7 @@ Transform2D::Transform2D()
       x = 0.0;
       y = 0.0;
     }
-    
+
 Transform2D::Transform2D(const Vector2D & trans)
 {
       theta = 0.0;
@@ -133,11 +133,13 @@ std::ostream & operator<<(std::ostream & os, const Transform2D & tf)
 
 std::istream & operator>>(std::istream & is, Transform2D & tf)
 {
-  is >> tf.theta;
-  is>>tf.x;
-  is>>tf.y;
-  tf.ctheta =  cos(tf.theta);
-  tf.stheta =  sin(tf.theta);
+  double theta, x, y;
+  is >> theta;
+  is >> x;
+  is >> y;
+  Vector2D temp_vec{x, y};
+  Transform2D temp_transform(temp_vec, theta);
+  tf = temp_transform;
   return is;
 
 }
