@@ -2,7 +2,7 @@
 ///// \brief This file contains all functions definitions regarding 2d rigid body 
 ///// transforms. In particular, the 2D homogeneous transformation representations,
 ///// changing reference frames of points and twists are the core logic in the file
-#include"rigid2d.hpp"
+#include"rigid2d/rigid2d.hpp"
 
 namespace rigid2d
 {

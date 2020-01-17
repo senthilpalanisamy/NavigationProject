@@ -4,7 +4,7 @@
 ///// points and twists in any user defined frame, and converts them those points 
 ///// and frames to all other existing frames and displays them
 #include<iostream>
-#include"rigid2d.hpp"
+#include"rigid2d/rigid2d.hpp"
 #include <vector>
 
 
