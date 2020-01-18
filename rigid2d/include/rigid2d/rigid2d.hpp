@@ -155,6 +155,7 @@ namespace rigid2d
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
         TransformParameters displacement() const;
+        Transform2D integrateTwist(Twist2D& V1) const;
 
 
     private:

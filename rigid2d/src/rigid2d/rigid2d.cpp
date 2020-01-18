@@ -6,6 +6,35 @@
 
 namespace rigid2d
 {
+
+
+
+  Transform2D::Transform2D(double theta_in, double ctheta_in, double stheta_in, double x_in,
+                           double y_in)
+{
+  theta = theta_in;
+  ctheta = ctheta_in;
+  stheta = stheta_in;
+  x = x_in;
+  y = y_in;
+}
+
+
+Transform2D Transform2D::integrateTwist(Twist2D& V1) const
+{
+  double c_theta, s_theta, r_theta, theta, x, y;
+  r_theta = abs(V1.wz);
+  c_theta = -V1.wz * V1.wz * (1 - cos(r_theta)) + 1;
+  s_theta = V1.wz * sin(r_theta);
+  theta = atan2(s_theta, c_theta);
+  x = - V1.vx * V1.wz * V1.wz * sin(r_theta);
+  y =  V1.vx * V1.wz * V1.wz *V1.wz *  (1 - cos(r_theta));
+  Transform2D integratedTransform(theta, c_theta, s_theta, x, y);
+  return integratedTransform;
+
+
+}
+
 std::ostream & operator<<(std::ostream & os, const rigid2d::Vector2D & v)
 {
   os<<v.x<<"  "<<v.y<<"\n";
