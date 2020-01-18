@@ -96,6 +96,11 @@ namespace rigid2d
        float wz=0.0, vx=0.0, vy=0.0;
     };
 
+    struct TransformParameters
+    {
+      double theta, x, y;
+    };
+
     /// \brief output a 2 dimensional twist vector as [omegaz linearx lineary]
     /// os - stream to output to
     /// v - twist vector to print
@@ -149,6 +154,9 @@ namespace rigid2d
         /// \brief \see operator<<(...) (declared outside this class)
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
+        TransformParameters displacement() const;
+
+
     private:
         /// directly initialize, useful for forming the inverse
         Transform2D(double theta, double ctheta, double stheta, double x, double y);

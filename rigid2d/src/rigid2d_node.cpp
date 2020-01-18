@@ -21,8 +21,11 @@ int main(void)
 
 
 
-  cout<<"\nEnter Transformation Tab: order - dtheta, dx, dy:";
+  cout<<"\nEnterrrr Transformation Tab: order - dtheta, dx, dy:";
   cin>> Tab;
+
+  cout<<"\nPrinting transformation\n";
+  cout<<Tab;
 
 
   cout<<"\nEnter Transformation Tbc: order - dtheta, dx, dy:";

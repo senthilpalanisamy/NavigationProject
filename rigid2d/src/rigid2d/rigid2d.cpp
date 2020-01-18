@@ -12,6 +12,15 @@ std::ostream & operator<<(std::ostream & os, const rigid2d::Vector2D & v)
   return os;
 }
 
+TransformParameters Transform2D::displacement() const
+{
+  TransformParameters params;
+  params.x = this->x;
+  params.y = this->y;
+  params.theta = this->theta;
+  return params;
+}
+
 
 std::istream & operator>>(std::istream & is, Vector2D & v)
 {
@@ -104,7 +113,7 @@ return v;
 
 Transform2D Transform2D::inv() const{
   Transform2D inv_transform;
-  inv_transform.theta = -this->theta;
+  inv_transform.theta = atan2(sin(-this->theta), cos(-this->theta));
   inv_transform.ctheta = this->ctheta;
   inv_transform.stheta = -this->stheta;
   inv_transform.x = -this->ctheta * this->x - this->stheta * this->y;

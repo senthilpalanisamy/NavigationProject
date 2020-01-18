@@ -131,7 +131,7 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/rigid2d_node.cpp src/rigid2d/rigid2d.cpp)
+add_executable(${PROJECT_NAME}_node src/rigid2d_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -146,6 +146,7 @@ add_executable(${PROJECT_NAME}_node src/rigid2d_node.cpp src/rigid2d/rigid2d.cpp
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
 )
 
 #############
@@ -195,7 +196,17 @@ target_link_libraries(${PROJECT_NAME}_node
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_rigid2d.cpp)
+# if (CATKIN_ENABLE_TESTING)
+#   catkin_add_gtest(${PROJECT_NAME}-test tests/rigid2d_unit_test.cpp)
+#   target_link_libraries(${PROJECT_NAME}-test $(catkin_LIBRARIES) gtest_main)
+# endif()
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(${PROJECT_NAME}_test tests/rigid2d_unit_test.cpp)
+  target_link_libraries(${PROJECT_NAME}_test  ${catkin_Libraries} gtest_main
+                        ${PROJECT_NAME})
+endif()
+
+
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
