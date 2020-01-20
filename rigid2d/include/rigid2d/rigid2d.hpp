@@ -90,10 +90,17 @@ namespace rigid2d
     /// https://en.cppreference.com/w/cpp/io/basic_istream/get
     std::istream & operator>>(std::istream & is, Vector2D & v);
 
+
+    struct AxisAngle
+    {
+      float vx, vy, wz, angle;
+    };
+
     /// \brief A 2-Dimensional Twist vector
     struct Twist2D
     {
        float wz=0.0, vx=0.0, vy=0.0;
+       AxisAngle return_axis_angle_representation() const;
     };
 
     struct TransformParameters
@@ -114,12 +121,15 @@ namespace rigid2d
 
 
 
+
+
     /// \brief a rigid body transformation in 2 dimensions
     class Transform2D
     {
     public:
         /// \brief Create an identity transformation
         Transform2D();
+
 
         /// \brief create a transformation that is a pure translation
         /// \param trans - the vector by which to translate
@@ -155,7 +165,6 @@ namespace rigid2d
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
         TransformParameters displacement() const;
-        Transform2D integrateTwist(Twist2D& V1) const;
 
 
     private:
@@ -184,6 +193,8 @@ namespace rigid2d
     /// \return the composition of the two transforms
     /// HINT: This function can be implemented in terms of *=
     Transform2D operator*(Transform2D lhs, const Transform2D & rhs);
+
+    Transform2D integrateTwist(const Twist2D& V1);
 }
 
 #endif

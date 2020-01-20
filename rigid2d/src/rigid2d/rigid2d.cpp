@@ -20,16 +20,41 @@ namespace rigid2d
 }
 
 
-Transform2D Transform2D::integrateTwist(Twist2D& V1) const
+AxisAngle Twist2D::return_axis_angle_representation() const
 {
-  double c_theta, s_theta, r_theta, theta, x, y;
-  r_theta = abs(V1.wz);
-  c_theta = -V1.wz * V1.wz * (1 - cos(r_theta)) + 1;
-  s_theta = V1.wz * sin(r_theta);
+  AxisAngle normalised_twist;
+  if(this->wz == 0)
+  {
+   normalised_twist.angle = pow(pow(this->vx, 2) + pow(this->vy, 2), 0.5); 
+   normalised_twist.vx = this->vx / normalised_twist.angle;
+   normalised_twist.vy = this->vy / normalised_twist.angle;
+  }
+  else
+  {
+    normalised_twist.angle = abs(this->wz);
+    normalised_twist.vx = this-> vx / normalised_twist.angle;
+    normalised_twist.vy = this->vy / normalised_twist.angle;
+    normalised_twist.wz = 1.0;
+  }
+  return normalised_twist;
+
+}
+
+
+Transform2D integrateTwist(const Twist2D& V1) 
+{
+  double c_theta, s_theta, theta, x, y;
+  auto normalisedV1 = V1.return_axis_angle_representation();
+  c_theta = -normalisedV1.wz * normalisedV1.wz * (1 - cos(normalisedV1.angle)) + 1;
+  s_theta = normalisedV1.wz * sin(normalisedV1.angle);
   theta = atan2(s_theta, c_theta);
-  x = - V1.vx * V1.wz * V1.wz * sin(r_theta);
-  y =  V1.vx * V1.wz * V1.wz *V1.wz *  (1 - cos(r_theta));
-  Transform2D integratedTransform(theta, c_theta, s_theta, x, y);
+  x = normalisedV1.vx * (normalisedV1.angle- (normalisedV1.angle- sin(normalisedV1.angle)) 
+      * normalisedV1.wz * normalisedV1.wz) - normalisedV1.vy * (1 -cos(normalisedV1.angle)) * normalisedV1.wz;
+  y = normalisedV1.vx * normalisedV1.wz * (1 - cos(normalisedV1.angle))  + 
+      normalisedV1.vy * (normalisedV1.angle- (normalisedV1.angle- sin(normalisedV1.angle))
+      * normalisedV1.wz * normalisedV1.wz);
+  Vector2D t{x, y};
+  Transform2D integratedTransform(t, theta);
   return integratedTransform;
 
 
