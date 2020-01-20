@@ -7,8 +7,6 @@
 namespace rigid2d
 {
 
-
-
   Transform2D::Transform2D(double theta_in, double ctheta_in, double stheta_in, double x_in,
                            double y_in)
 {
@@ -18,6 +16,56 @@ namespace rigid2d
   x = x_in;
   y = y_in;
 }
+
+
+Vector2D Vector2D::operator+=(const Vector2D & rhsVector)
+{
+  this->x = rhsVector.x;
+  this->y = rhsVector.y;
+  return *this;
+
+}
+
+Vector2D Vector2D::operator-=(const Vector2D & rhsVector)
+{
+  this->x = this->x - rhsVector.x;
+  this->y = this->y - rhsVector.y;
+  return *this;
+}
+
+Vector2D Vector2D::operator*=(const double scaling_factor)
+{
+ this-> x = this-> x * scaling_factor;
+ this-> y = this->y * scaling_factor;
+ return *this;
+}
+
+Vector2D operator+(Vector2D  lhsVector, const Vector2D & rhsVector)
+{
+  lhsVector += rhsVector;
+  return lhsVector;
+}
+
+Vector2D operator-(Vector2D  lhsVector, const Vector2D & rhsVector)
+{
+  lhsVector -= rhsVector;
+  return lhsVector;
+}
+
+Vector2D operator*(Vector2D  lhsVector, const double scaling_constant)
+{
+
+lhsVector *= scaling_constant;
+return lhsVector;
+}
+
+Vector2D operator*(const double scaling_constant, Vector2D  lhsVector)
+{
+
+lhsVector *= scaling_constant;
+return lhsVector;
+}
+
 
 
 AxisAngle Twist2D::return_axis_angle_representation() const
@@ -105,9 +153,8 @@ std::istream & operator>>(std::istream & is, Twist2D & v)
 Transform2D operator*(Transform2D lhs, const Transform2D & rhs)
 {
 Transform2D result;
-result *= lhs;
-result *= rhs;
-return result;
+lhs *= rhs;
+return lhs;
 }
 
 Transform2D::Transform2D()
@@ -149,7 +196,7 @@ Transform2D::Transform2D(const Vector2D & trans, double radians)
 
 Vector2D Transform2D::operator()(Vector2D v) const
 {
-  float old_x = v.x;
+  double old_x = v.x;
   v.x = this->ctheta * v.x - this->stheta * v.y + this-> x;
   v.y = this->stheta * old_x + this->ctheta * v.y + this-> y;
   return v;
@@ -159,7 +206,7 @@ Vector2D Transform2D::operator()(Vector2D v) const
 
 Twist2D Transform2D::operator()(Twist2D v) const
 {
-float old_twistvx = v.vx;
+double old_twistvx = v.vx;
 v.vx = v.wz * this->y + this->ctheta * v.vx - this->stheta * v.vy;
 v.vy = -this->x * v.wz + this-> stheta * old_twistvx + this->ctheta * v.vy;
 return v;
@@ -179,8 +226,8 @@ Transform2D & Transform2D::operator*=(const Transform2D & rhs)
 {
 
   this->theta = this->theta + rhs.theta;
-  float prev_c_theta = this->ctheta;
-  float prev_s_theta = this->stheta;
+  double prev_c_theta = this->ctheta;
+  double prev_s_theta = this->stheta;
   this->ctheta = cos(this->theta);
   this->stheta = sin(this->theta);
   this->x = prev_c_theta * rhs.x - prev_s_theta * rhs.y + this->x;
@@ -208,7 +255,7 @@ std::istream & operator>>(std::istream & is, Transform2D & tf)
 }
 
 
-Vector2D Vector2D::operator/(const float divisor)
+Vector2D Vector2D::operator/(const double divisor)
 {
   struct Vector2D divided_vec = {0.0, 0.0};
   divided_vec.x = this->x / divisor;
@@ -219,7 +266,7 @@ Vector2D Vector2D::operator/(const float divisor)
 
 void Vector2D::normalise()
 {
-  float length = pow(pow(this->x, 2) + pow(this->y, 2), 0.5);
+  double length = pow(pow(this->x, 2) + pow(this->y, 2), 0.5);
   *this = *this / length;
 
 }

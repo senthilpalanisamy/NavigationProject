@@ -69,10 +69,48 @@ namespace rigid2d
         double x = 0.0;
         double y = 0.0;
 
-    Vector2D operator/(const float divisor);
+    Vector2D operator/(const double divisor);
+
+    Vector2D operator+=(const Vector2D & rhsVector);
+    Vector2D operator-=(const Vector2D & rhsVector);
+    Vector2D operator*=(const double scaling_constant);
     void normalise();
 
     };
+
+
+    Vector2D operator+(Vector2D  lhsVector, const Vector2D & rhsVector);
+    Vector2D operator-(Vector2D  lhsVector, const Vector2D & rhsVector);
+    Vector2D operator*(Vector2D  lhsVector, const double scaling_constant);
+    Vector2D operator*(const double scaling_constant, Vector2D rhsVector);
+    //double length(Vector2D V);
+    //double distance(Vector2D v1, Vector2D v2);
+    //double angle(Vector2D v1, Vector2D v2);
+    //double normalize_angle(double rad);
+
+     constexpr double length(Vector2D V)
+     {
+      return (pow(pow(V.x, 2)+pow(V.y, 2), 0.5));
+     }
+
+    constexpr double distance(Vector2D v1, Vector2D v2)
+    {
+      return(pow(pow(v1.x-v2.x, 2) + pow(v1.y - v2.y, 2), 0.5));
+
+    }
+
+    constexpr double angle(Vector2D v1)
+    {
+      return (atan2(v1.y, v1.x));
+    }
+
+    constexpr double normalize_angle(double rad)
+    {
+      return(atan2(sin(rad), cos(rad)));
+    }
+
+    static_assert(almost_equal(0.001, 0.005, 1.0e-2), "is_zero failed");
+
 
 
     /// \brief output a 2 dimensional vector as [xcomponent ycomponent]
@@ -93,13 +131,13 @@ namespace rigid2d
 
     struct AxisAngle
     {
-      float vx, vy, wz, angle;
+      double vx, vy, wz, angle;
     };
 
     /// \brief A 2-Dimensional Twist vector
     struct Twist2D
     {
-       float wz=0.0, vx=0.0, vy=0.0;
+       double wz=0.0, vx=0.0, vy=0.0;
        AxisAngle return_axis_angle_representation() const;
     };
 
@@ -160,6 +198,7 @@ namespace rigid2d
         /// \param rhs - the first transform to apply
         /// \returns a reference to the newly transformed operator
         Transform2D & operator*=(const Transform2D & rhs);
+        // operator*=(const Transform2D & rhs);
 
         /// \brief \see operator<<(...) (declared outside this class)
         /// for a description
