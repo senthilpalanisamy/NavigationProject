@@ -66,10 +66,13 @@ namespace rigid2d
     /// \brief A 2-Dimensional Vector
     struct Vector2D
     {
-        double x = 0.0;
-        double y = 0.0;
+      //Vector2D(const double x, const double y);
+      //Vector2D();
 
-    Vector2D operator/(const double divisor);
+      double x=0, y=0;
+
+    Vector2D operator/=(const double divisor);
+    //Vector2D operator/(const double divisor);
 
     Vector2D operator+=(const Vector2D & rhsVector);
     Vector2D operator-=(const Vector2D & rhsVector);
@@ -83,10 +86,7 @@ namespace rigid2d
     Vector2D operator-(Vector2D  lhsVector, const Vector2D & rhsVector);
     Vector2D operator*(Vector2D  lhsVector, const double scaling_constant);
     Vector2D operator*(const double scaling_constant, Vector2D rhsVector);
-    //double length(Vector2D V);
-    //double distance(Vector2D v1, Vector2D v2);
-    //double angle(Vector2D v1, Vector2D v2);
-    //double normalize_angle(double rad);
+    Vector2D operator/(Vector2D v1, const double divisor);
 
      constexpr double length(Vector2D V)
      {
@@ -108,8 +108,10 @@ namespace rigid2d
     {
       return(atan2(sin(rad), cos(rad)));
     }
+    Vector2D V1;
 
-    static_assert(almost_equal(0.001, 0.005, 1.0e-2), "is_zero failed");
+    static_assert(almost_equal(normalize_angle(5.28), -1.0031, 1.0e-2), "is_zero failed");
+    //static_assert(almost_equal(angle(V1), 2.75406, 1.0e-2), "angle_magnitude_calculations_failed");
 
 
 

@@ -17,11 +17,25 @@ namespace rigid2d
   y = y_in;
 }
 
+// Vector2D::Vector2D(const double x1, const double y1)
+// {
+//   x = x1;
+//   y = y1;
+// 
+// }
+// 
+// Vector2D::Vector2D()
+// {
+//   x = 0.0;
+//   y = 0.0;
+// 
+// }
+
 
 Vector2D Vector2D::operator+=(const Vector2D & rhsVector)
 {
-  this->x = rhsVector.x;
-  this->y = rhsVector.y;
+  this->x = this->x + rhsVector.x;
+  this->y = this->y + rhsVector.y;
   return *this;
 
 }
@@ -254,15 +268,21 @@ std::istream & operator>>(std::istream & is, Transform2D & tf)
 
 }
 
-
-Vector2D Vector2D::operator/(const double divisor)
+Vector2D Vector2D::operator/=(const double divisor)
 {
-  struct Vector2D divided_vec = {0.0, 0.0};
-  divided_vec.x = this->x / divisor;
-  divided_vec.y = this->y / divisor;
-  return divided_vec;
+  this->x = this->x / divisor;
+  this->y = this->y / divisor;
+  return *this;
+}
+
+
+Vector2D operator/(Vector2D v1, const double divisor)
+{
+  v1 /= divisor;
+  return v1;
 
 }
+
 
 void Vector2D::normalise()
 {
