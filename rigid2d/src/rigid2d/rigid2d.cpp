@@ -17,19 +17,19 @@ namespace rigid2d
   y = y_in;
 }
 
-// Vector2D::Vector2D(const double x1, const double y1)
-// {
-//   x = x1;
-//   y = y1;
-// 
-// }
-// 
-// Vector2D::Vector2D()
-// {
-//   x = 0.0;
-//   y = 0.0;
-// 
-// }
+//  Vector2D::Vector2D(const double x1, const double y1)
+//  {
+//    x = x1;
+//    y = y1;
+//  
+//  }
+ 
+ // Vector2D::Vector2D()
+ //  {
+ //    x = 0.0;
+ //    y = 0.0;
+ //  
+ //  }
 
 
 Vector2D Vector2D::operator+=(const Vector2D & rhsVector)

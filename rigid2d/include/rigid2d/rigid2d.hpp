@@ -66,14 +66,12 @@ namespace rigid2d
     /// \brief A 2-Dimensional Vector
     struct Vector2D
     {
-      //Vector2D(const double x, const double y);
-      //Vector2D();
+      double x, y;
 
-      double x=0, y=0;
-
+      Vector2D(): x(0), y(0) {}
+      constexpr Vector2D(const double x1, const double y1): x(x1), y(y1) {}
+      //Vector2D(const double x1, const double y1): x(x1), y(y1) {}
     Vector2D operator/=(const double divisor);
-    //Vector2D operator/(const double divisor);
-
     Vector2D operator+=(const Vector2D & rhsVector);
     Vector2D operator-=(const Vector2D & rhsVector);
     Vector2D operator*=(const double scaling_constant);
@@ -88,10 +86,12 @@ namespace rigid2d
     Vector2D operator*(const double scaling_constant, Vector2D rhsVector);
     Vector2D operator/(Vector2D v1, const double divisor);
 
-     constexpr double length(Vector2D V)
-     {
-      return (pow(pow(V.x, 2)+pow(V.y, 2), 0.5));
-     }
+    // double length(const Vector2D V);
+    // double distance(const Vector2D v1, const Vector2D v2);
+    constexpr double length(Vector2D V)
+    {
+     return (pow(pow(V.x, 2)+pow(V.y, 2), 0.5));
+    }
 
     constexpr double distance(Vector2D v1, Vector2D v2)
     {
@@ -108,10 +108,9 @@ namespace rigid2d
     {
       return(atan2(sin(rad), cos(rad)));
     }
-    Vector2D V1;
-
-    static_assert(almost_equal(normalize_angle(5.28), -1.0031, 1.0e-2), "is_zero failed");
-    //static_assert(almost_equal(angle(V1), 2.75406, 1.0e-2), "angle_magnitude_calculations_failed");
+   //constexpr Vector2D V1{1,2 };
+   static_assert(almost_equal(normalize_angle(5.28), -1.0031, 1.0e-2), "is_zero failed");
+   //static_assert(almost_equal(angle(constexpr Vector2D V1{1, 2}), 1.107148, 1.0e-2), "angle_magnitude_calculations_failed");
 
 
 
