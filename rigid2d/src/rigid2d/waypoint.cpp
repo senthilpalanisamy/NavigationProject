@@ -1,44 +1,17 @@
-#include<waypoints.hpp>
+#include"rigid2d/waypoint.hpp"
 
 namespace rigid2d
 {
 
-  template<typename T>
-  Node<T>::Node(T input_value)
-  {
-    value = input_value;
-    nextElement = NULL;
 
-  }
-  template<typename T>
-  CircularLinkedList<T>::CircularLinkedList()
+  Waypoint::Waypoint(std::vector<Vector2D> PointSequence)
   {
-    head=NULL;
-    current=NULL;
+    trajectoryPoints.addElements(PointSequence);
   }
 
-  template<typename T>
-  CircularLinkedList<T>::CircularLinkedList(std::vector<T> all_elements)
+  Waypoint::Waypoint()
   {
-    auto nodeElement = new Node<T>(all_elements[0]);
-    head = &nodeElement;
-    current = &nodeElement;
-    for (auto it = all_elements.begin()+1; it != all_elements.end(); it++) 
-    {
-      nodeElement = new Node<T>(*it);
-      current->nextElement = &nodeElement;
-      current = &nodeElement;
-    }
-    current->nextElement = head;
-   current = head;
 
-  }
-
-  template<typename T>
-  T CircularLinkedList<T>::returnNextElement()
-  {
-   current = &current->nextElement;
-   return current.value;
   }
 
 
