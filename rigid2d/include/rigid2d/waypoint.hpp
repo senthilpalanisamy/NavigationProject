@@ -73,10 +73,11 @@ namespace rigid2d
 
   T returnNextElement()
   {
-   auto elemValue = current->value;
-   current = current->nextElement;
-   return elemValue;
-  }
+     auto elemValue = current->value;
+     current = current->nextElement;
+     return elemValue;
+
+   }
 
    private:
    Node<T> *head,*current, *tail;
@@ -85,10 +86,14 @@ namespace rigid2d
   class  Waypoint
   {
     public:
-    Waypoint();
-    explicit Waypoint(std::vector<Vector2D> PointSequence);
-    std::vector<double> nextWaypoint();
-    CircularLinkedList<Vector2D> trajectoryPoints;
+      explicit Waypoint(std::vector<Vector2D> PointSequence);
+      std::vector<double> nextWaypoint();
+      CircularLinkedList<Vector2D> trajectoryPoints;
+      WheelVelocities  nextVelocity(float timeInterval=0.1);
+    private:
+      DiffDrive diffCar;
+      Vector2D currentWaypoint;
+      double maxLinearVelocity, maxAngularVelocity;
   };
 
 

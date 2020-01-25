@@ -46,7 +46,7 @@ namespace rigid2d
     currentPose = currentPose * T_b_bd;
   }
 
-  void DiffDrive::feedforward(Twist2D BodyTwist) 
+  void DiffDrive::feedforward(Twist2D BodyTwist)
   {
 
     auto T_b_bd = integrateTwist(BodyTwist);
