@@ -70,7 +70,6 @@ namespace rigid2d
 
       Vector2D(): x(0), y(0) {}
       constexpr Vector2D(const double x1, const double y1): x(x1), y(y1) {}
-      //Vector2D(const double x1, const double y1): x(x1), y(y1) {}
     Vector2D operator/=(const double divisor);
     Vector2D operator+=(const Vector2D & rhsVector);
     Vector2D operator-=(const Vector2D & rhsVector);
@@ -158,6 +157,12 @@ namespace rigid2d
     std::istream & operator>>(std::istream & is, Twist2D & v);
 
 
+    /// \brief A 2-Dimensional Pose
+    struct Pose2D
+    {
+       double theta=0.0, x=0.0, y=0.0;
+    };
+
 
 
 
@@ -235,6 +240,58 @@ namespace rigid2d
     Transform2D operator*(Transform2D lhs, const Transform2D & rhs);
 
     Transform2D integrateTwist(const Twist2D& V1);
+
+    struct WheelVelocities
+    {
+    double left, right;
+    };
+
+    class DiffDrive
+    {
+      public:
+      /// \brief the default constructor creates a robot at (0,0,0), with a 
+      /// fixed wheel base and wheel radius
+      DiffDrive();
+      /// \brief create a DiffDrive model by specifying the pose, and geometry
+      ///
+      /// \param pose - the current position of the robot
+      /// \param wheel_base - the distance between the wheel centers
+      /// \param wheel_radius - the raidus of the wheels
+      DiffDrive(Transform2D robotPose, double wheel_base, double wheel_radius);
+
+      /// \brief determine the wheel velocities required to make the robot
+      /// move with the desired linear and angular velocities
+      /// \param twist - the desired twist in the body frame of the robot
+      /// \returns - the wheel velocities to use
+      /// \throws std::exception
+      WheelVelocities twistToWheelVelocities(Twist2D BodyTwist);
+
+      /// \brief determine the body twist of the robot from its wheel velocities
+      /// \param vel - the velocities of the wheels, assumed to be held constant
+      /// for one time unit
+      /// \returns twist in the original body frame of the
+      Twist2D WheelVelocitiestoTwist(WheelVelocities velocities);
+      /// \brief Update the robot's odometry based on the current encoder readings
+      /// \param left - the left encoder angle (in radians)
+      /// \param right - the right encoder angle (in radians)
+      void UpdateOdometry(double phiLeft, double phiRight);
+      /// \brief update the odometry of the diff drive robot, assuming that
+      /// it follows the given body twist for one time  unit
+      /// \param cmd - the twist command to send to the robot
+      void feedforward(Twist2D BodyTwist);
+      /// \brief get the current pose of the robot
+      TransformParameters returnPose();
+      /// \brief get the wheel speeds, based on the last encoder update
+      /// \returns the velocity of the wheels, which is equivalent to
+      ///  displacement because \Delta T = 1
+      WheelVelocities returnLastEncoderVelocities() const;
+      /// \brief reset the robot to the given position/orientation
+      void reset(Transform2D newPose);
+      private:
+      Transform2D currentPose;
+      double wheelBase, wheelRadius;
+      WheelVelocities previousWheelVelocities;
+    };
 }
 
 #endif

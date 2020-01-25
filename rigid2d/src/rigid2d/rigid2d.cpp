@@ -7,6 +7,69 @@
 namespace rigid2d
 {
 
+  DiffDrive::DiffDrive()
+  {
+   wheelBase = 5;
+   wheelRadius = 3;
+
+  }
+
+  DiffDrive::DiffDrive(Transform2D initialPose, double wheel_base, double wheel_radius)
+  {
+    currentPose = initialPose;
+    wheelBase = wheel_base;
+    wheelRadius = wheel_radius;
+  }
+
+  WheelVelocities DiffDrive::twistToWheelVelocities(Twist2D BodyTwist)
+  {
+    WheelVelocities diffwheels;
+    diffwheels.left = (- this->wheelBase/ 2  * BodyTwist.wz + BodyTwist.vx) / this->wheelRadius;
+    diffwheels.right = (this->wheelBase /2 * BodyTwist.wz + BodyTwist.vx)/ this->wheelRadius;
+    return diffwheels;
+  }
+
+  Twist2D DiffDrive::WheelVelocitiestoTwist(WheelVelocities velocities)
+  {
+    Twist2D BodyTwist;
+    BodyTwist.wz = - this->wheelRadius / this->wheelBase * velocities.left + 
+                     this->wheelRadius / this->wheelBase * velocities.right;
+    BodyTwist.vx = this->wheelRadius / 2 * velocities.left  + this->wheelRadius / 2 * velocities.right;
+    return BodyTwist;
+  }
+
+  void DiffDrive::UpdateOdometry(double phiLeft, double phiRight)
+  {
+    WheelVelocities velocities = {phiLeft, phiRight};
+    auto BodyTwist = WheelVelocitiestoTwist(velocities);
+    auto T_b_bd = integrateTwist(BodyTwist);
+    currentPose = currentPose * T_b_bd;
+  }
+
+  void DiffDrive::feedforward(Twist2D BodyTwist) 
+  {
+
+    auto T_b_bd = integrateTwist(BodyTwist);
+    currentPose = currentPose * T_b_bd;
+  }
+
+  TransformParameters DiffDrive::returnPose() 
+  {
+    return this->currentPose.displacement();
+
+  }
+
+  WheelVelocities DiffDrive::returnLastEncoderVelocities() const
+  {
+    return previousWheelVelocities;
+  }
+
+  void DiffDrive::reset(Transform2D newPose)
+  {
+    this->currentPose = newPose;
+  } 
+
+
   Transform2D::Transform2D(double theta_in, double ctheta_in, double stheta_in, double x_in,
                            double y_in)
 {
@@ -16,21 +79,6 @@ namespace rigid2d
   x = x_in;
   y = y_in;
 }
-
-//  Vector2D::Vector2D(const double x1, const double y1)
-//  {
-//    x = x1;
-//    y = y1;
-//  
-//  }
- 
- // Vector2D::Vector2D()
- //  {
- //    x = 0.0;
- //    y = 0.0;
- //  
- //  }
-
 
 Vector2D Vector2D::operator+=(const Vector2D & rhsVector)
 {
@@ -96,7 +144,10 @@ AxisAngle Twist2D::return_axis_angle_representation() const
     normalised_twist.angle = abs(this->wz);
     normalised_twist.vx = this-> vx / normalised_twist.angle;
     normalised_twist.vy = this->vy / normalised_twist.angle;
-    normalised_twist.wz = 1.0;
+    if(this->wz > 0)
+      normalised_twist.wz = 1.0;
+    else
+      normalised_twist.wz = -1.0;
   }
   return normalised_twist;
 
