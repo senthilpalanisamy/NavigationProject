@@ -360,6 +360,139 @@ TEST(RigidTransform2D, vectorAngle)
   ASSERT_NEAR(vec_angle, answer, 0.01) <<"Error in calculating the angle of a vector";
 }
 
+TEST(DiffDrive, twistToWheelVelocitiesConversion)
+{
+
+ rigid2d::Twist2D Twist2beApplied = {0.0, 0.3, 0.0};
+ double wheel_radius = 3.0, wheel_base=6.0;
+ rigid2d::Transform2D initialPose;
+ rigid2d::DiffDrive diffCar(initialPose, wheel_base, wheel_radius);
+ auto WheelVelocities = diffCar.twistToWheelVelocities(Twist2beApplied);
+ ASSERT_NEAR(WheelVelocities.left, WheelVelocities.right, 0.01) <<"Error in calculating wheel velocities from given twists";
+
+ Twist2beApplied = {2.8, 0.0, 0.0};
+ WheelVelocities = diffCar.twistToWheelVelocities(Twist2beApplied);
+ ASSERT_NEAR(WheelVelocities.left, -WheelVelocities.right, 0.01) <<"Error in calculating wheel velocities from given twists";
+
+ Twist2beApplied = {1.0, -1.0, 0.0};
+ double left_wheel_answer=(-wheel_base/2-1) / wheel_radius;
+ double right_wheel_answer=(wheel_base/2-1) / wheel_radius;
+ WheelVelocities = diffCar.twistToWheelVelocities(Twist2beApplied);
+ ASSERT_NEAR(WheelVelocities.right, right_wheel_answer, 0.01) <<"Error in calculating wheel velocities from given twists";
+ ASSERT_NEAR(WheelVelocities.left, left_wheel_answer, 0.01) <<"Error in calculating wheel velocities from given twists";
+}
+
+
+TEST(DiffDrive, wheelVelocitiesToTwistConversion)
+{
+
+ double wheel_radius = 3.0, wheel_base=6.0;
+ rigid2d::Transform2D initialPose;
+ rigid2d::DiffDrive diffCar(initialPose, wheel_base, wheel_radius);
+ rigid2d::WheelVelocities velocities = {1.0, 1.0};
+ auto BodyTwist = diffCar.WheelVelocitiestoTwist(velocities);
+ ASSERT_NEAR(BodyTwist.wz, 0.00, 0.01) <<"Error in converting twist to wheel velocities. The twist has non-zero wz component"
+                                         "for equal wheel velocities";
+ ASSERT_NEAR(BodyTwist.vy, 0.00, 0.01) <<"Error in converting twist to wheel velocities. The twist has non-zero vy component"
+                                         "for equal wheel velocities";
+
+ velocities = {-1.0, 1.0};
+ BodyTwist = diffCar.WheelVelocitiestoTwist(velocities);
+ ASSERT_NEAR(BodyTwist.vx, 0.00, 0.01) <<"Error in converting twist to wheel velocities. The twist has non-zero vx component"
+                                         "for equal and opposite wheel velocities";
+ ASSERT_NEAR(BodyTwist.vy, 0.00, 0.01) <<"Error in converting twist to wheel velocities. The twist has non-zero vy component"
+                                         "for equal and opposite wheel velocities";
+
+ velocities = {-0.3, 1.0};
+ double wz_answer = - wheel_radius / wheel_base * velocities.left +
+                    wheel_radius / wheel_base * velocities.right;
+ double vx_answer = wheel_radius / 2 * velocities.left + wheel_radius / 2 * velocities.right;
+ BodyTwist = diffCar.WheelVelocitiestoTwist(velocities);
+ ASSERT_NEAR(BodyTwist.vy, 0.00, 0.01) <<"Error in converting twist to wheel velocities. The body twist has non-zero vy component";
+ ASSERT_NEAR(BodyTwist.wz, wz_answer, 0.01) <<"Error in converting twist to wheel velocities. The twist has wrong wz component";
+ ASSERT_NEAR(BodyTwist.vx, vx_answer, 0.01) <<"Error in converting twist to wheel velocities. The twist has wrong vx component";
+
+}
+
+TEST(DiffDrive, UpdataOdometry)
+{
+
+ double wheel_radius = 3.0, wheel_base=6.0;
+ rigid2d::Transform2D initialPose;
+ rigid2d::DiffDrive diffCar(initialPose, wheel_base, wheel_radius);
+
+ double phi_left=1.0, phi_right=1.0;
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ auto currentPose = diffCar.returnPose();
+ ASSERT_NEAR(currentPose.x, wheel_radius * phi_left, 0.01) <<"Error in updating odometry for moving in the body vx direction";
+ ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry for moving in the body vx direction";
+ ASSERT_NEAR(currentPose.theta, 0 ,0.01) <<"Error in updating odometry for moving in the body vx direction";
+
+ phi_left=1.0, phi_right=-1.0;
+ diffCar.reset(initialPose);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ currentPose = diffCar.returnPose();
+ ASSERT_NEAR(currentPose.theta, -1.0, 0.01) <<"Error in updating odometry for rotating in place";
+ ASSERT_NEAR(currentPose.x, 0.00, 0.01) <<"Error in updating odometry for rotating in place";
+ ASSERT_NEAR(currentPose.y, 0.00, 0.01) <<"Error in updating odometry for rotating in place";
+
+
+ phi_left=1.0, phi_right=0.5;
+ diffCar.reset(initialPose);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ currentPose = diffCar.returnPose();
+ rigid2d::Twist2D equivalentTwist = {-wheel_radius / 2 / wheel_base, 3 * wheel_radius / 4, 0.0};
+ auto finalTransform = rigid2d::integrateTwist(equivalentTwist);
+ auto answer = finalTransform.displacement();
+ ASSERT_NEAR(answer.x, currentPose.x, 0.01) <<"Error in updating odometry for a rotate + translate case. Mismatch in x value";
+ ASSERT_NEAR(answer.y, currentPose.y, 0.01) <<"Error in updating odometry for a rotate + translate case. Mismatch in y value";
+ ASSERT_NEAR(answer.theta, currentPose.theta, 0.01) <<"Error in updating odometry for a rotate + translate case. Mismatch in theta value";
+}
+
+TEST(DiffDrive, feedforward)
+{
+
+ double wheel_radius = 3.0, wheel_base=6.0;
+ rigid2d::Transform2D initialPose;
+ rigid2d::DiffDrive diffCar(initialPose, wheel_base, wheel_radius);
+
+ rigid2d::Twist2D AppliedTwist = {1.0, 0, 0};
+ diffCar.feedforward(AppliedTwist);
+ auto currentPose = diffCar.returnPose();
+
+ ASSERT_NEAR(currentPose.x, 0, 0.01) <<"Error in updating odometry using feedforward twist. X translation is non-zero for pure rotation";
+ ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry using feedforward twist. Y translation is non-zero for pure rotation";
+ ASSERT_NEAR(currentPose.theta, 1.0 ,0.01) <<"Error in updating odometry using feedforward twist.";
+
+ AppliedTwist = {0.0, 1.0, 0};
+ diffCar.reset(initialPose);
+ diffCar.feedforward(AppliedTwist);
+ currentPose = diffCar.returnPose();
+
+ ASSERT_NEAR(currentPose.x, 1.0, 0.01) <<"Error in updating odometry using feedforward twist";
+ ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry using feedforward twist."
+                                         "Y translation is non-zero for pure translation along x axis";
+ ASSERT_NEAR(currentPose.theta, 0.0 ,0.01) <<"Error in updating odometry using feedforward twist."
+                                             "orientation is non-zero for a pure translation along x axis";
+
+
+ AppliedTwist = {1.0, 1.0, 0};
+ diffCar.reset(initialPose);
+ diffCar.feedforward(AppliedTwist);
+ currentPose = diffCar.returnPose();
+
+ ASSERT_NEAR(currentPose.x, cos(1.5 * rigid2d::PI + 1.0), 0.01) <<"Error in updating odometry using feedforward twist for rotation + translation";
+ ASSERT_NEAR(currentPose.y, sin(1.5 * rigid2d::PI + 1.0) + 1.0 ,0.01) <<"Error in updating odometry using feedforward twist for rotation + translation";
+ ASSERT_NEAR(currentPose.theta, 1.0 ,0.01) <<"Error in updating odometry using feedforward twist for rotation + translation";
+
+
+
+}
+
+
+
+
+
 
 
 
