@@ -121,6 +121,7 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/rigid2d.cpp
+  src/${PROJECT_NAME}/waypoint.cpp
 )
 
 ## Add cmake target dependencies of the library

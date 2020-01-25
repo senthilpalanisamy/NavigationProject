@@ -1,6 +1,7 @@
 #include<gtest/gtest.h>
 #include"rigid2d/rigid2d.hpp"
 #include<sstream>
+#include"rigid2d/waypoint.hpp"
 
 TEST(RigidTransform2D, multiplyTransforms)
 {
@@ -488,6 +489,29 @@ TEST(DiffDrive, feedforward)
 
 
 }
+
+TEST(Rigid2d, circularlinkedlist)
+{
+  rigid2d::Vector2D P1 = {1.0, 2.0}, P2 = {-11.0, -2.0};
+  std::vector<rigid2d::Vector2D> traj_points{P1, P2};
+  rigid2d::Waypoint waypoints(traj_points);
+  // waypoints.trajectoryPoints.addElements(traj_points);
+  auto X1 = waypoints.trajectoryPoints.returnNextElement();
+  auto X2 = waypoints.trajectoryPoints.returnNextElement();
+  auto X3 = waypoints.trajectoryPoints.returnNextElement();
+
+  ASSERT_NEAR(X1.x, P2.x, 0.01) <<"Error in circular linked list. First point does not match";
+  ASSERT_NEAR(X1.y, P2.y, 0.01) <<"Error in circular linked list. First point does not match";
+
+  ASSERT_NEAR(X2.x, P1.x, 0.01) <<"Error in circular linked list. Second point does not match";
+  ASSERT_NEAR(X2.y, P1.y, 0.01) <<"Error in circular linked list. Second point does not match";
+
+  ASSERT_NEAR(X3.x, P2.x, 0.01) <<"Error in circular linked list.The list does not cycle back to the first element after the last";
+  ASSERT_NEAR(X3.y, P2.y, 0.01) <<"Error in circular linked list. The list does not cycle back to the first element after the last";
+
+}
+
+
 
 
 
