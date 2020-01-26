@@ -1,0 +1,15 @@
+<launch>
+  <!-- This launch file launches the turtle from turtelism package and -->
+  <!-- loads parameters for describing the pentagonal trajectory-->
+  <!-- turtle and launches node which does the turtle control and a rqt for visualisation -->
+  <rosparam param="waypoint_x">[2.0, 5.0, 5.92, 3.50, 1.08]</rosparam>
+  <rosparam param="waypoint_y">[1.0, 1.0, 2.85, 4.61, 2.85]</rosparam>
+  <!-- param name="waypoint_y" value="[1.0, 1.0, 2.85, 4.61, 2.85]"/ -->
+  <param name="trans_vel" value="0.5"/>
+  <param name="rot_vel" value="0.5"/>
+  <param name="frequency" value="60"/>
+  <arg name="plot_gui" default="True" doc="A rqt plot to visualise pose_error"/>
+  <node name="turtle_way" pkg="tsim" type="turtle_way" output="screen"/>
+  <node pkg="turtlesim" name="sim" type="turtlesim_node"/>
+  <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" args="/pose_error" if="$(arg plot_gui)"/>
+</launch>
