@@ -1,0 +1,11 @@
+<launch>
+  <!-- This launch file launches the odometry node and loads the associated parameters -->
+  <param name="wheel_base" value="10"/>
+  <param name="wheel_radius" value="3"/>
+  <node name="rigid2d_odometry_node" pkg="rigid2d" type="rigid2d_odometry_node" output="screen">
+  <param name="odom_frame_id" value="odom"/>
+  <param name="body_frame_id" value="body"/>
+  <param name="left_wheel_joint" value="left"/>
+  <param name="right_wheel_joint" value="right"/>
+  </node>
+</launch>
