@@ -137,6 +137,7 @@ ${catkin_INCLUDE_DIRS}
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(turtle_rect src/turtle_rect.cpp)
+add_executable(turtle_way src/turtle_way.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -150,6 +151,10 @@ add_executable(turtle_rect src/turtle_rect.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(turtle_rect
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(turtle_way
   ${catkin_LIBRARIES}
 )
 
@@ -169,10 +174,10 @@ target_link_libraries(turtle_rect
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
 
+install(TARGETS turtle_way turtle_rect 
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
 # install(TARGETS ${PROJECT_NAME}
