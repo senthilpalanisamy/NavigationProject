@@ -1,4 +1,7 @@
 #include<turtle_way.hpp>
+#include <cmath>
+#include <ros/console.h>
+#include <iostream>
 
 using namespace std;
 
@@ -41,6 +44,8 @@ Rect_Navigation::Rect_Navigation(int argc, char **argv)
   reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
                                      this);
   pose_error_publisher = n.advertise<tsim::ErrorPose>("/pose_error", 1000);
+  pose_subscriber = n.subscribe("/turtle1/pose", 1000, &Rect_Navigation::pose_callback,
+                                    this);
 }
 
 bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
