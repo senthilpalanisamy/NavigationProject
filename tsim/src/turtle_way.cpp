@@ -26,21 +26,21 @@ namespace TurtleWay
 Rect_Navigation::Rect_Navigation(int argc, char **argv)
 {
 
-  ROS_INFO_STREAM("first line of init");
+  // ROS_INFO_STREAM("first line of init");
   ros::init(argc, argv, "turtle_way");
   ros::NodeHandle n;
-  ROS_INFO_STREAM("inside node initialisation");
+  // ROS_INFO_STREAM("inside node initialisation");
   ros::param::get("waypoint_x", wayPointX);
-  ROS_INFO_STREAM("got waypointx"<<wayPointX[0]<<wayPointX[1]<<"\n");
+  // ROS_INFO_STREAM("got waypointx"<<wayPointX[0]<<wayPointX[1]<<"\n");
   ros::param::get("waypoint_y", wayPointY);
-  ROS_INFO_STREAM("got waypointy"<<wayPointY[0]<<wayPointY[1]<<"\n");
+  // ROS_INFO_STREAM("got waypointy"<<wayPointY[0]<<wayPointY[1]<<"\n");
   ros::param::get("frequency", frequency);
   ros::param::get("rot_vel", rot_vel);
   ros::param::get("trans_vel", trans_vel);
-  ROS_INFO_STREAM("\nfrequency:"<<frequency<<"\nrotational velocity"<<rot_vel<<"\ntranslational velocity"<<trans_vel);
+  // ROS_INFO_STREAM("\nfrequency:"<<frequency<<"\nrotational velocity"<<rot_vel<<"\ntranslational velocity"<<trans_vel);
   state = INITIALISE;
   current_waypoint = create_waypoints_list();
-  velocity_publisher = n.advertise<geometry_msgs::Twist>("/turtle1/cmd_vel", 1000);
+  velocity_publisher = n.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
   reset_turtle = n.advertiseService("/traj_reset", &Rect_Navigation::reset_turtle_callback,
                                      this);
   pose_error_publisher = n.advertise<tsim::ErrorPose>("/pose_error", 1000);
@@ -52,13 +52,13 @@ bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
                                             std_srvs::Empty::Response& response)
 {
   state = RESET;
-  ROS_INFO_STREAM("Inside service\n");
+  //ROS_INFO_STREAM("Inside service\n");
   return true;
 }
 
 void Rect_Navigation::pose_callback(const turtlesim::Pose pose)
 {
-  ROS_INFO_STREAM("pose_x  "<<pose.x<<"  pose_y  "<<pose.y<<"pose theta"<<pose.theta);
+  //ROS_INFO_STREAM("pose_x  "<<pose.x<<"  pose_y  "<<pose.y<<"pose theta"<<pose.theta);
   tsim::ErrorPose  error_message;
   error_message.x_error = abs(pose.x - current_x);
   error_message.y_error = abs(pose.y - current_y);
@@ -127,13 +127,13 @@ void Rect_Navigation::update_current_pose()
 {
   ros::Duration time_duration = ros::Time::now() - previous_time;
   double time_elapsed = time_duration.toSec();
-  ROS_INFO_STREAM("time elapsed:  "<<time_elapsed);
+  //ROS_INFO_STREAM("time elapsed:  "<<time_elapsed);
   current_angle += time_elapsed * previous_velocity.angular.z;
   current_x += time_elapsed * previous_velocity.linear.x * cos(current_angle);
   current_y += time_elapsed * previous_velocity.linear.x * sin(current_angle);
-  ROS_INFO_STREAM("current_x:  " << current_x <<"current_y:  " <<current_y<<"current theta:  "<<current_angle);
+  //ROS_INFO_STREAM("current_x:  " << current_x <<"current_y:  " <<current_y<<"current theta:  "<<current_angle);
   current_angle = atan2(sin(current_angle), cos(current_angle));
-  ROS_INFO_STREAM("finished update pose");
+  //ROS_INFO_STREAM("finished update pose");
 }
 
 void Rect_Navigation::follow_way_point()
@@ -141,9 +141,9 @@ void Rect_Navigation::follow_way_point()
   geometry_msgs::Twist velocity_message;
   update_current_pose();
 
-  ROS_INFO_STREAM("accessing waypoint");
+  //ROS_INFO_STREAM("accessing waypoint");
   float goal_angle = atan2(current_waypoint->y - current_y, current_waypoint->x - current_x);
-  ROS_INFO_STREAM("finished accessing waypoint");
+  //ROS_INFO_STREAM("finished accessing waypoint");
   float angle_difference = current_angle - goal_angle;
   float angle_diff_wrapped = atan2(sin(angle_difference), cos(angle_difference));
   float distance_difference = pow(pow((current_waypoint->x - current_x), 2) +
@@ -152,7 +152,7 @@ void Rect_Navigation::follow_way_point()
 
   if(abs(angle_diff_wrapped) >= 0.1)
   {
-    ROS_INFO_STREAM("angle difference" << current_angle - goal_angle);
+    //ROS_INFO_STREAM("angle difference" << current_angle - goal_angle);
      if (angle_diff_wrapped > 0)
        velocity_message.angular.z =  -rot_vel;
      else
@@ -162,19 +162,19 @@ void Rect_Navigation::follow_way_point()
   else if (distance_difference > 0.1)
   {
 
-    ROS_INFO_STREAM("distance difference" <<pow(pow((current_waypoint->x - current_x), 2) +
-                                             pow((current_waypoint->y - current_y), 2), 0.5));
+    //ROS_INFO_STREAM("distance difference" <<pow(pow((current_waypoint->x - current_x), 2) +
+    //                                         pow((current_waypoint->y - current_y), 2), 0.5));
     velocity_message.linear.x = trans_vel;
     velocity_publisher.publish(velocity_message);
   } 
   else
   {
-    ROS_INFO_STREAM("changing way point");
+    //ROS_INFO_STREAM("changing way point");
     state = CHANGE_WAY_POINT;
   }
   previous_time = ros::Time::now();
   previous_velocity = velocity_message;
-  ROS_INFO_STREAM("finished one cycle of following way point");
+  // ROS_INFO_STREAM("finished one cycle of following way point");
 }
 
 
@@ -189,14 +189,14 @@ void Rect_Navigation::execute_trajectory()
   case CHANGE_WAY_POINT:current_waypoint = current_waypoint->next_element;
                         state = FOLLOW_WAYPOINT;
                         break;
-  case RESET: ROS_INFO_STREAM("started_reset");
+  case RESET: // ROS_INFO_STREAM("started_reset");
               initialise_turtle();
               current_waypoint = first_waypoint;
               current_x = wayPointX[0];
               current_y = wayPointY[0];
               current_angle = 0;
               state = FOLLOW_WAYPOINT;
-              ROS_INFO_STREAM("Finished reset");
+              // ROS_INFO_STREAM("Finished reset");
               break;
 
 }

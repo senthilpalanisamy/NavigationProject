@@ -1,5 +1,6 @@
 #include"rigid2d/fake_diff_encoders.hpp"
 #include <sensor_msgs/JointState.h>
+#include <ros/console.h>
 
 namespace FakeEncoder
 {
@@ -15,8 +16,9 @@ namespace FakeEncoder
 
   ros::param::get("wheel_base", wheelBase);
   ros::param::get("wheel_radius", wheelRadius);
-  ros::param::get("left_wheel_joint", leftWheelJoint);
-  ros::param::get("right_wheel_joint", rightWheelJoint);
+  ros::param::get("~left_wheel_joint", leftWheelJoint);
+  ros::param::get("~right_wheel_joint", rightWheelJoint);
+  ROS_INFO_STREAM("got all params"<<leftWheelJoint<<rightWheelJoint<<"\n");
   currentTime = ros::Time::now();
   lastTime = ros::Time::now();
   bIsFirstRun = true;
@@ -24,9 +26,11 @@ namespace FakeEncoder
 
   void FakeEncoder::cmdVelCallback(const geometry_msgs::Twist bodyTwistMsg)
   {
-    sensor_msgs::JointState jointStateMsg;
     currentTime = ros::Time::now();
-    std::vector<std::string> jointNames = {"left", "right"};
+    sensor_msgs::JointState jointStateMsg;
+    jointStateMsg.header.stamp = currentTime;
+    jointStateMsg.header.frame_id = "diff_drive";
+    std::vector<std::string> jointNames = {leftWheelJoint, rightWheelJoint};
     std::vector<double> jointPosition;
 
     if(bIsFirstRun)

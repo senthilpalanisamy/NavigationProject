@@ -39,14 +39,19 @@ odometry::odometry::odometry(int argc, char** argv)
 void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
 {
 
-  ROS_INFO_STREAM("\n Inside subscriber");
+  ROS_INFO_STREAM("\n Inside subscriber"<<jointMessage.position[0]<<"\t"
+                  <<jointMessage.position[1]);
 
   currentTime = ros::Time::now();
-  float leftDistance = jointMessage.position[0] - leftWheelPosition;
-  float rightDistance = jointMessage.velocity[1] - rightWheelPosition;
+  double leftDistance = jointMessage.position[0] - leftWheelPosition;
+  double rightDistance = jointMessage.position[1] - rightWheelPosition;
+  ROS_INFO_STREAM("distances"<<leftDistance<<"\t"<<rightDistance);
   diffcar.UpdateOdometry(leftDistance, rightDistance);
   rigid2d::Twist2D bodyTwist;
   auto carPose = diffcar.returnPose();
+  ROS_INFO_STREAM("pose"<<carPose.theta<<"\t"<<carPose.x<<"\t"<<carPose.y);
+  diffcar.UpdateOdometry(leftDistance, rightDistance);
+
 
   if(bIsFirstRun)
   {
@@ -62,6 +67,8 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   rigid2d::WheelVelocities velocities = {leftDistance / totalTime, rightDistance / totalTime};
   bodyTwist = diffcar.WheelVelocitiestoTwist(velocities);
   }
+
+  ROS_INFO_STREAM("\n Publishing message");
 
   nav_msgs::Odometry odom;
   odom.header.stamp = currentTime;
@@ -84,9 +91,11 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   //publish the message
   odometryPublisher.publish(odom);
 
+  ROS_INFO_STREAM("\n Publishing transform");
+
   static tf2_ros::TransformBroadcaster br;
   geometry_msgs::TransformStamped transformStamped; 
-  transformStamped.header.stamp = ros::Time::now();
+  transformStamped.header.stamp = currentTime;
   transformStamped.header.frame_id = odom_frame_id;
   transformStamped.child_frame_id = body_frame_id;
   transformStamped.transform.translation.x = carPose.x;
@@ -100,6 +109,8 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   transformStamped.transform.rotation.w = odomQuat.w;
   br.sendTransform(transformStamped);
   lastTime = currentTime;
+
+  ROS_INFO_STREAM("\n Finished");
 
 
 }

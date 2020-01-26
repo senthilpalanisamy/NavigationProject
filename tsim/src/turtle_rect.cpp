@@ -44,6 +44,7 @@ Rect_Navigation::Rect_Navigation(int argc, char **argv)
   pose_error_publisher = n.advertise<tsim::ErrorPose>("/pose_error", 1000);
   pose_subscriber = n.subscribe("/turtle1/pose", 1000, &Rect_Navigation::pose_callback,
                                     this);
+
 }
 
 bool Rect_Navigation::reset_turtle_callback(std_srvs::Empty::Request& request,
