@@ -9,6 +9,11 @@ add_compile_options(-std=c++17 -Wall -Werror)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  nav_msgs
+  sensor_msgs
+  tf
+  std_msgs
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rigid2d
-#  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp nav_msgs sensor_msgs tf std_msgs geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -133,6 +138,7 @@ add_library(${PROJECT_NAME}
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/rigid2d_node.cpp)
+add_executable(${PROJECT_NAME}_odometry_node src/odometry.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -146,6 +152,11 @@ add_executable(${PROJECT_NAME}_node src/rigid2d_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
+)
+
+target_link_libraries(${PROJECT_NAME}_odometry_node
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}
 )
@@ -166,9 +177,9 @@ target_link_libraries(${PROJECT_NAME}_node
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS ${PROJECT_NAME}_node ${PROJECT_NAME}_odometry_node 
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html

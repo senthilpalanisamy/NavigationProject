@@ -21,7 +21,7 @@ namespace rigid2d
     wheelRadius = wheel_radius;
   }
 
-  WheelVelocities DiffDrive::twistToWheelVelocities(Twist2D BodyTwist)
+  WheelVelocities DiffDrive::twistToWheelVelocities(Twist2D BodyTwist, double totalTime)
   {
     WheelVelocities diffwheels;
     diffwheels.left = (- this->wheelBase/ 2  * BodyTwist.wz + BodyTwist.vx) / this->wheelRadius;
@@ -32,6 +32,8 @@ namespace rigid2d
   Twist2D DiffDrive::WheelVelocitiestoTwist(WheelVelocities velocities)
   {
     Twist2D BodyTwist;
+    // velocities.left = velocities.left / totalTime;
+    // velocities.right = velocities.left / totalTime;
     BodyTwist.wz = - this->wheelRadius / this->wheelBase * velocities.left + 
                      this->wheelRadius / this->wheelBase * velocities.right;
     BodyTwist.vx = this->wheelRadius / 2 * velocities.left  + this->wheelRadius / 2 * velocities.right;
@@ -46,10 +48,10 @@ namespace rigid2d
     currentPose = currentPose * T_b_bd;
   }
 
-  void DiffDrive::feedforward(Twist2D BodyTwist)
+  void DiffDrive::feedforward(Twist2D BodyTwist, double totalTime)
   {
 
-    auto T_b_bd = integrateTwist(BodyTwist);
+    auto T_b_bd = integrateTwist(BodyTwist, totalTime);
     currentPose = currentPose * T_b_bd;
   }
 
@@ -154,10 +156,11 @@ AxisAngle Twist2D::return_axis_angle_representation() const
 }
 
 
-Transform2D integrateTwist(const Twist2D& V1) 
+Transform2D integrateTwist(const Twist2D& V1, double totalTime) 
 {
   double c_theta, s_theta, theta, x, y;
-  auto normalisedV1 = V1.return_axis_angle_representation();
+  Twist2D scaledV1 = {V1.wz * totalTime, V1.vx * totalTime, V1.vy * totalTime};
+  auto normalisedV1 = scaledV1.return_axis_angle_representation();
   c_theta = -normalisedV1.wz * normalisedV1.wz * (1 - cos(normalisedV1.angle)) + 1;
   s_theta = normalisedV1.wz * sin(normalisedV1.angle);
   theta = atan2(s_theta, c_theta);

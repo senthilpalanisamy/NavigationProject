@@ -239,7 +239,7 @@ namespace rigid2d
     /// HINT: This function can be implemented in terms of *=
     Transform2D operator*(Transform2D lhs, const Transform2D & rhs);
 
-    Transform2D integrateTwist(const Twist2D& V1);
+    Transform2D integrateTwist(const Twist2D& V1, double totalTime=1.0);
 
     struct WheelVelocities
     {
@@ -264,7 +264,7 @@ namespace rigid2d
       /// \param twist - the desired twist in the body frame of the robot
       /// \returns - the wheel velocities to use
       /// \throws std::exception
-      WheelVelocities twistToWheelVelocities(Twist2D BodyTwist);
+      WheelVelocities twistToWheelVelocities(Twist2D BodyTwist, double totalTime=1.0);
 
       /// \brief determine the body twist of the robot from its wheel velocities
       /// \param vel - the velocities of the wheels, assumed to be held constant
@@ -278,7 +278,7 @@ namespace rigid2d
       /// \brief update the odometry of the diff drive robot, assuming that
       /// it follows the given body twist for one time  unit
       /// \param cmd - the twist command to send to the robot
-      void feedforward(Twist2D BodyTwist);
+      void feedforward(Twist2D BodyTwist, double totalTime=1.0);
       /// \brief get the current pose of the robot
       TransformParameters returnPose();
       /// \brief get the wheel speeds, based on the last encoder update
