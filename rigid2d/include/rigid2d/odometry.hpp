@@ -25,7 +25,7 @@ class odometry
     rigid2d::DiffDrive diffcar;
     float leftWheelPosition, rightWheelPosition;
     ros::Time currentTime, lastTime;
-    ros::Publisher odom_pub;
+    bool bIsFirstRun;
 
 };
 }

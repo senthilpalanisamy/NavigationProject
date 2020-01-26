@@ -10,7 +10,7 @@ namespace odometry
 {
 odometry::odometry::odometry(int argc, char** argv)
 {
-   ros::init(argc, argv, "odometry_publisher");
+   ros::init(argc, argv, "odometer");
    ros::NodeHandle n;
    //odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);
    tf::TransformBroadcaster odom_broadcaster;
@@ -39,18 +39,29 @@ odometry::odometry::odometry(int argc, char** argv)
 void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
 {
 
-   ROS_INFO_STREAM("\n Inside subscriber");
+  ROS_INFO_STREAM("\n Inside subscriber");
 
   currentTime = ros::Time::now();
   float leftDistance = jointMessage.position[0] - leftWheelPosition;
   float rightDistance = jointMessage.velocity[1] - rightWheelPosition;
   diffcar.UpdateOdometry(leftDistance, rightDistance);
-
+  rigid2d::Twist2D bodyTwist;
   auto carPose = diffcar.returnPose();
+
+  if(bIsFirstRun)
+  {
+    lastTime = currentTime;
+    bodyTwist = {0.0, 0.0, 0.0};
+    bIsFirstRun = false;
+
+  }
+  else
+  {
   ros::Duration time_duration = currentTime - lastTime;
   double totalTime = time_duration.toSec();
   rigid2d::WheelVelocities velocities = {leftDistance / totalTime, rightDistance / totalTime};
-  auto bodyTwist = diffcar.WheelVelocitiestoTwist(velocities);
+  bodyTwist = diffcar.WheelVelocitiestoTwist(velocities);
+  }
 
   nav_msgs::Odometry odom;
   odom.header.stamp = currentTime;

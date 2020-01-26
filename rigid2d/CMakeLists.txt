@@ -139,6 +139,7 @@ add_library(${PROJECT_NAME}
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/rigid2d_node.cpp)
 add_executable(${PROJECT_NAME}_odometry_node src/odometry.cpp)
+add_executable(${PROJECT_NAME}_fake_encoders src/fake_diff_encoders.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -161,6 +162,11 @@ target_link_libraries(${PROJECT_NAME}_odometry_node
   ${PROJECT_NAME}
 )
 
+target_link_libraries(${PROJECT_NAME}_fake_encoders
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
+)
+
 #############
 ## Install ##
 #############
@@ -177,7 +183,7 @@ target_link_libraries(${PROJECT_NAME}_odometry_node
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS ${PROJECT_NAME}_node ${PROJECT_NAME}_odometry_node 
+install(TARGETS ${PROJECT_NAME}_node ${PROJECT_NAME}_odometry_node ${PROJECT_NAME}_fake_encoders
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
