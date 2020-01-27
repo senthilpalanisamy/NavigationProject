@@ -48,7 +48,6 @@ odometry::odometry::odometry(int argc, char** argv)
    rightWheelPosition = 0.0;
    rigid2d::Transform2D identityTransform(0);
    diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
-  auto carPose = diffcar.returnPose();
 }
 
 
