@@ -33,8 +33,8 @@ through a feed forward control.
 ## Outputs ##
 1. rqt graph output of the turtle following pentagon path<br>
 ![Image of rqtgraph](./img/pentagon.png)
-2. Screenshot of turtle<br>
+2. Screenshot of turtle following rectangular path<br>
 ![Image of turtle](./img/turtle_screenshot.png)
-3. rqt graph output<br>
+3. rqt graph output for a rectangular path<br>
 ![Image of rqt graph Output](./img/rqt_plot.png)
 4. [Link to video output](https://drive.google.com/file/d/1CjJGAg3pz2uSBVpcFEVQs__nyGiVkVnt/view?usp=sharing)
