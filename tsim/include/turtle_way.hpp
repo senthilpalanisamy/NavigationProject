@@ -3,7 +3,7 @@
 
 /// \file
 ///// \brief A RoS node for controlling a turtle in turtlesim package to
-//           follow a rectangular path by using feed forward control
+//           follow a given sequence of waypoints using feed forward control
 /////
 ///// PARAMETERS:
 /////   x (float): x co-ordinate of the lower left corner of the rectangular

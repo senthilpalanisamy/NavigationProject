@@ -4,13 +4,12 @@
   <!-- to simulate a fake encoder for a differential dirve robot and update its -->
   <!-- odometry -->
   <include file="$(find tsim)/launch/turtle_pent.launch" />
-  <param name="wheel_base" value="10" />
-  <param name="wheel_radius" value="3" />
+  <include file="$(find nuturtle_description)/launch/view_diff_drive.launch">
+    <arg name="is_jsp_needed" value="False"/>
+    <arg name="use_jsp_gui" value="False"/>
+    <arg name="rviz_path" value="$(find nuturtle_description)/config/diff_drive_odometry.rviz" />
+  </include>
 
-  <arg name="use_jsp_gui" default="True" doc="Launch the joint_state_publisher gui to publish joint angles"/>
-  <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
-  <param name="robot_description" command="xacro '$(find nuturtle_description)/urdf/diff_drive.urdf.xacro'"/>
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find nuturtle_description)/config/diff_drive_odometry.rviz" required="True"/>
   <node name="rigid2d_fake_encoders" pkg="rigid2d" type="rigid2d_fake_encoders" output="screen">
   <param name="left_wheel_joint" value="left_wheel_axle"/>
   <param name="right_wheel_joint" value="right_wheel_axle"/>
@@ -21,5 +20,4 @@
   <param name="left_wheel_joint" value="left_wheel_axle"/>
   <param name="right_wheel_joint" value="right_wheel_axle"/>
   </node>
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 </launch>

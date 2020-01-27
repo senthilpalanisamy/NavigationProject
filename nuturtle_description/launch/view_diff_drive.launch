@@ -1,0 +1,18 @@
+<launch>
+  <!-- This launch file launches the urdf definition of a differential drive robot in rviz -->
+  <!-- and launches joint state publisher and robot state publisher -->
+
+  <arg name="is_jsp_needed" default="True" doc="determines whether joint state publisher should be launched"/>
+  <arg name="use_jsp_gui" default="True" doc="Launch the joint_state_publisher gui to publish joint angles"/>
+  <arg name="rviz_path" default="$(find nuturtle_description)/config/diff_drive.rviz" doc="path to load the rviz configuration file from" />
+  <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
+  <param name="robot_description" command="xacro '$(find nuturtle_description)/urdf/diff_drive.urdf.xacro'"/>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(arg is_jsp_needed)">
+  <param name="use_gui" value="$(arg use_jsp_gui)" />
+  </node>
+  <!-- node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher if="$(arg is_jsp_needed)" -->
+  <!-- param name="use_gui" value="$(arg use_jsp_gui)" / -->
+  <!-- /node -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_path)" required="True"/>
+</launch>
