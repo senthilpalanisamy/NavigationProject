@@ -69,7 +69,7 @@
   </link>
 
 
-   <joint name="castor_axle" type="continuous">
+   <joint name="castor_axle" type="fixed">
     <parent link="base_link"/>
     <child link="castor"/>
     <origin xyz="${robot_specs['chasis_length'] - robot_specs['wheel_radius']/4} 0 ${-robot_specs['chasis_thickness']/2-robot_specs['wheel_radius']/4}"/>

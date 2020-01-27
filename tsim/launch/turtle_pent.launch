@@ -4,7 +4,6 @@
   <!-- turtle and launches node which does the turtle control and a rqt for visualisation -->
   <rosparam param="waypoint_x">[2.0, 5.0, 5.92, 3.50, 1.08]</rosparam>
   <rosparam param="waypoint_y">[1.0, 1.0, 2.85, 4.61, 2.85]</rosparam>
-  <!-- param name="waypoint_y" value="[1.0, 1.0, 2.85, 4.61, 2.85]"/ -->
   <param name="trans_vel" value="0.5"/>
   <param name="rot_vel" value="0.5"/>
   <param name="frequency" value="60"/>
