@@ -240,6 +240,7 @@ namespace rigid2d
     Transform2D operator*(Transform2D lhs, const Transform2D & rhs);
 
     Transform2D integrateTwist(const Twist2D& V1, double totalTime=1.0);
+    // Transform2D integrateTwist(const Twist2D& V1);
 
     struct WheelVelocities
     {
@@ -279,6 +280,7 @@ namespace rigid2d
       /// it follows the given body twist for one time  unit
       /// \param cmd - the twist command to send to the robot
       void feedforward(Twist2D BodyTwist, double totalTime=1.0);
+      // void feedforward(Twist2D BodyTwist);
       /// \brief get the current pose of the robot
       TransformParameters returnPose();
       /// \brief get the wheel speeds, based on the last encoder update

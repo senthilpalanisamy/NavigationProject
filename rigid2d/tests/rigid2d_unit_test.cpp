@@ -448,13 +448,21 @@ TEST(DiffDrive, UpdataOdometry)
  ASSERT_NEAR(answer.x, currentPose.x, 0.01) <<"Error in updating odometry for a rotate + translate case. Mismatch in x value";
  ASSERT_NEAR(answer.y, currentPose.y, 0.01) <<"Error in updating odometry for a rotate + translate case. Mismatch in y value";
  ASSERT_NEAR(answer.theta, currentPose.theta, 0.01) <<"Error in updating odometry for a rotate + translate case. Mismatch in theta value";
+
+ phi_left=0.0, phi_right=0.0;
+ diffCar.reset(initialPose);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ currentPose = diffCar.returnPose();
+ ASSERT_NEAR(currentPose.x, 0, 0.01) <<"Error in updating odometry for a base case of zero velocity";
+ ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry for a base case of zero velocity";
+ ASSERT_NEAR(currentPose.theta, 0 ,0.01) <<"Error in updating odometry for a base case of zero velocity";
 }
 
 TEST(DiffDrive, feedforward)
 {
 
  double wheel_radius = 3.0, wheel_base=6.0;
- rigid2d::Transform2D initialPose;
+ rigid2d::Transform2D initialPose(0);
  rigid2d::DiffDrive diffCar(initialPose, wheel_base, wheel_radius);
 
  rigid2d::Twist2D AppliedTwist = {1.0, 0, 0};

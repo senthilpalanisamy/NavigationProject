@@ -17,6 +17,7 @@ odometry::odometry::odometry(int argc, char** argv)
    currentTime = ros::Time::now();
    lastTime = ros::Time::now();
    ros::Rate r(10.0);
+   // ros::Rate r(0.1);
    ros::param::get("wheel_base", wheelBase);
    ros::param::get("wheel_radius", wheelRadius);
    jointStataSubscriber = n.subscribe("joint_states", 1000, &odometry::jointStatesCallback,
@@ -32,20 +33,25 @@ odometry::odometry::odometry(int argc, char** argv)
    leftWheelPosition = 0.0;
    rightWheelPosition = 0.0;
    ROS_INFO_STREAM("\n finished initialising");
-                  
+   rigid2d::Transform2D identityTransform(0);
+   diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
+  auto carPose = diffcar.returnPose();
+  ROS_INFO_STREAM("diff car x:\t"<<carPose.x<<"\t y"<<carPose.y<<"\t theta"<<carPose.theta<<"\n");
+  ROS_INFO_STREAM("wheel Base:\t"<<wheelBase<<"\t radius"<<wheelRadius);
+  ROS_INFO_STREAM("Exiting constructor");
 }
 
 
 void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
 {
 
-  ROS_INFO_STREAM("\n Inside subscriber"<<jointMessage.position[0]<<"\t"
-                  <<jointMessage.position[1]);
+  // ROS_INFO_STREAM("\n Inside subscriber"<<jointMessage.position[0]<<"\t"
+  //                <<jointMessage.position[1]);
 
   currentTime = ros::Time::now();
   double leftDistance = jointMessage.position[0] - leftWheelPosition;
   double rightDistance = jointMessage.position[1] - rightWheelPosition;
-  ROS_INFO_STREAM("distances"<<leftDistance<<"\t"<<rightDistance);
+  ROS_INFO_STREAM("distances: left\t"<<leftDistance<<"\tright:"<<rightDistance);
   diffcar.UpdateOdometry(leftDistance, rightDistance);
   rigid2d::Twist2D bodyTwist;
   auto carPose = diffcar.returnPose();
@@ -111,6 +117,8 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   lastTime = currentTime;
 
   ROS_INFO_STREAM("\n Finished");
+  leftWheelPosition = jointMessage.position[0];
+  rightWheelPosition = jointMessage.position[1];
 
 
 }

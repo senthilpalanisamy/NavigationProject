@@ -37,21 +37,30 @@ namespace rigid2d
     BodyTwist.wz = - this->wheelRadius / this->wheelBase * velocities.left + 
                      this->wheelRadius / this->wheelBase * velocities.right;
     BodyTwist.vx = this->wheelRadius / 2 * velocities.left  + this->wheelRadius / 2 * velocities.right;
+    BodyTwist.vy = 0;
     return BodyTwist;
   }
 
   void DiffDrive::UpdateOdometry(double phiLeft, double phiRight)
   {
+    if (phiLeft == 0 && phiRight==0)
+    {
+     return void();
+    }
     WheelVelocities velocities = {phiLeft, phiRight};
     auto BodyTwist = WheelVelocitiestoTwist(velocities);
+    //std::cout<<"\nBody Twist: vx \t"<<BodyTwist.vx<<"BodyTwist: vy \t"<<BodyTwist.vy<<"Body Twist: wz"<<BodyTwist.wz<<"\n";
     auto T_b_bd = integrateTwist(BodyTwist);
+    //std::cout<<"\nBody Twist: vx \t"<<transform.x<<"BodyTwist: vy \t"<<BodyTwist.vy<<"Body Twist: wz"<<BodyTwist.wz<<"\n";
     currentPose = currentPose * T_b_bd;
   }
 
+  // void DiffDrive::feedforward(Twist2D BodyTwist)
   void DiffDrive::feedforward(Twist2D BodyTwist, double totalTime)
   {
 
     auto T_b_bd = integrateTwist(BodyTwist, totalTime);
+    // auto T_b_bd = integrateTwist(BodyTwist);
     currentPose = currentPose * T_b_bd;
   }
 
@@ -137,12 +146,17 @@ AxisAngle Twist2D::return_axis_angle_representation() const
   AxisAngle normalised_twist;
   if(this->wz == 0)
   {
+   //std::cout<<"\nwz=0\n";
+   //std::cout<<"vx="<<this->vx<<"\tvy="<<this->vy<<"\twz ="<<this->wz<<"\n";
    normalised_twist.angle = pow(pow(this->vx, 2) + pow(this->vy, 2), 0.5); 
    normalised_twist.vx = this->vx / normalised_twist.angle;
    normalised_twist.vy = this->vy / normalised_twist.angle;
+   normalised_twist.wz = 0;
+   //std::cout<<"\nfinal values vx="<<normalised_twist.vx<<"\tvy="<<normalised_twist.vy<<"\twz="<<normalised_twist.wz<<"\n";
   }
   else
   {
+    //std::cout<<"found you";
     normalised_twist.angle = abs(this->wz);
     normalised_twist.vx = this-> vx / normalised_twist.angle;
     normalised_twist.vy = this->vy / normalised_twist.angle;
@@ -156,11 +170,17 @@ AxisAngle Twist2D::return_axis_angle_representation() const
 }
 
 
+//Transform2D integrateTwist(const Twist2D& V1) 
 Transform2D integrateTwist(const Twist2D& V1, double totalTime) 
 {
   double c_theta, s_theta, theta, x, y;
   Twist2D scaledV1 = {V1.wz * totalTime, V1.vx * totalTime, V1.vy * totalTime};
+  //std::cout<<"here################################\n";
+  //std::cout<< scaledV1.wz <<"\t" <<scaledV1.vx <<"\t" <<scaledV1.vy<<"\t totalTime"<<totalTime<<"\n";
+  //std::cout<< V1.wz <<"\t" <<V1.vx <<"\t" <<V1.vy<<"\n";
   auto normalisedV1 = scaledV1.return_axis_angle_representation();
+  //std::cout<<"normalised\n";
+  //std::cout<< normalisedV1.wz <<"\t" <<normalisedV1.vx <<"\t" <<normalisedV1.vy<<"\t totalTime"<<totalTime<<"\n";
   c_theta = -normalisedV1.wz * normalisedV1.wz * (1 - cos(normalisedV1.angle)) + 1;
   s_theta = normalisedV1.wz * sin(normalisedV1.angle);
   theta = atan2(s_theta, c_theta);
@@ -171,6 +191,8 @@ Transform2D integrateTwist(const Twist2D& V1, double totalTime)
       * normalisedV1.wz * normalisedV1.wz);
   Vector2D t{x, y};
   Transform2D integratedTransform(t, theta);
+  //std::cout<< theta <<"\t" <<x <<"\t" <<y<<"\n";
+  //std::cout<<"here################################\n";
   return integratedTransform;
 
 
