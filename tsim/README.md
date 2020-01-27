@@ -31,14 +31,10 @@ through a feed forward control.
                         same path
                   
 ## Outputs ##
-1. rqt graph output of the turtle following pentagon path 
-![Image of rqt_graph](./img/pentagon.png)
-<br>
-<br>
-2. Screenshot of turtle
-<br>
-<br>
+rqt graph output of the turtle following pentagon path 
+![Image of rqtgraph](./img/pentagon.png)
+Screenshot of turtle
 ![Image of turtle](./img/turtle_screenshot.png)
-3. rqt graph output
+rqt graph output
 ![Image of rqt graph Output](./img/rqt_plot.png)
-4. [Link to video output](https://drive.google.com/file/d/1CjJGAg3pz2uSBVpcFEVQs__nyGiVkVnt/view?usp=sharing)
+[Link to video output](https://drive.google.com/file/d/1CjJGAg3pz2uSBVpcFEVQs__nyGiVkVnt/view?usp=sharing)
