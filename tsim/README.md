@@ -33,7 +33,11 @@ through a feed forward control.
 ## Outputs ##
 1. rqt graph output of the turtle following pentagon path 
 ![Image of rqt_graph](./img/pentagon.png)
+<br>
+<br>
 2. Screenshot of turtle
+<br>
+<br>
 ![Image of turtle](./img/turtle_screenshot.png)
 3. rqt graph output
 ![Image of rqt graph Output](./img/rqt_plot.png)
