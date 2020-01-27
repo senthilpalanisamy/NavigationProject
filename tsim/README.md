@@ -1,6 +1,6 @@
 ## Package Description ##
 This package contains code for controlling a turtle from turtlesim package
-through a feed forward control
+through a feed forward control.
 
  
 ##  roslaunch command ##
