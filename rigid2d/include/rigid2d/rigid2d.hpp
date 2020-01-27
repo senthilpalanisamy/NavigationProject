@@ -8,7 +8,6 @@
 #include<iostream>
 #include<math.h>
 
-//#include <boost/numeric/ublas/matrix.hpp>
 
 
 
@@ -68,48 +67,120 @@ namespace rigid2d
     {
       double x, y;
 
+      /// \brief Default constructor for Vector2D
       Vector2D(): x(0), y(0) {}
+      /// \brief Parameterised constructor for the class
+      /// \param x1 - x co-ordinate value
+      /// \param y1 - y co-ordinate value
       constexpr Vector2D(const double x1, const double y1): x(x1), y(y1) {}
-    Vector2D operator/=(const double divisor);
-    Vector2D operator+=(const Vector2D & rhsVector);
-    Vector2D operator-=(const Vector2D & rhsVector);
-    Vector2D operator*=(const double scaling_constant);
-    void normalise();
+      /// \brief Overloading division operator. Division is only defined for division
+      /// by a scalar
+      /// \param divisor - the scalar number to divide the vector by
+      /// \return The resultant vector obtained by dividing the vector element-wise
+      /// by the scalar
+      Vector2D operator/=(const double divisor);
+      /// \brief Overloading +- operator for vector addition
+      /// \param rhsVector - the vector which should be added to the vector
+      /// on the right hand side of the equation
+      /// \return A vector whose sum is equal to the sum of two vectors
+      Vector2D operator+=(const Vector2D & rhsVector);
+      /// \brief Overloading of -= operator for vector subtraction
+      /// \param rhsVector - the vector which should be subtracted from the
+      /// vector on the right hand side of the equation.
+      /// \return A vector whose value is equal to the element wise subtraction
+      /// of the vector on the right from the  vector on the left
+      Vector2D operator-=(const Vector2D & rhsVector);
+      /// \brief Overloading of *= operator for vector multiplication. It should be
+      /// not here that the multiplication is a multiplication by a scalar number
+      /// \param scaling_constant - the scalar number which should be multiplied to
+      /// every component of the vector
+      /// \return A vector whose each element is scaled by the scaling constant 
+      /// given
+      Vector2D operator*=(const double scaling_constant);
+      /// \brief Normalise and return a vector which has unit magnitude and the same
+      /// direction as that of the original vector
+      void normalise();
 
     };
 
-
+    /// \brief vector addition overloading. Two vectors could be added element wise
+    /// using + operator
+    /// \param lhsVector - The vector element that lies to the left of + operator
+    /// \param rhsVector - The vector element that lies to the right of + operator
+    /// \return A vector which is equal to the sum of the two vectors
     Vector2D operator+(Vector2D  lhsVector, const Vector2D & rhsVector);
+    /// \brief vector subtraction overloading. Two vectors could be subtracted element wise
+    /// using - operator
+    /// \param lhsVector - The vector element that lies to the left of - operator or the 
+    /// vector from which the other vector should be subtracted
+    /// \param rhsVector - The vector element that lies to the right of - operator or the
+    /// vector that should be subtracted from the other vector
+    /// \return A vector whose value is equal to the subtraction of the vector
+    /// on the right from the vector on the left
     Vector2D operator-(Vector2D  lhsVector, const Vector2D & rhsVector);
+    /// \brief vector multiplication overloading using * operator. A vector can 
+    /// be scaled element wise by a scalar value
+    /// \param lhsVector - The vector element that should be scaled. It can lie
+    /// on either side of the * operator provided the other number is scalar.
+    /// \param scaling_constant - The scalar number that should be multiplied 
+    /// to every element of the vector. This can lie on either side of the star 
+    /// operator
+    /// \return A vector whose every element is scaled by the scaling constant
+    /// given
     Vector2D operator*(Vector2D  lhsVector, const double scaling_constant);
+    /// \brief vector multiplication overloading using * operator. A vector can 
+    /// be scaled element wise by a scalar value
+    /// \param rhsVector - The vector element that should be scaled. It can lie
+    /// on either side of the * operator provided the other number is scalar.
+    /// \param scaling_constant - The scalar number that should be multiplied 
+    /// to every element of the vector. This can lie on either side of the star 
+    /// operator
+    /// \return A vector whose every element is scaled by the scaling constant
+    /// given
     Vector2D operator*(const double scaling_constant, Vector2D rhsVector);
+    /// \brief overloading of division operator to implement the element-wise division
+    /// of a vector by a scalar value.  It should be noted that the scalar value
+    /// has to lie on the right side of division operator. Vice-versa is not
+    /// permitted.
+    /// \param v1 - The vector to be divided
+    /// \param divisor - The scalar number through which each element of the
+    /// vector should be divided by
+    /// \return A vector whose every element is divided by the value given 
+    /// as divisor.
     Vector2D operator/(Vector2D v1, const double divisor);
-
-    // double length(const Vector2D V);
-    // double distance(const Vector2D v1, const Vector2D v2);
+    /// \brief Returns the length L2 norm of a given vector
+    /// \param V - Vector whose length is to be found
+    /// \return length of the vecor
     constexpr double length(Vector2D V)
     {
      return (pow(pow(V.x, 2)+pow(V.y, 2), 0.5));
     }
-
+    /// \brief Returns the distance between two vectors
+    /// \param v1 - vector 1 for finding distance
+    /// \param v2 - vector 2 for finding distance
+    /// \return distance between the vectors
     constexpr double distance(Vector2D v1, Vector2D v2)
     {
       return(pow(pow(v1.x-v2.x, 2) + pow(v1.y - v2.y, 2), 0.5));
 
     }
-
+    /// \brief Find the angle of the vector with respect to standard cartesian axis
+    /// The angle returned is between [-pi,pi)
+    /// \param v1 - vector whose angle is to be found
+    /// \return angle of the vector 
     constexpr double angle(Vector2D v1)
     {
       return (atan2(v1.y, v1.x));
     }
-
+    /// \brief Normalizes the given angle and returns an angle that is between [-pi,pi)
+    /// \param rad - Angle in radians which is to be normalised
+    /// \return normalized angled
     constexpr double normalize_angle(double rad)
     {
       return(atan2(sin(rad), cos(rad)));
     }
-   //constexpr Vector2D V1{1,2 };
-   static_assert(almost_equal(normalize_angle(5.28), -1.0031, 1.0e-2), "is_zero failed");
-   //static_assert(almost_equal(angle(constexpr Vector2D V1{1, 2}), 1.107148, 1.0e-2), "angle_magnitude_calculations_failed");
+    /// \brief A static assertion check for checking the normalize functionality
+    static_assert(almost_equal(normalize_angle(5.28), -1.0031, 1.0e-2), "is_zero failed");
 
 
 
@@ -129,6 +200,9 @@ namespace rigid2d
     std::istream & operator>>(std::istream & is, Vector2D & v);
 
 
+    /// \brief A structure that represents a twist in a axis angle format. The axis
+    /// is normalized as per screw axis normalizing conventions and the 
+    /// angle is extracted out such that angle * normalised_scre_axis = Twist
     struct AxisAngle
     {
       double vx, vy, wz, angle;
@@ -141,6 +215,8 @@ namespace rigid2d
        AxisAngle return_axis_angle_representation() const;
     };
 
+    /// \brief A structure that is used in the getter function of Transform2D class
+    /// to allow a view of its private variables.
     struct TransformParameters
     {
       double theta, x, y;
@@ -193,8 +269,11 @@ namespace rigid2d
         /// \param v - the vector to transform
         /// \return a vector in the new coordinate system
         Vector2D operator()(Vector2D v) const;
+        /// \brief Adjoint transformation of a twist from one frame to another
+        /// \param v - the twist which is to be transformed from one frame
+        /// to another as per the transformation matrix specified
+        /// \return The twist transformed to another frame
         Twist2D operator()(Twist2D v) const;
-
         /// \brief invert the transformation
         /// \return the inverse transformation. 
         Transform2D inv() const;
@@ -209,6 +288,10 @@ namespace rigid2d
         /// \brief \see operator<<(...) (declared outside this class)
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
+        /// \brief A getter function for viewing the private variables of the
+        /// transform class
+        /// \return Returns a structure containing the translation and rotation
+        /// parameters
         TransformParameters displacement() const;
 
 
@@ -239,14 +322,26 @@ namespace rigid2d
     /// HINT: This function can be implemented in terms of *=
     Transform2D operator*(Transform2D lhs, const Transform2D & rhs);
 
+    /// \brief Integrate a given twist to a transformation matrix
+    /// \param V1 - The twist representing the eucleadian motion to be 
+    /// integrated
+    /// \param totalTime - The time period over which the twist should 
+    /// be integrated. By default the time period is assumed to be 1 units.
+    /// \return - A Transform2D object which represents the movement of the 
+    /// frame
     Transform2D integrateTwist(const Twist2D& V1, double totalTime=1.0);
-    // Transform2D integrateTwist(const Twist2D& V1);
 
+    /// \brief A structure for velocities of the wheels of a differential drive robot
     struct WheelVelocities
     {
     double left, right;
     };
 
+    /// \brief A class for implementing all functionalities of differential
+    /// drive robot. It includes functions used for controls like switching
+    /// from body twist to wheel velocities and vice-versa. The class also
+    /// holds two mechanisms for odometry by computing the motion due to a 
+    /// feed forward control or by updating encoder readings.
     class DiffDrive
     {
       public:
@@ -264,7 +359,6 @@ namespace rigid2d
       /// move with the desired linear and angular velocities
       /// \param twist - the desired twist in the body frame of the robot
       /// \returns - the wheel velocities to use
-      /// \throws std::exception
       WheelVelocities twistToWheelVelocities(Twist2D BodyTwist, double totalTime=1.0);
 
       /// \brief determine the body twist of the robot from its wheel velocities
@@ -282,6 +376,7 @@ namespace rigid2d
       void feedforward(Twist2D BodyTwist, double totalTime=1.0);
       // void feedforward(Twist2D BodyTwist);
       /// \brief get the current pose of the robot
+      /// \return A view of all private datas representing the pose of the robot
       TransformParameters returnPose();
       /// \brief get the wheel speeds, based on the last encoder update
       /// \returns the velocity of the wheels, which is equivalent to
@@ -290,6 +385,9 @@ namespace rigid2d
       /// \brief reset the robot to the given position/orientation
       void reset(Transform2D newPose);
       private:
+      /// Private data of the robot include the pose of the robot, its geometry
+      /// details like wheelBase and wheelRadius. It also holds the previous
+      /// wheel velocities for computing odometry due to a feedforward control
       Transform2D currentPose;
       double wheelBase, wheelRadius;
       WheelVelocities previousWheelVelocities;

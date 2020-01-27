@@ -1,3 +1,9 @@
+/// \file
+///// \brief This file contains all functions definitions regarding waypoint node 
+///// transforms. In particular, it contains the constructor for waypoint class and 
+///// next velocity function that specifies the next velocity for following a waypoint
+///// Many other function definitions, particularly the circular linked list implementation
+///// lie as templates in the hpp file
 #include"rigid2d/waypoint.hpp"
 
 namespace rigid2d
@@ -12,10 +18,6 @@ namespace rigid2d
     maxAngularVelocity = 0.5;
   }
 
-  // Waypoint::Waypoint()
-  // {
-
-  // }
 
   WheelVelocities Waypoint::nextVelocity(float timeInterval)
   {

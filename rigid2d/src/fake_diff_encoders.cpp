@@ -1,3 +1,19 @@
+/// \file
+/// \brief This file contains all functions definitions for the fake encoder node 
+/// This node contains all functionalities to simulate a fake encoder for a robot navigation 
+///
+/// PARAMETERS:
+///  wheel_base   (double) : Wheel to wheel distance of the differential drive robot
+///  wheel_radius (double) : Wheel radius of the differential drive robot
+///  ~left_wheel_joint (string) : Name of the left wheel joint 
+///  ~right_wheel_joint(string) : Name of the right wheel joint
+/// PUBLISHES:
+///  joint_states (sensor_msgs/JointState) : A topic for publishing the joint state of various
+///                                           joints on the robot
+///
+/// SUBSCRIBES:
+///  cmd_vel (geometry_msgs/Twist) : A topic where the twist the robot needs to follow is
+///                                  published
 #include"rigid2d/fake_diff_encoders.hpp"
 #include <sensor_msgs/JointState.h>
 #include <ros/console.h>
@@ -48,8 +64,6 @@ namespace FakeEncoder
     twistFollowed.wz = previousTwistMsg.angular.z;
     twistFollowed.vx = previousTwistMsg.linear.x;
     twistFollowed.vy = previousTwistMsg.linear.y;
-    // ROS_INFO_STREAM("twist input-wz "<<twistFollowed.wz<<"\t twist input-vx"<<twistFollowed.vx
-    //                 <<"\t twist input-vy"<<twistFollowed.vy);
     auto velocities = diffcar.twistToWheelVelocities(twistFollowed, totalTime);
     jointPosition = {velocities.left * totalTime, velocities.right * totalTime};
     previousTwistMsg = bodyTwistMsg;

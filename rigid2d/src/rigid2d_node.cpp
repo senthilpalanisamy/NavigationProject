@@ -9,7 +9,6 @@
 
 
 using namespace std;
-// using namespace rigid2d;
 
 int main(void)
 {
