@@ -428,7 +428,6 @@ TEST(DiffDrive, UpdataOdometry)
  ASSERT_NEAR(currentPose.x, wheel_radius * phi_left, 0.01) <<"Error in updating odometry for moving in the body vx direction";
  ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry for moving in the body vx direction";
  ASSERT_NEAR(currentPose.theta, 0 ,0.01) <<"Error in updating odometry for moving in the body vx direction";
-
  phi_left=1.0, phi_right=-1.0;
  diffCar.reset(initialPose);
  diffCar.UpdateOdometry(phi_left, phi_right);
@@ -456,6 +455,28 @@ TEST(DiffDrive, UpdataOdometry)
  ASSERT_NEAR(currentPose.x, 0, 0.01) <<"Error in updating odometry for a base case of zero velocity";
  ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry for a base case of zero velocity";
  ASSERT_NEAR(currentPose.theta, 0 ,0.01) <<"Error in updating odometry for a base case of zero velocity";
+
+
+ phi_left=1.0, phi_right=1.0;
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ currentPose = diffCar.returnPose();
+ ASSERT_NEAR(currentPose.x, wheel_radius * phi_left * 3, 0.01) <<"Error in updating odometry for a series of moition commands";
+ ASSERT_NEAR(currentPose.y, 0 ,0.01) <<"Error in updating odometry for a series of moition commands";
+ ASSERT_NEAR(currentPose.theta, 0 ,0.01) <<"Error in updating odometry for a series of moition commands";
+
+ phi_left=1.0, phi_right=-1.0;
+ diffCar.reset(initialPose);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ currentPose = diffCar.returnPose();
+ ASSERT_NEAR(currentPose.theta, -3.0, 0.01) <<"Error in updating odometry for a sequence of rotations";
+ ASSERT_NEAR(currentPose.x, 0.00, 0.01) <<"Error in updating odometry for a sequence of rotations";
+ ASSERT_NEAR(currentPose.y, 0.00, 0.01) <<"Error in updating odometry for a sequence of rotations";
+
+
 }
 
 TEST(DiffDrive, feedforward)

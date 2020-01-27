@@ -35,7 +35,6 @@ namespace FakeEncoder
 
     if(bIsFirstRun)
     {
-      lastTime = ros::Time::now();
       previousTwistMsg = bodyTwistMsg;
       jointPosition = {0.0, 0.0};
       bIsFirstRun = false;
@@ -49,13 +48,17 @@ namespace FakeEncoder
     twistFollowed.wz = previousTwistMsg.angular.z;
     twistFollowed.vx = previousTwistMsg.linear.x;
     twistFollowed.vy = previousTwistMsg.linear.y;
+    // ROS_INFO_STREAM("twist input-wz "<<twistFollowed.wz<<"\t twist input-vx"<<twistFollowed.vx
+    //                 <<"\t twist input-vy"<<twistFollowed.vy);
     auto velocities = diffcar.twistToWheelVelocities(twistFollowed, totalTime);
     jointPosition = {velocities.left * totalTime, velocities.right * totalTime};
+    previousTwistMsg = bodyTwistMsg;
     }
 
     jointStateMsg.name = jointNames;
     jointStateMsg.position = jointPosition;
     jointStatePublisher.publish(jointStateMsg);
+    lastTime = currentTime;
   }
 
 }

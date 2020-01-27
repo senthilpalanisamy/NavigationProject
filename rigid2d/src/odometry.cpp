@@ -49,14 +49,19 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   //                <<jointMessage.position[1]);
 
   currentTime = ros::Time::now();
-  double leftDistance = jointMessage.position[0] - leftWheelPosition;
-  double rightDistance = jointMessage.position[1] - rightWheelPosition;
-  ROS_INFO_STREAM("distances: left\t"<<leftDistance<<"\tright:"<<rightDistance);
+  //double leftDistance = jointMessage.position[0] - leftWheelPosition;
+  //double rightDistance = jointMessage.position[1] - rightWheelPosition;
+  
+  double leftDistance = jointMessage.position[0];
+  double rightDistance = jointMessage.position[1];
+
+
+  auto carPose = diffcar.returnPose();
+  ROS_INFO_STREAM("before pose"<<carPose.theta<<"\t"<<carPose.x<<"\t"<<carPose.y<<"\n");
   diffcar.UpdateOdometry(leftDistance, rightDistance);
   rigid2d::Twist2D bodyTwist;
-  auto carPose = diffcar.returnPose();
-  ROS_INFO_STREAM("pose"<<carPose.theta<<"\t"<<carPose.x<<"\t"<<carPose.y);
-  diffcar.UpdateOdometry(leftDistance, rightDistance);
+  carPose = diffcar.returnPose();
+  ROS_INFO_STREAM("after pose"<<carPose.theta<<"\t"<<carPose.x<<"\t"<<carPose.y<<"\n");
 
 
   if(bIsFirstRun)
@@ -119,6 +124,7 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   ROS_INFO_STREAM("\n Finished");
   leftWheelPosition = jointMessage.position[0];
   rightWheelPosition = jointMessage.position[1];
+  //ros::Duration(1.0).sleep();
 
 
 }
