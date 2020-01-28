@@ -3,7 +3,7 @@
 ///// transforms. In particular, the 2D homogeneous transformation representations,
 ///// changing reference frames of points and twists are the core logic in the file
 #include"rigid2d/rigid2d.hpp"
-
+#include<exception>
 namespace rigid2d
 {
 
@@ -22,7 +22,10 @@ namespace rigid2d
   }
 
   WheelVelocities DiffDrive::twistToWheelVelocities(Twist2D BodyTwist, double totalTime)
-  {
+  { if(BodyTwist.vy !=0)
+    {
+      throw std::invalid_argument("wrong twist");
+    }
     WheelVelocities diffwheels;
     diffwheels.left = (- this->wheelBase/ 2  * BodyTwist.wz + BodyTwist.vx) / this->wheelRadius;
     diffwheels.right = (this->wheelBase /2 * BodyTwist.wz + BodyTwist.vx)/ this->wheelRadius;
