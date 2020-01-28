@@ -8,12 +8,12 @@ add_compile_options(-std=c++17 -Wall -Werror)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  nav_msgs
-  sensor_msgs
-  tf
-  std_msgs
   geometry_msgs
+  nav_msgs
+  roscpp
+  sensor_msgs
+  std_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -107,8 +107,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES rigid2d
-  CATKIN_DEPENDS roscpp nav_msgs sensor_msgs tf std_msgs geometry_msgs
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp sensor_msgs  std_msgs tf
 #  DEPENDS system_lib
 )
 
@@ -187,7 +187,7 @@ install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(TARGETS ${PROJECT_NAME}_node ${PROJECT_NAME}_odometry_node ${PROJECT_NAME}_fake_encoders 
+install(TARGETS ${PROJECT_NAME}_fake_encoders ${PROJECT_NAME}_node ${PROJECT_NAME}_odometry_node 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

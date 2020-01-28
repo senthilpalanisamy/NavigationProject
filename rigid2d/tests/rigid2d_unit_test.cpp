@@ -2,6 +2,8 @@
 #include"rigid2d/rigid2d.hpp"
 #include<sstream>
 #include"rigid2d/waypoint.hpp"
+/// \file
+/// Test cases for unit testing open apis of the rigid2d library
 
 TEST(RigidTransform2D, multiplyTransforms)
 {

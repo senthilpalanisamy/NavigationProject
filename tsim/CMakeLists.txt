@@ -8,12 +8,12 @@ project(tsim)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  turtlesim
-  std_msgs
-  message_generation
   geometry_msgs
+  message_generation
+  roscpp
+  std_msgs
   std_srvs
+  turtlesim
   )
 
 ## System dependencies are found with CMake's conventions
@@ -71,10 +71,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
- )
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,7 +108,7 @@ add_message_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES tsim
-  CATKIN_DEPENDS message_runtime std_msgs geometry_msgs
+  CATKIN_DEPENDS geometry_msgs message_runtime std_msgs 
 #  DEPENDS system_lib
 )
 
@@ -175,7 +175,7 @@ target_link_libraries(turtle_way
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
 
-install(TARGETS turtle_way turtle_rect 
+install(TARGETS turtle_rect turtle_way
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 ## Mark libraries for installation
