@@ -6,7 +6,8 @@
 #include <nav_msgs/Odometry.h>
 #include "rigid2d/rigid2d.hpp"
 #include <sensor_msgs/JointState.h>
-
+#include <std_srvs/Empty.h>
+#include <rigid2d/SetPose.h> 
 
 
 using namespace std;
@@ -30,6 +31,7 @@ class odometry
     /// Subscriber and publisher for communication
     ros::Subscriber jointStataSubscriber;
     ros::Publisher odometryPublisher;
+    ros::ServiceServer setTurtlePose;
     /// other private parameters to keep track of the states and necessary
     /// information about the robot
     double wheelBase, wheelRadius;
@@ -37,7 +39,8 @@ class odometry
     float leftWheelPosition, rightWheelPosition;
     ros::Time currentTime, lastTime;
     bool bIsFirstRun;
-
+    bool setTurtlePoseCallback(rigid2d::SetPose::Request& request,
+                               rigid2d::SetPose::Response& response);
 };
 }
 #endif
