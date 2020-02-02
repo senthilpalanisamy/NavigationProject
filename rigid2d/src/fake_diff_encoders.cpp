@@ -38,6 +38,8 @@ namespace FakeEncoder
   currentTime = ros::Time::now();
   lastTime = ros::Time::now();
   bIsFirstRun = true;
+  rigid2d::Transform2D identityTransform(0);
+  diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
   }
 
   void FakeEncoder::cmdVelCallback(const geometry_msgs::Twist bodyTwistMsg)
