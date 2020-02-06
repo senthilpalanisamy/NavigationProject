@@ -1,10 +1,10 @@
 <launch>
   <arg name="robot" default="0" doc="used to identify the remote machine address. 0 if its the local host
     A number X other than zero indicates TurtlebotX as the remote host"/>
-  <machine name="turtlebot" address="localhost" unless="$(arg robot)" />
+  <machine name="turtlebot" address="localhost" if="$(eval robot == '0')" />
   <machine name="turtlebot" address="turtlebot$(arg robot)" env-loader="/home/student/install/env.sh" user="student"
-  if="$(eval arg robot != 0)"/>
-  <node pkg="rosserial_python" type="serial_node.py" name="serial_node">
+  if="$(eval robot != '0')"/>
+  <node machine="turtlebot" pkg="rosserial_python" type="serial_node.py" name="serial_node">
   <param name="port" value="/dev/ttyACM0"/>
   <param name="baud" value="115200"/>
   </node>
