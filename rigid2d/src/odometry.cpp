@@ -22,6 +22,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <ros/console.h>
+#include <rigid2d/SetPose.h> 
 
 
 namespace odometry
@@ -48,6 +49,20 @@ odometry::odometry::odometry(int argc, char** argv)
    rightWheelPosition = 0.0;
    rigid2d::Transform2D identityTransform(0);
    diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
+   setTurtlePose = n.advertiseService("/set_pose", &odometry::setTurtlePoseCallback,
+                                     this);
+}
+
+bool odometry::setTurtlePoseCallback(rigid2d::SetPose::Request& request,
+                                     rigid2d::SetPose::Response& response)
+{
+
+   rigid2d::Vector2D newPosition = {request.desiredPose.x, request.desiredPose.y};
+   rigid2d::Transform2D newPose(newPosition, request.desiredPose.theta);
+   rigid2d::DiffDrive diffcarNewPose(newPose, wheelBase, wheelRadius);
+   diffcar = diffcarNewPose;
+  //ROS_INFO_STREAM("Inside service\n");
+  return true;
 }
 
 
