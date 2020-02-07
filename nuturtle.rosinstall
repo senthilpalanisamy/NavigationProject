@@ -1,0 +1,6 @@
+- git:
+    local-name: nav_library
+    uri: git@github.com:ME495-Navigation/main-assignment-senthilpalanisamy.git
+- git:
+    local-name: turtlebot
+    uri: https://github.com/ME495-Navigation/nuturtlebot.git
