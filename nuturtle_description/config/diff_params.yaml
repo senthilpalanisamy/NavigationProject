@@ -1,8 +1,14 @@
 ---
-wheel_width: 0.75 # Thickness of the wheel
-wheel_radius: 2.5 # radius of the two differential wheels. 
+wheel_width: 0.011 # Thickness of the wheel
+wheel_radius: 0.033 # radius of the two differential wheels. 
                   # The radius of the castor wheel is half of this
-wheel_base: 3.0   # Distance between the wheel centers
-chasis_length: 10.0 # Length of the robot's body
-chasis_thickness: 3.0 # z dimension of the robot body
+wheel_base: 0.08   # Distance between the wheel centers
+chasis_length: 0.178 # Length of the robot's body
+chasis_thickness: 0.192 # z dimension of the robot body
+encoder_ticks_per_rev: 4096  #Number of ticks for completing one complete cycle of revolution # clarify once
+max_trans_vel: 0.22 # Maximum linear velocity of the robot
+max_rot_vel_robot: 2.84 # Maximum rotational velocity of the robot
+max_rot_vel_motor: 6.35492 # Maximum rotational velocity of the motor
+max_motor_power: 260
+
 
