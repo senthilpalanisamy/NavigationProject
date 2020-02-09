@@ -9,12 +9,14 @@ project(nuturtle_robot)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nuturtlebot
-  nuturtle_description
-  rigid2d
-  roscpp
-  rostest
-  std_msgs
+             message_generation
+             message_runtime
+             nuturtle_description
+             nuturtlebot
+             rigid2d
+             roscpp
+             rostest
+             std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -58,11 +60,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
+add_service_files(
+  FILES
+  StartRotation.srv
 #   Service2.srv
-# )
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -72,10 +74,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,7 +111,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuturtle_robot
-  CATKIN_DEPENDS nuturtlebot nuturtle_description rigid2d roscpp std_msgs 
+  CATKIN_DEPENDS message_generation message_runtime nuturtle_description  nuturtlebot rigid2d roscpp std_msgs 
 #  DEPENDS system_lib
 )
 
@@ -140,6 +142,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_turtle_interface_node src/turtle_interface.cpp)
+add_executable(${PROJECT_NAME}_rotation src/rotation.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,6 +156,10 @@ add_executable(${PROJECT_NAME}_turtle_interface_node src/turtle_interface.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_turtle_interface_node
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_rotation
   ${catkin_LIBRARIES}
 )
 
@@ -202,6 +209,9 @@ install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 install(TARGETS ${PROJECT_NAME}_turtle_interface_node 
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+
+install(TARGETS ${PROJECT_NAME}_rotation
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 #############
 ## Testing ##
 #############
