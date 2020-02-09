@@ -7,6 +7,33 @@
 #include "nuturtlebot/SensorData.h" 
 #include <cmath>
 
+double clockwiseDistance(double x, double y)
+{
+  if(y > x)
+  {
+    return y-x;
+   }
+  else
+  {
+    return 2 * rigid2d::PI -x + y;
+  }
+
+}
+
+
+double anticlockwiseDistance(double x, double y)
+{
+  if(y < x)
+  {
+    return y-x;
+   }
+  else
+  {
+    return y - 2 * rigid2d::PI -x;
+  }
+
+}
+
 double clampValue(double input, double upperLimit, double lowerLimit)
 {
   double clampedValue;
@@ -99,10 +126,32 @@ void cmdVelCallback(const geometry_msgs::Twist bodyTwistMsg)
     wheelCommandPublisher.publish(wheelVelCommands);
 }
 
+double calculateWheelVelocities(double previousPoint, double presentPoint, double time)
+{
+
+    double clkDistance = clockwiseDistance(previousPoint, presentPoint);
+    double anticlkDistance = anticlockwiseDistance(previousPoint, presentPoint);
+
+    ROS_INFO_STREAM("clockwise_distance"<<clkDistance);
+    ROS_INFO_STREAM("anticlockwise_distance"<<anticlkDistance);
+    double wheelVelocity;
+    if(abs(anticlkDistance) < clkDistance)
+    {
+     wheelVelocity = anticlkDistance / time;
+    }
+    else
+    {
+      wheelVelocity = clkDistance/ time;
+    }
+    return wheelVelocity;
+
+}
+
+
 void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
 {
 
-    currentTime = ros::Time::now();
+    currentTime = turtlebotSensor.stamp;
     sensor_msgs::JointState jointStateMsg;
     jointStateMsg.header.stamp = currentTime;
     jointStateMsg.header.frame_id = "turtle_interface";
@@ -132,8 +181,19 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
 
     ros::Duration totalDuration = currentTime - lastTime;
     double totalTime = totalDuration.toSec();
-    jointVelocities = {(jointPositions[0] - leftPrevPosition) / totalTime,
-                     (jointPositions[0] - rightPrevPosition) / totalTime};
+    double leftWheelVelocity = calculateWheelVelocities(leftPrevPosition, jointPositions[0], totalTime);
+    double rightWheelVelocity = calculateWheelVelocities(rightPrevPosition, jointPositions[1], totalTime);
+    ROS_INFO_STREAM("left wheel velocity"<<leftWheelVelocity);
+    ROS_INFO_STREAM("right wheel velocity"<<rightWheelVelocity);
+    ROS_INFO_STREAM("total time"<<totalDuration);
+    ROS_INFO_STREAM("right previous wheel position"<<rightPrevPosition);
+    ROS_INFO_STREAM("left previous wheel position"<<leftPrevPosition);
+    ROS_INFO_STREAM("right wheel position"<<jointPositions[1]);
+    ROS_INFO_STREAM("left  wheel position"<<jointPositions[0]);
+
+    ROS_INFO_STREAM("total time"<<totalDuration);
+
+    jointVelocities = {leftWheelVelocity, rightWheelVelocity};
     }
 
 

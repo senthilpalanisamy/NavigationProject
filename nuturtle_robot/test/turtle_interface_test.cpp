@@ -208,21 +208,60 @@ class TurtleInterfaceFixture : public ::testing::Test {
 
  TEST_F(TurtleInterfaceFixture, EncoderToJointStates)
 {
-  nuturtlebot::SensorData turtleBotData;
-  turtleBotData.left_encoder = 400;
-  turtleBotData.right_encoder = 600;
-  publishSensorData(turtleBotData);
+  nuturtlebot::SensorData turtleBotData1;
+  turtleBotData1.left_encoder = 0;
+  turtleBotData1.right_encoder = 100;
+  auto firstTime = ros::Time::now();
+  turtleBotData1.stamp = firstTime;
+  publishSensorData(turtleBotData1);
   while(not jspMessageReceived)
    {
      ros::spinOnce();
    }
-  auto jointStates = receivedJoint;
+
+  auto firstJointStates = receivedJoint;
   jspMessageReceived = false;
-  ASSERT_NEAR(jointStates.position[0],
-              double(turtleBotData.left_encoder) / encoderTicksPerRevolution * PI * 2,
+
+
+  nuturtlebot::SensorData turtleBotData2;
+  turtleBotData2.left_encoder = 100;
+  turtleBotData2.right_encoder = 0;
+  auto secondTime = ros::Time::now();
+  turtleBotData2.stamp = secondTime;
+
+  publishSensorData(turtleBotData2);
+  while(not jspMessageReceived)
+   {
+     ros::spinOnce();
+   }
+
+  auto secondJointStates = receivedJoint;
+  jspMessageReceived = false;
+
+
+  ros::Duration totalDuration = secondTime - firstTime;
+  double totalTime = totalDuration.toSec();
+
+  ASSERT_NEAR(firstJointStates.position[0],
+              double(turtleBotData1.left_encoder) / encoderTicksPerRevolution * PI * 2,
               0.01)<<"Error in calculating joint states from sensor message";
-  ASSERT_NEAR(jointStates.position[1],
-              double(turtleBotData.right_encoder) / encoderTicksPerRevolution * PI * 2,
+  ASSERT_NEAR(firstJointStates.position[1],
+              double(turtleBotData1.right_encoder) / encoderTicksPerRevolution * PI * 2,
+              0.01)<<"Error in calculating joint states from sensor reading";
+
+  ASSERT_NEAR(secondJointStates.position[0],
+              double(turtleBotData2.left_encoder) / encoderTicksPerRevolution * PI * 2,
+              0.01)<<"Error in calculating joint states from sensor message";
+  ASSERT_NEAR(secondJointStates.position[1],
+              double(turtleBotData2.right_encoder) / encoderTicksPerRevolution * PI * 2,
+              0.01)<<"Error in calculating joint states from sensor reading";
+
+
+  ASSERT_NEAR(secondJointStates.velocity[0],
+              double(100) / encoderTicksPerRevolution * PI * 2 / totalTime,
+              0.01)<<"Error in calculating joint states from sensor message";
+  ASSERT_NEAR(secondJointStates.velocity[1],
+              double(-100) / encoderTicksPerRevolution * PI * 2 / totalTime,
               0.01)<<"Error in calculating joint states from sensor reading";
 
 }
