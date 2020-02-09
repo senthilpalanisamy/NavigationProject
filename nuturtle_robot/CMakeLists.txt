@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
+set(ROS_BUILD_TYPE Debug)
 project(nuturtle_robot)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
@@ -11,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   nuturtlebot
   rigid2d
   roscpp
+  rostest
   std_msgs
 )
 
@@ -106,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuturtle_robot
-  CATKIN_DEPENDS nuturtlebot roscpp std_msgs rigid2d
+  CATKIN_DEPENDS nuturtlebot rigid2d roscpp std_msgs 
 #  DEPENDS system_lib
 )
 
@@ -119,8 +121,8 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
-  ${rigid2d_INCLUDE_DIRS}
-  ${nuturtlebot_INCLUDE_DIRS}
+  #  ${rigid2d_INCLUDE_DIRS}
+  # ${nuturtlebot_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -211,3 +213,9 @@ install(TARGETS ${PROJECT_NAME}_turtle_interface_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+if(CATKIN_ENABLE_TESTING)
+  add_rostest_gtest(turtle_interface_test
+    test/turtle_interface.test
+    test/turtle_interface_test.cpp)
+  target_link_libraries(turtle_interface_test ${catkin_LIBRARIES})
+endif()
