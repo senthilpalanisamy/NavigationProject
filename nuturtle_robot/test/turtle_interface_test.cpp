@@ -12,9 +12,12 @@
 //#include <turtle_interface.cpp>
 
 // TODO: add other includes as needed
+//
+
+constexpr float PI = 3.141592653589793238;
 
 
-class TestNode : public ::testing::Test {
+class TurtleInterfaceFixture : public ::testing::Test {
 
    public:
 
@@ -23,16 +26,16 @@ class TestNode : public ::testing::Test {
      double maxMotorVelocity, robotMaxTransVel, robotMaxRotVel;
      double wheelBase, wheelRadius, encoderTicksPerRevolution;
      std::string leftWheelJoint, rightWheelJoint;
-     bool message_received;
+     bool twistMessageReceived, jspMessageReceived;
      int maxWheelCommand;
      nuturtlebot::WheelCommands receivedCommand;
      sensor_msgs::JointState receivedJoint;
      ros::NodeHandle n;
 
-        TestNode()
+        TurtleInterfaceFixture()
         {
 
-         ros::Rate loop_rate(10);
+         //ros::Rate loop_rate(10);
          ros::param::get("max_rot_vel_motor", maxMotorVelocity);
          ros::param::get("max_trans_vel", robotMaxTransVel);
          ros::param::get("max_rot_vel_motor", robotMaxRotVel);
@@ -45,18 +48,27 @@ class TestNode : public ::testing::Test {
 
          cmdVelPublisher = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000, true);
          sensorDataPublisher = n.advertise<nuturtlebot::SensorData>("/sensor_data", 1000, true);
-         wheelCmdSubscriber = n.subscribe("/wheel_commands", 1000, &TestNode::wheelCmdCallback, this);
-         jspSubscriber = n.subscribe("/joint_states", 1000, &TestNode::jspCallback, this);
-         message_received = false;
+         wheelCmdSubscriber = n.subscribe("/wheel_commands", 1000, &TurtleInterfaceFixture::wheelCmdCallback, this);
+         jspSubscriber = n.subscribe("/joint_states", 1000, &TurtleInterfaceFixture::jspCallback, this);
+         twistMessageReceived = false;
+         jspMessageReceived = true;
+         //loop_rate.sleep();
         }
 
 
 
-   void publish(geometry_msgs::Twist zeroRotTwist)
+   void publishTwist(const geometry_msgs::Twist zeroRotTwist)
    {
 
    cmdVelPublisher.publish(zeroRotTwist);
+   twistMessageReceived = false;
 
+   }
+
+   void publishSensorData(const nuturtlebot::SensorData turtleBotData)
+   {
+   sensorDataPublisher.publish(turtleBotData);
+   jspMessageReceived = false;
    }
 
 
@@ -64,6 +76,7 @@ class TestNode : public ::testing::Test {
    void wheelCmdCallback(const nuturtlebot::WheelCommands movementCommand)
    {
      receivedCommand = movementCommand;
+     twistMessageReceived = true;
 
    }
 
@@ -71,6 +84,7 @@ class TestNode : public ::testing::Test {
   void jspCallback(const sensor_msgs::JointState jointState)
   {
     receivedJoint = jointState;
+    jspMessageReceived = true;
 
   }
 
@@ -78,33 +92,142 @@ class TestNode : public ::testing::Test {
 
 
 
- TEST_F(TestNode, TwistZeroRotation) 
- {
+  TEST_F(TurtleInterfaceFixture, PureTransaltionVelocityCommand) 
+  {
 
 
 
-   ROS_INFO("Entered test case");
-   geometry_msgs::Twist zeroRotTwist;
+    ROS_INFO("Entered test case");
+    geometry_msgs::Twist zeroRotTwist;
 
-   zeroRotTwist.linear.x = 0.1;
-   zeroRotTwist.linear.y = 0;
-   zeroRotTwist.linear.z = 0;
-   zeroRotTwist.angular.x = 0;
-   zeroRotTwist.angular.y = 0;
-   zeroRotTwist.angular.z = 0;
-   cmdVelPublisher.publish(zeroRotTwist);
+    zeroRotTwist.linear.x = 0.1;
+    zeroRotTwist.linear.y = 0;
+    zeroRotTwist.linear.z = 0;
+    zeroRotTwist.angular.x = 0;
+    zeroRotTwist.angular.y = 0;
+    zeroRotTwist.angular.z = 0;
+    publishTwist(zeroRotTwist);
+    //cmdVelPublisher.publish(zeroRotTwist);
 
-   auto output = ros::topic::waitForMessage<nuturtlebot::WheelCommands>(wheelCmdSubscriber.getTopic(),
-                                                                        ros::Duration(1));
+    // auto output = ros::topic::waitForMessage<nuturtlebot::WheelCommands>(wheelCmdSubscriber.getTopic(),
+    //                                                                      ros::Duration(10));
 
-   ROS_INFO("Compare results");
-   ASSERT_TRUE(output != NULL)<<"Message not received for testing robot velocity commands";
-   int expected_output = round(0.1 / wheelRadius * maxWheelCommand / maxMotorVelocity);
-   ASSERT_NEAR(output->left_velocity, expected_output, 0.01)<<"Velocities commands don't match the"
-                                                              "expected value for a pure translation";
-   ASSERT_NEAR(output->right_velocity, expected_output, 0.01)<<"Velocities commands don't match the"
-                                                              "expected value for a pure translation";
- }
+     while(not twistMessageReceived)
+      {
+
+        ros::spinOnce();
+      }
+
+    twistMessageReceived = false;
+
+    ROS_INFO("Compare results");
+    //ASSERT_TRUE(output != NULL)<<"Message not received for testing robot velocity commands";
+    int expected_output = round(0.1 / wheelRadius * maxWheelCommand / maxMotorVelocity);
+    ASSERT_EQ(receivedCommand.left_velocity, expected_output)<<"Velocities commands don't match the"
+                                                               "expected value for a pure translation";
+    ASSERT_EQ(receivedCommand.right_velocity, expected_output)<<"Velocities commands don't match the"
+                                                               "expected value for a pure translation";
+  }
+
+
+   TEST_F(TurtleInterfaceFixture, PureRotationVelocityCommand) 
+   {
+  
+   
+     ROS_INFO("Entered test case");
+     geometry_msgs::Twist pureRotTwist;
+  
+     pureRotTwist.linear.x = 0;
+     pureRotTwist.linear.y = 0;
+     pureRotTwist.linear.z = 0;
+     pureRotTwist.angular.x = 0;
+     pureRotTwist.angular.y = 0;
+     pureRotTwist.angular.z = PI;
+     publishTwist(pureRotTwist);
+  
+     // auto output = ros::topic::waitForMessage<nuturtlebot::WheelCommands>(wheelCmdSubscriber.getTopic(),
+     //                                                                      ros::Duration(10));
+     while(not twistMessageReceived)
+     {
+
+       ros::spinOnce();
+     }
+     twistMessageReceived = false;
+     ROS_INFO("Compare results");
+     // ASSERT_TRUE(output != NULL)<<"Message not received for testing robot velocity commands";
+     float expectedWheelMovement = wheelBase / 2.0 * PI;
+     int expected_output = round(expectedWheelMovement / wheelRadius * maxWheelCommand / maxMotorVelocity);
+     ASSERT_EQ(receivedCommand.right_velocity, expected_output)<<"Velocities commands don't match the"
+                                                                "expected value for a pure rotation";
+     ASSERT_EQ(receivedCommand.left_velocity, -expected_output)<<"Velocities commands don't match the"
+                                                                "expected value for a pure rotation";
+     //ASSERT_EQ(0, expected_output)<<"Velocities commands don't match the"
+     //                                                           "expected value for a pure rotation";
+   }
+
+
+
+  TEST_F(TurtleInterfaceFixture, RotataionPlusTranslationVelocityCommand) 
+  {
+ 
+  
+    ROS_INFO("Entered test case");
+    geometry_msgs::Twist Twist;
+ 
+    Twist.linear.x = 0.01;
+    Twist.linear.y = 0;
+    Twist.linear.z = 0;
+    Twist.angular.x = 0;
+    Twist.angular.y = 0;
+    Twist.angular.z = PI;
+    publishTwist(Twist);
+ 
+    // auto output = ros::topic::waitForMessage<nuturtlebot::WheelCommands>(wheelCmdSubscriber.getTopic(),
+    //                                                                      ros::Duration(10));
+    while(not twistMessageReceived)
+     {
+
+       ros::spinOnce();
+     }
+    twistMessageReceived = false;
+ 
+    ROS_INFO("Compare results");
+    // ASSERT_TRUE(output != NULL)<<"Message not received for testing robot velocity commands";
+    float smallCircleRadius = Twist.linear.x / PI - wheelBase / 2.0;
+    float bigCircleRadius = Twist.linear.x / PI + wheelBase /2.0; 
+    float expectedLeftWheelVelocity = PI * smallCircleRadius / wheelRadius;
+    float expectedRightWheelVelocity = PI * bigCircleRadius / wheelRadius;	
+    int expectedLeftWheelCommand = round(expectedLeftWheelVelocity * maxWheelCommand / maxMotorVelocity);
+    int expectedRightWheelCommand = round(expectedRightWheelVelocity * maxWheelCommand / maxMotorVelocity);
+    ASSERT_EQ(receivedCommand.right_velocity, expectedRightWheelCommand)<<"Velocities commands don't match the"
+                                                               "expected value for rotation plus translation";
+    ASSERT_EQ(receivedCommand.left_velocity, expectedLeftWheelCommand)<<"Velocities commands don't match the"
+                                                               "expected value for rotation plus translation";
+  }
+
+
+ TEST_F(TurtleInterfaceFixture, EncoderToJointStates)
+{
+  nuturtlebot::SensorData turtleBotData;
+  turtleBotData.left_encoder = 400;
+  turtleBotData.right_encoder = 600;
+  publishSensorData(turtleBotData);
+  while(not jspMessageReceived)
+   {
+     ros::spinOnce();
+   }
+  auto jointStates = receivedJoint;
+  jspMessageReceived = false;
+  ASSERT_NEAR(jointStates.position[0],
+              double(turtleBotData.left_encoder) / encoderTicksPerRevolution * PI * 2,
+              0.01)<<"Error in calculating joint states from sensor message";
+  ASSERT_NEAR(jointStates.position[1],
+              double(turtleBotData.right_encoder) / encoderTicksPerRevolution * PI * 2,
+              0.01)<<"Error in calculating joint states from sensor reading";
+
+}
+
+
 
 
 
@@ -113,10 +236,20 @@ class TestNode : public ::testing::Test {
 int main(int argc, char** argv)
 {
 
-  ros::init(argc, argv, "turtle_interface_test");
-  ::testing::InitGoogleTest(&argc, argv);
-  ROS_INFO("stated node");
-  return RUN_ALL_TESTS();
+   ros::init(argc, argv, "turtle_interface_test");
+   ::testing::InitGoogleTest(&argc, argv);
+   ROS_INFO("stated node");
+   return RUN_ALL_TESTS();
+
+  // testing::InitGoogleTest(&argc, argv);
+  // ros::init(argc, argv, "TurtleInterfaceTest");
+
+  // ros::AsyncSpinner spinner(1);
+  // spinner.start();
+  // int ret = RUN_ALL_TESTS();
+  // spinner.stop();
+  // ros::shutdown();
+  // return ret;
 }
 
 

@@ -51,8 +51,8 @@ class turtleInterface
 
   sensorDataSubscriber = n.subscribe("/sensor_data", 1000, &turtleInterface::sensorDataCallback,
                                   this);
-  wheelCommandPublisher = n.advertise<nuturtlebot::WheelCommands>("/wheel_commands", 1000);
-  jspPublisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000);
+  wheelCommandPublisher = n.advertise<nuturtlebot::WheelCommands>("/wheel_commands", 1000, true);
+  jspPublisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000, true);
   //jspPublisher = n.advertise<sensor_msgs::JointState>("/jsp", 1000);
 
   ros::param::get("max_rot_vel_motor", maxMotorVelocity);
@@ -121,8 +121,8 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
       bIsFirstRun = false;
     }
 
-    jointPositions = {turtlebotSensor.left_encoder / float(encoderTicksPerRevolution),
-                     turtlebotSensor.right_encoder / float(encoderTicksPerRevolution)};
+    jointPositions = {turtlebotSensor.left_encoder / float(encoderTicksPerRevolution) * rigid2d::PI * 2,
+                     turtlebotSensor.right_encoder / float(encoderTicksPerRevolution) * rigid2d::PI * 2};
     if(bIsFirstRun)
     {
       jointVelocities = {0.0, 0.0};

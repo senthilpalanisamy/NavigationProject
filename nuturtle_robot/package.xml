@@ -60,6 +60,8 @@
   <build_depend>nuturtlebot</build_depend>
   <build_export_depend>nuturtlebot</build_export_depend>
   <build_depend>rostest</build_depend>
+  <build_depend>nuturtle_description</build_depend>
+  <build_export_depend>nuturtle_description</build_export_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

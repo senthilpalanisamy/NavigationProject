@@ -10,6 +10,7 @@ project(nuturtle_robot)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   nuturtlebot
+  nuturtle_description
   rigid2d
   roscpp
   rostest
@@ -108,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuturtle_robot
-  CATKIN_DEPENDS nuturtlebot rigid2d roscpp std_msgs 
+  CATKIN_DEPENDS nuturtlebot nuturtle_description rigid2d roscpp std_msgs 
 #  DEPENDS system_lib
 )
 
