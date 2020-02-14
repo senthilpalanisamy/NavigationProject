@@ -13,11 +13,12 @@ class RotateInPlace
   ros::ServiceClient setPose;
   ros::Publisher cmdVelPUblisher;
   bool isClockwise, isWaitTime;
-  double totalElapsedTime, rotationVelocity, callbackTime, rotationPeriod;
+  double totalElapsedTime, rotationVelocity, callbackTime, rotationPeriod, fracVel;
   int rotationCount, callbackCount, rotationsNeeded;
   ros::Time previousTime;
   enum RotationStates {ROTATE, WAIT, STOP}; 
   RotationStates state;
+  bool startService;
   public:
   RotateInPlace(int argc, char** argv)
   {
@@ -29,15 +30,17 @@ class RotateInPlace
                                      this);
     cmdVelPUblisher = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
     setPose = n.serviceClient<rigid2d::SetPose>("/set_pose");
+    ros::param::get("~frac_vel", fracVel);
     isClockwise = true;
     callbackTime = callTime;
     totalElapsedTime = 0.0;
     rotationCount = 0;
-    rotationVelocity = 1.0;
+    rotationVelocity = fracVel;
     isWaitTime = false;
     state = ROTATE;
-    rotationPeriod = 2 * rigid2d::PI / rotationVelocity;
+    rotationPeriod = 2.0 * rigid2d::PI / rotationVelocity;
     rotationsNeeded = 2;
+    startService = false;
   }
 
   bool startCallback(nuturtle_robot::StartRotation::Request& request,
@@ -52,6 +55,7 @@ class RotateInPlace
       setPose.call(initialPose);
     }
     isClockwise = request.isClockwise;
+    startService = true;
     return true;
 
   }
@@ -60,6 +64,11 @@ class RotateInPlace
   {
 
     double totalTime =  callbackCount * callbackTime;
+    if(not startService)
+    {
+    return;
+    }
+
     if(rotationCount == rotationsNeeded)
     {
       state = STOP;

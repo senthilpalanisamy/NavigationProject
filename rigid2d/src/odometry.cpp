@@ -39,7 +39,7 @@ odometry::odometry::odometry(int argc, char** argv)
    ros::param::get("wheel_radius", wheelRadius);
    jointStataSubscriber = n.subscribe("joint_states", 1000, &odometry::jointStatesCallback,
                                     this);
-   odometryPublisher = n.advertise<nav_msgs::Odometry>("/nav_msgs/odometry", 1000);
+   odometryPublisher = n.advertise<nav_msgs::Odometry>("nav_msgs/odometry", 1000);
    ros::param::get("~odom_frame_id", odom_frame_id);
    ros::param::get("~body_frame_id", body_frame_id);
    ros::param::get("~left_wheel_joint", left_wheel_joint);

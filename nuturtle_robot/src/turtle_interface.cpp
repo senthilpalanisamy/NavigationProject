@@ -78,7 +78,7 @@ class turtleInterface
 
   sensorDataSubscriber = n.subscribe("/sensor_data", 1000, &turtleInterface::sensorDataCallback,
                                   this);
-  wheelCommandPublisher = n.advertise<nuturtlebot::WheelCommands>("/wheel_commands", 1000, true);
+  wheelCommandPublisher = n.advertise<nuturtlebot::WheelCommands>("/wheel_cmd", 1000, true);
   jspPublisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1000, true);
   //jspPublisher = n.advertise<sensor_msgs::JointState>("/jsp", 1000);
 
