@@ -1,0 +1,7 @@
+<launch>
+  <arg name="robot" default="1" doc="The turtle bot number to run"/>
+  <include file="$(find nuturtle_robot)/launch/basic_remote.launch">
+    <arg name="robot" value="$(arg robot)"/>
+  </include> 
+
+</launch>
