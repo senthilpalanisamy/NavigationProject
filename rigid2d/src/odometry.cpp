@@ -29,6 +29,7 @@ namespace odometry
 {
 odometry::odometry::odometry(int argc, char** argv)
 {
+
    ros::init(argc, argv, "odometer");
    ros::NodeHandle n;
    tf::TransformBroadcaster odom_broadcaster;
@@ -37,6 +38,7 @@ odometry::odometry::odometry(int argc, char** argv)
    ros::Rate r(10.0);
    ros::param::get("wheel_base", wheelBase);
    ros::param::get("wheel_radius", wheelRadius);
+   nameSpace = ros::this_node::getNamespace();
    jointStataSubscriber = n.subscribe("joint_states", 1000, &odometry::jointStatesCallback,
                                     this);
    odometryPublisher = n.advertise<nav_msgs::Odometry>("nav_msgs/odometry", 1000);
@@ -44,6 +46,17 @@ odometry::odometry::odometry(int argc, char** argv)
    ros::param::get("~body_frame_id", body_frame_id);
    ros::param::get("~left_wheel_joint", left_wheel_joint);
    ros::param::get("~right_wheel_joint", right_wheel_joint);
+   if(nameSpace != "")
+   {
+     odom_frame_id = nameSpace +"_" + odom_frame_id;
+     body_frame_id = nameSpace +"_" + body_frame_id;
+   }
+
+  ROS_INFO_STREAM("namespace:"<<nameSpace);
+  ROS_INFO_STREAM("namespace"<<ros::this_node::getNamespace());
+  ROS_INFO_STREAM("odom_frame_id"<<odom_frame_id);
+  ROS_INFO_STREAM("body_frame_id"<<body_frame_id);
+
    lastTime = ros::Time::now();
    leftWheelPosition = 0.0;
    rightWheelPosition = 0.0;

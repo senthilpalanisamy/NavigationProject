@@ -93,7 +93,7 @@ class turtleInterface
   ros::param::get("max_wheel_command", maxWheelCommand);
 
   rigid2d::Transform2D identityTransform(0);
-  diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
+  diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius);
   scaleMotorVelToCmd = maxWheelCommand /  maxMotorVelocity;
   bIsFirstRun = true;
   }

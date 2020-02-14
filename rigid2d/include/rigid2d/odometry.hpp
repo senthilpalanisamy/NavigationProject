@@ -41,6 +41,7 @@ class odometry
     bool bIsFirstRun;
     bool setTurtlePoseCallback(rigid2d::SetPose::Request& request,
                                rigid2d::SetPose::Response& response);
+    string nameSpace;
 };
 }
 #endif

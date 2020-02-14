@@ -17,5 +17,5 @@
   </node>
   <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake"/>
   <node pkg="tf2_ros" type="static_transform_publisher" name="fake_odom_broadcaster" args="0 0 0 0 0 0 1 odom fake_odom" />
-
+  <node name="rviz" pkg="rviz" type="rviz" if="$(eval robot == 0)" />
 </launch>
