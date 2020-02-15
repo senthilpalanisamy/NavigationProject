@@ -63,6 +63,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   StartRotation.srv
+  StartTranslation.srv
 #   Service2.srv
  )
 

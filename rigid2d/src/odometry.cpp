@@ -46,7 +46,7 @@ odometry::odometry::odometry(int argc, char** argv)
    ros::param::get("~body_frame_id", body_frame_id);
    ros::param::get("~left_wheel_joint", left_wheel_joint);
    ros::param::get("~right_wheel_joint", right_wheel_joint);
-   if(nameSpace != "")
+   if(nameSpace != "/")
    {
      odom_frame_id = nameSpace +"_" + odom_frame_id;
      body_frame_id = nameSpace +"_" + body_frame_id;

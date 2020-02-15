@@ -46,10 +46,13 @@ namespace FakeEncoder
   {
     currentTime = ros::Time::now();
     sensor_msgs::JointState jointStateMsg;
+
     jointStateMsg.header.stamp = currentTime;
     jointStateMsg.header.frame_id = "diff_drive";
     std::vector<std::string> jointNames = {leftWheelJoint, rightWheelJoint};
     std::vector<double> jointPosition;
+    std::vector<double> jointVelocities;
+    jointVelocities = {0.0, 0.0};
 
     if(bIsFirstRun)
     {
@@ -73,6 +76,7 @@ namespace FakeEncoder
 
     jointStateMsg.name = jointNames;
     jointStateMsg.position = jointPosition;
+    jointStateMsg.velocity = jointVelocities;
     jointStatePublisher.publish(jointStateMsg);
     lastTime = currentTime;
   }

@@ -167,18 +167,17 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
     std::vector<double> jointPositions;
     std::vector<double> jointVelocities;
 
+    int leftEncoderTicks = turtlebotSensor.left_encoder % encoderTicksPerRevolution;
+    int rightEncoderTicks = turtlebotSensor.right_encoder % encoderTicksPerRevolution;
 
+
+    jointPositions = {leftEncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2.0,
+                     rightEncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2.0};
 
     if(bIsFirstRun)
     {
       jointPositions = {0.0, 0.0};
       bIsFirstRun = false;
-    }
-
-    jointPositions = {turtlebotSensor.left_encoder / float(encoderTicksPerRevolution) * rigid2d::PI * 2,
-                     turtlebotSensor.right_encoder / float(encoderTicksPerRevolution) * rigid2d::PI * 2};
-    if(bIsFirstRun)
-    {
       jointVelocities = {0.0, 0.0};
     }
     else
