@@ -9,13 +9,16 @@
   if="$(eval robot != 0)"/>
 
   <param name="robot_description" command="xacro '$(find nuturtle_description)/urdf/diff_drive.urdf.xacro'"/>
-  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_turtle_interface_node" name="turtle_interface"/>
-  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_rotation" name="rotation"/>
+  <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
+  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_turtle_interface_node" name="turtle_interface" output="screen"/>
+  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_rotation" name="rotation" output="screen">
+  <param name="frac_vel" value="0.5"/>
+  </node>
   <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="odometry" />
   <node machine="turtlebot" pkg="rigid2d" type="rigid2d_fake_encoders" name="fake_encoders">
   <remap from="/joint_states" to="/fake/joint_states"/>
   </node>
   <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake"/>
   <node pkg="tf2_ros" type="static_transform_publisher" name="fake_odom_broadcaster" args="0 0 0 0 0 0 1 odom fake_odom" />
-  <node name="rviz" pkg="rviz" type="rviz" if="$(eval robot == 0)" />
+  <node name="rviz" pkg="rviz" type="rviz" if="$(eval robot != 0)" />
 </launch>

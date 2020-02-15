@@ -84,7 +84,7 @@ class turtleInterface
 
   ros::param::get("max_rot_vel_motor", maxMotorVelocity);
   ros::param::get("max_trans_vel", robotMaxTransVel);
-  ros::param::get("max_rot_vel_motor", robotMaxRotVel);
+  ros::param::get("max_rot_vel_robot", robotMaxRotVel);
   ros::param::get("wheel_base", wheelBase);
   ros::param::get("wheel_radius", wheelRadius);
   ros::param::get("~left_wheel_joint", leftWheelJoint);
@@ -101,6 +101,11 @@ class turtleInterface
 void cmdVelCallback(const geometry_msgs::Twist bodyTwistMsg)
 
   {
+
+    ROS_INFO_STREAM("linear velocity before clamp"<<bodyTwistMsg.linear.x);
+    ROS_INFO_STREAM("angular velocity before clamp"<<bodyTwistMsg.angular.z);
+    ROS_INFO_STREAM("robot Max Trans Velocity"<<robotMaxTransVel);
+    ROS_INFO_STREAM("robot Max Rotational Velocity"<<robotMaxRotVel);
     auto linearVelocity = clampValue(bodyTwistMsg.linear.x, robotMaxTransVel, -robotMaxTransVel);
     auto angularVelocity = clampValue(bodyTwistMsg.angular.z, robotMaxRotVel, -robotMaxRotVel);
     ROS_INFO_STREAM("linear velocity"<<linearVelocity);
@@ -132,8 +137,8 @@ double calculateWheelVelocities(double previousPoint, double presentPoint, doubl
     double clkDistance = clockwiseDistance(previousPoint, presentPoint);
     double anticlkDistance = anticlockwiseDistance(previousPoint, presentPoint);
 
-    ROS_INFO_STREAM("clockwise_distance"<<clkDistance);
-    ROS_INFO_STREAM("anticlockwise_distance"<<anticlkDistance);
+    // ROS_INFO_STREAM("clockwise_distance"<<clkDistance);
+    // ROS_INFO_STREAM("anticlockwise_distance"<<anticlkDistance);
     double wheelVelocity;
     if(abs(anticlkDistance) < clkDistance)
     {
@@ -183,15 +188,15 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
     double totalTime = totalDuration.toSec();
     double leftWheelVelocity = calculateWheelVelocities(leftPrevPosition, jointPositions[0], totalTime);
     double rightWheelVelocity = calculateWheelVelocities(rightPrevPosition, jointPositions[1], totalTime);
-    ROS_INFO_STREAM("left wheel velocity"<<leftWheelVelocity);
-    ROS_INFO_STREAM("right wheel velocity"<<rightWheelVelocity);
-    ROS_INFO_STREAM("total time"<<totalDuration);
-    ROS_INFO_STREAM("right previous wheel position"<<rightPrevPosition);
-    ROS_INFO_STREAM("left previous wheel position"<<leftPrevPosition);
-    ROS_INFO_STREAM("right wheel position"<<jointPositions[1]);
-    ROS_INFO_STREAM("left  wheel position"<<jointPositions[0]);
+    // ROS_INFO_STREAM("left wheel velocity"<<leftWheelVelocity);
+    // ROS_INFO_STREAM("right wheel velocity"<<rightWheelVelocity);
+    // ROS_INFO_STREAM("total time"<<totalDuration);
+    // ROS_INFO_STREAM("right previous wheel position"<<rightPrevPosition);
+    // ROS_INFO_STREAM("left previous wheel position"<<leftPrevPosition);
+    // ROS_INFO_STREAM("right wheel position"<<jointPositions[1]);
+    // ROS_INFO_STREAM("left  wheel position"<<jointPositions[0]);
 
-    ROS_INFO_STREAM("total time"<<totalDuration);
+    // ROS_INFO_STREAM("total time"<<totalDuration);
 
     jointVelocities = {leftWheelVelocity, rightWheelVelocity};
     }

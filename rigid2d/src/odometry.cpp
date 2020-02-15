@@ -70,6 +70,7 @@ bool odometry::setTurtlePoseCallback(rigid2d::SetPose::Request& request,
                                      rigid2d::SetPose::Response& response)
 {
 
+
    rigid2d::Vector2D newPosition = {request.desiredPose.x, request.desiredPose.y};
    rigid2d::Transform2D newPose(newPosition, request.desiredPose.theta);
    rigid2d::DiffDrive diffcarNewPose(newPose, wheelBase, wheelRadius);
