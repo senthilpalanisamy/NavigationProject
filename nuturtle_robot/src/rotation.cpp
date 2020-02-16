@@ -46,7 +46,7 @@ class RotateInPlace
     rotationPeriod = 2.0 * rigid2d::PI / rotationVelocity;
     rotationsNeeded = 20;
     startService = false;
-    callbackTime = rotationPeriod / 30.0;
+    callbackTime = rotationPeriod / 200.0;
   }
 
  double returnCallbackTime()

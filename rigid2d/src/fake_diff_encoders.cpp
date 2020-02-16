@@ -18,6 +18,19 @@
 #include <sensor_msgs/JointState.h>
 #include <ros/console.h>
 
+double wrapAngle0to2Pi(double angle)
+{
+  double cTheta = cos(angle);
+  double sTheta = sin(angle);
+  double theta = atan2(sTheta, cTheta);
+  if(theta < 0)
+  {
+    theta = 2 * rigid2d::PI - abs(theta);
+  }
+  return theta;
+
+}
+
 namespace FakeEncoder
 {
   FakeEncoder::FakeEncoder(int argc, char** argv)
@@ -25,7 +38,7 @@ namespace FakeEncoder
 
   ros::init(argc, argv, "fake_diff_encoders");
   ros::NodeHandle n;
-  ros::Rate r(10.0);
+  ros::Rate r(100.0);
   cmdVelSubscriber = n.subscribe("cmd_vel", 1000, &FakeEncoder::cmdVelCallback,
                                     this);
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("joint_states", 1000);
@@ -40,6 +53,8 @@ namespace FakeEncoder
   bIsFirstRun = true;
   rigid2d::Transform2D identityTransform(0);
   diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
+  previousLeftPosition = 0.0;
+  previousRightPosition = 0.0;
   }
 
   void FakeEncoder::cmdVelCallback(const geometry_msgs::Twist bodyTwistMsg)
@@ -59,6 +74,8 @@ namespace FakeEncoder
       previousTwistMsg = bodyTwistMsg;
       jointPosition = {0.0, 0.0};
       bIsFirstRun = false;
+      previousLeftPosition = 0.0;
+      previousRightPosition = 0.0;
     }
     else
     {
@@ -70,7 +87,14 @@ namespace FakeEncoder
     twistFollowed.vx = previousTwistMsg.linear.x;
     twistFollowed.vy = previousTwistMsg.linear.y;
     auto velocities = diffcar.twistToWheelVelocities(twistFollowed, totalTime);
-    jointPosition = {velocities.left * totalTime, velocities.right * totalTime};
+    double leftMovement =  velocities.left * totalTime;
+    double rightMovement = velocities.right * totalTime;
+    jointPosition = {previousLeftPosition + leftMovement,
+                    previousRightPosition + rightMovement};
+    previousLeftPosition = jointPosition[0];
+    previousRightPosition = jointPosition[1];
+    previousLeftPosition =  wrapAngle0to2Pi(previousLeftPosition);
+    previousRightPosition = wrapAngle0to2Pi(previousRightPosition);
     previousTwistMsg = bodyTwistMsg;
     }
 

@@ -28,7 +28,7 @@ namespace FakeEncoder
     ros::Publisher jointStatePublisher;
     /// Other parameters useful for maintaining states and information about
     /// the system
-    double wheelRadius, wheelBase;
+    double wheelRadius, wheelBase, previousLeftPosition, previousRightPosition;
     std::string leftWheelJoint, rightWheelJoint;
     ros::Time currentTime, lastTime;
     geometry_msgs::Twist previousTwistMsg;

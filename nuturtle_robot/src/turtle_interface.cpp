@@ -72,6 +72,7 @@ class turtleInterface
 
   ros::init(argc, argv, "turtle_interface");
   ros::NodeHandle n;
+  ros::Rate r(100.0);
 
   cmdVelSubscriber = n.subscribe("/cmd_vel", 1000, &turtleInterface::cmdVelCallback,
                                   this);
@@ -152,6 +153,25 @@ double calculateWheelVelocities(double previousPoint, double presentPoint, doubl
 
 }
 
+double wrapEncoderTicks(const int& encoderValue)
+{
+
+   int EncoderTicks;
+   if(encoderValue > 0)
+   {
+    EncoderTicks = encoderValue % encoderTicksPerRevolution;
+   }
+   else
+   {
+    EncoderTicks = abs(encoderValue) % encoderTicksPerRevolution;
+    EncoderTicks = - EncoderTicks;
+   }
+   double jointState = EncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2;
+   return jointState;
+
+
+}
+
 
 void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
 {
@@ -167,12 +187,18 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
     std::vector<double> jointPositions;
     std::vector<double> jointVelocities;
 
-    int leftEncoderTicks = turtlebotSensor.left_encoder % encoderTicksPerRevolution;
-    int rightEncoderTicks = turtlebotSensor.right_encoder % encoderTicksPerRevolution;
+    int leftEncoderTicks = turtlebotSensor.left_encoder;
+    int rightEncoderTicks = turtlebotSensor.right_encoder;
 
 
-    jointPositions = {leftEncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2.0,
-                     rightEncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2.0};
+    //jointPositions = {leftEncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2.0,
+    //                 rightEncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2.0};
+    ROS_INFO_STREAM("****************************************");
+    ROS_INFO_STREAM("left Wheel Positions before"<<leftEncoderTicks);
+    ROS_INFO_STREAM("right Wheel Positions before"<<rightEncoderTicks);
+    jointPositions = {wrapEncoderTicks(leftEncoderTicks), wrapEncoderTicks(rightEncoderTicks)};
+    ROS_INFO_STREAM("right wheel Positions after"<<jointPositions[0]);
+    ROS_INFO_STREAM("right wheel Positions after"<<jointPositions[1]);
 
     if(bIsFirstRun)
     {
@@ -187,6 +213,10 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
     double totalTime = totalDuration.toSec();
     double leftWheelVelocity = calculateWheelVelocities(leftPrevPosition, jointPositions[0], totalTime);
     double rightWheelVelocity = calculateWheelVelocities(rightPrevPosition, jointPositions[1], totalTime);
+
+    ROS_INFO_STREAM("right wheel velocity"<<leftWheelVelocity);
+    ROS_INFO_STREAM("right wheel velocity"<<rightWheelVelocity);
+    ROS_INFO_STREAM("****************************************");
     // ROS_INFO_STREAM("left wheel velocity"<<leftWheelVelocity);
     // ROS_INFO_STREAM("right wheel velocity"<<rightWheelVelocity);
     // ROS_INFO_STREAM("total time"<<totalDuration);

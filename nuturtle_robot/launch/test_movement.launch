@@ -13,14 +13,14 @@
 
   <param name="robot_description" command="xacro '$(find nuturtle_description)/urdf/diff_drive.urdf.xacro'"/>
   <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
-  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_turtle_interface_node" name="turtle_interface" output="screen">
+  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_turtle_interface_node" name="turtle_interface">
   <param name="left_wheel_joint" value="left_wheel_axle"/>
   <param name="right_wheel_joint" value="right_wheel_axle"/>
   </node>
-  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_rotation" name="rotation" output="screen">
-  <param name="frac_vel" value="0.5"/>
+  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_rotation" name="rotation">
+  <param name="frac_vel" value="1.0"/>
   </node>
-  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="odometry" output="screen">
+  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="odometry">
   <param name="odom_frame_id" value="odom"/>
   <param name="body_frame_id" value="base_link"/>
   </node>
@@ -32,11 +32,11 @@
 
   <!-- node machine="turtlebot" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" / -->
 
-  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake" output="screen">
+  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake">
   <param name="odom_frame_id" value="odom"/>
   <param name="body_frame_id" value="base_link"/>
   </node>
 
-  <node pkg="tf2_ros" type="static_transform_publisher" name="fake_odom_broadcaster" args="0 0 0 0 0 0 1 odom fake_odom" />
+  <node machine="turtlebot" pkg="tf2_ros" type="static_transform_publisher" name="fake_odom_broadcaster" args="0 0 0 0 0 0 1 odom fake_odom" />
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_path)" if="$(eval robot != 0)" />
 </launch>

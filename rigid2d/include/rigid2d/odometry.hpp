@@ -34,7 +34,7 @@ class odometry
     ros::ServiceServer setTurtlePose;
     /// other private parameters to keep track of the states and necessary
     /// information about the robot
-    double wheelBase, wheelRadius;
+    double wheelBase, wheelRadius, previousLeftPosition, previousRightPosition;
     rigid2d::DiffDrive diffcar;
     float leftWheelPosition, rightWheelPosition;
     ros::Time currentTime, lastTime;
