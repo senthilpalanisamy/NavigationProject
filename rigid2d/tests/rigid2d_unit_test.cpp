@@ -479,6 +479,15 @@ TEST(DiffDrive, UpdataOdometry)
  ASSERT_NEAR(currentPose.y, 0.00, 0.01) <<"Error in updating odometry for a sequence of rotations";
 
 
+ phi_left=0.00339831, phi_right=0.00339831;
+ diffCar.reset(initialPose);
+ diffCar.UpdateOdometry(phi_left, phi_right);
+ currentPose = diffCar.returnPose();
+ ASSERT_NEAR(currentPose.theta, 0.00, 0.01)<<"Error  in updating odometry for a sequence of translation";
+ ASSERT_NEAR(currentPose.x, wheel_radius * 0.00339831, 0.01) <<"Error in updating odometry for a sequence of translation";
+ ASSERT_NEAR(currentPose.y, 0.00, 0.01) <<"Error in updating odometry for a sequence of translation";
+
+
 }
 
 TEST(DiffDrive, feedforward)

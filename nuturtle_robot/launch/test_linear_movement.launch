@@ -1,0 +1,42 @@
+<launch>
+
+  <arg name="rviz_path" default="$(find nuturtle_robot)/config/movement.rviz" doc="path to load the rviz configuration file from" />
+
+  <arg name="robot" default="1" doc="The turtle bot number to run"/>
+  <include file="$(find nuturtle_robot)/launch/basic_remote.launch">
+    <arg name="robot" value="$(arg robot)"/>
+  </include> 
+
+  <machine name="turtlebot" address="localhost" if="$(eval robot == 0)" />
+  <machine name="turtlebot" address="turtlebot$(arg robot)" env-loader="/home/student/senthil_install/env.sh" user="student"
+  if="$(eval robot != 0)"/>
+
+  <param name="robot_description" command="xacro '$(find nuturtle_description)/urdf/diff_drive.urdf.xacro'"/>
+  <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
+  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_turtle_interface_node" name="turtle_interface">
+  <param name="left_wheel_joint" value="left_wheel_axle"/>
+  <param name="right_wheel_joint" value="right_wheel_axle"/>
+  </node>
+  <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_translation" name="translation">
+  <param name="frac_vel" value="1.0"/>
+  </node>
+  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="odometry">
+  <param name="odom_frame_id" value="odom"/>
+  <param name="body_frame_id" value="base_link"/>
+  </node>
+
+  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_fake_encoders" name="fake_encoders">
+  <remap from="/joint_states" to="/fake/joint_states"/>
+  </node>
+  <node machine="turtlebot" name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- node machine="turtlebot" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" / -->
+
+  <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake">
+  <param name="odom_frame_id" value="odom"/>
+  <param name="body_frame_id" value="base_link"/>
+  </node>
+
+  <node machine="turtlebot" pkg="tf2_ros" type="static_transform_publisher" name="fake_odom_broadcaster" args="0 0 0 0 0 0 1 odom fake_odom" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_path)" if="$(eval robot != 0)" />
+</launch>

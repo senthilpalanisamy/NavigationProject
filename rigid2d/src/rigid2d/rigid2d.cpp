@@ -22,7 +22,7 @@ namespace rigid2d
   }
 
   WheelVelocities DiffDrive::twistToWheelVelocities(Twist2D BodyTwist, double totalTime)
-  { if(BodyTwist.vy !=0)
+  { if(BodyTwist.vy > 1e-2)
     {
       throw std::invalid_argument("wrong twist");
     }
@@ -44,7 +44,7 @@ namespace rigid2d
 
   void DiffDrive::UpdateOdometry(double phiLeft, double phiRight)
   {
-    if (phiLeft == 0 && phiRight==0)
+    if (abs(phiLeft) < 1e-4 && abs(phiRight)<1e-4)
     {
      return void();
     }

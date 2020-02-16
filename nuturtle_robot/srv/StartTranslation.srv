@@ -1,0 +1,2 @@
+bool isForward # e.g. Specificies if the rotation is clockwise or anti-clockwise 
+---

@@ -85,6 +85,7 @@ double calculateWheelVelocities(double previousPoint, double presentPoint, doubl
 
 namespace odometry
 {
+
 odometry::odometry::odometry(int argc, char** argv)
 {
 
@@ -94,8 +95,8 @@ odometry::odometry::odometry(int argc, char** argv)
    currentTime = ros::Time::now();
    lastTime = ros::Time::now();
    ros::Rate r(100);
-   ros::param::get("wheel_base", wheelBase);
-   ros::param::get("wheel_radius", wheelRadius);
+   ros::param::get("/wheel_base", wheelBase);
+   ros::param::get("/wheel_radius", wheelRadius);
    nameSpace = ros::this_node::getNamespace();
    jointStataSubscriber = n.subscribe("joint_states", 1000, &odometry::jointStatesCallback,
                                     this);
@@ -114,6 +115,8 @@ odometry::odometry::odometry(int argc, char** argv)
   ROS_INFO_STREAM("namespace"<<ros::this_node::getNamespace());
   ROS_INFO_STREAM("odom_frame_id"<<odom_frame_id);
  ROS_INFO_STREAM("body_frame_id"<<body_frame_id);
+ ROS_INFO_STREAM("wheel_base"<<wheelBase);
+ ROS_INFO_STREAM("wheel_radius"<<wheelRadius);
 
    lastTime = ros::Time::now();
    leftWheelPosition = 0.0;
@@ -124,6 +127,7 @@ odometry::odometry::odometry(int argc, char** argv)
    diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
    setTurtlePose = n.advertiseService("/set_pose", &odometry::setTurtlePoseCallback,
                                      this);
+  bIsFirstRun = true; 
 }
 
 bool odometry::setTurtlePoseCallback(rigid2d::SetPose::Request& request,
@@ -146,6 +150,7 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   currentTime = ros::Time::now();
   double newLeftPosition = jointMessage.position[0];
   double newRightPosition = jointMessage.position[1];
+  ROS_INFO_STREAM("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   //ROS_INFO_STREAM("left position"<<leftDistance);
   //ROS_INFO_STREAM("right position"<<rightDistance);
 
@@ -163,23 +168,35 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   {
   ros::Duration time_duration = currentTime - lastTime;
   double totalTime = time_duration.toSec();
-  ROS_INFO_STREAM("##########################");
   ROS_INFO_STREAM("previousLeftPosition"<<previousLeftPosition);
   ROS_INFO_STREAM("previousRightPosition"<<previousRightPosition);
   ROS_INFO_STREAM("newLeftPosition"<<newLeftPosition);
   ROS_INFO_STREAM("newRightPosition"<<newRightPosition);
+  ROS_INFO_STREAM("time_duration"<<time_duration);
 
   double leftVelocity = calculateWheelVelocities(previousLeftPosition, newLeftPosition, totalTime);
   double rightVelocity = calculateWheelVelocities(previousRightPosition, newRightPosition, totalTime);
 
-  ROS_INFO_STREAM("left velocity"<<leftVelocity);
-  ROS_INFO_STREAM("right velocity"<<rightVelocity);
-  ROS_INFO_STREAM("##########################");
+  ROS_INFO_STREAM("left velocity"<<leftVelocity * totalTime);
+  ROS_INFO_STREAM("right velocity"<<rightVelocity * totalTime);
   rigid2d::WheelVelocities velocities = {leftVelocity, rightVelocity};
   bodyTwist = diffcar.WheelVelocitiestoTwist(velocities);
+  ROS_INFO_STREAM("Body Twist z x y"<<bodyTwist.wz<<" "<<bodyTwist.vx<<" "<<bodyTwist.vy);
+  ROS_INFO_STREAM("time taken:"<<totalTime);
+
+  carPose = diffcar.returnPose();
+
+  ROS_INFO_STREAM("before car pose x"<<carPose.x);
+  ROS_INFO_STREAM("before car pose y"<<carPose.y);
+  ROS_INFO_STREAM("before car pose theta"<<carPose.theta);
 
   diffcar.UpdateOdometry(leftVelocity * totalTime, rightVelocity * totalTime);
   carPose = diffcar.returnPose();
+
+  ROS_INFO_STREAM("after car pose x"<<carPose.x);
+  ROS_INFO_STREAM("after car pose y"<<carPose.y);
+  ROS_INFO_STREAM("after car pose theta"<<carPose.theta);
+
   }
 
   ROS_INFO_STREAM("\n Publishing message");
@@ -210,6 +227,8 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   ROS_INFO_STREAM("car pose x"<<carPose.x);
   ROS_INFO_STREAM("car pose y"<<carPose.y);
   ROS_INFO_STREAM("car pose theta"<<carPose.theta);
+  ROS_INFO_STREAM("presentPosition left"<<jointMessage.position[0]);
+  ROS_INFO_STREAM("presentPosition right"<<jointMessage.position[1]);
 
   //static tf2_ros::TransformBroadcaster br;
   static tf::TransformBroadcaster br;
@@ -230,6 +249,7 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   lastTime = currentTime;
 
   ROS_INFO_STREAM("\n Finished");
+  ROS_INFO_STREAM("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   previousLeftPosition = jointMessage.position[0];
   previousRightPosition = jointMessage.position[1];
 
