@@ -18,7 +18,7 @@
   <param name="right_wheel_joint" value="right_wheel_axle"/>
   </node>
   <node machine="turtlebot" pkg="nuturtle_robot" type="nuturtle_robot_rotation" name="rotation">
-  <param name="frac_vel" value="1.0"/>
+  <param name="frac_vel" value="0.3"/>
   </node>
   <node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="odometry">
   <param name="odom_frame_id" value="odom"/>

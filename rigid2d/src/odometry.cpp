@@ -147,7 +147,7 @@ bool odometry::setTurtlePoseCallback(rigid2d::SetPose::Request& request,
 void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
 {
 
-  currentTime = ros::Time::now();
+  currentTime = jointMessage.header.stamp;
   double newLeftPosition = jointMessage.position[0];
   double newRightPosition = jointMessage.position[1];
   ROS_INFO_STREAM("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -174,8 +174,10 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   ROS_INFO_STREAM("newRightPosition"<<newRightPosition);
   ROS_INFO_STREAM("time_duration"<<time_duration);
 
-  double leftVelocity = calculateWheelVelocities(previousLeftPosition, newLeftPosition, totalTime);
-  double rightVelocity = calculateWheelVelocities(previousRightPosition, newRightPosition, totalTime);
+  //double leftVelocity = calculateWheelVelocities(previousLeftPosition, newLeftPosition, totalTime);
+  //double rightVelocity = calculateWheelVelocities(previousRightPosition, newRightPosition, totalTime);
+  double leftVelocity = jointMessage.velocity[0];
+  double rightVelocity = jointMessage.velocity[1];
 
   ROS_INFO_STREAM("left velocity"<<leftVelocity * totalTime);
   ROS_INFO_STREAM("right velocity"<<rightVelocity * totalTime);
@@ -246,7 +248,7 @@ void odometry::jointStatesCallback(const sensor_msgs::JointState jointMessage)
   br.sendTransform(transformStamped);
 
 
-  lastTime = currentTime;
+  lastTime = jointMessage.header.stamp ;
 
   ROS_INFO_STREAM("\n Finished");
   ROS_INFO_STREAM("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");

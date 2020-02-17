@@ -77,7 +77,7 @@ class turtleInterface
 
   ros::init(argc, argv, "turtle_interface");
   ros::NodeHandle n;
-  ros::Rate r(10000.0);
+  ros::Rate r(100.0);
 
   cmdVelSubscriber = n.subscribe("/cmd_vel", 1000, &turtleInterface::cmdVelCallback,
                                   this);
@@ -141,39 +141,46 @@ void cmdVelCallback(const geometry_msgs::Twist bodyTwistMsg)
 double calculateWheelVelocities(double previousPoint, double presentPoint, double time)
 {
 
-    double clkDistance = clockwiseDistance(previousPoint, presentPoint);
-    double anticlkDistance = anticlockwiseDistance(previousPoint, presentPoint);
+    //double clkDistance = clockwiseDistance(previousPoint, presentPoint);
+    //double anticlkDistance = anticlockwiseDistance(previousPoint, presentPoint);
 
     // ROS_INFO_STREAM("clockwise_distance"<<clkDistance);
     // ROS_INFO_STREAM("anticlockwise_distance"<<anticlkDistance);
-    double wheelVelocity;
-    if(abs(anticlkDistance) < clkDistance)
-    {
-     wheelVelocity = anticlkDistance / time;
-    }
-    else
-    {
-      wheelVelocity = clkDistance/ time;
-    }
+    //double wheelVelocity;
+    //if(abs(anticlkDistance) < clkDistance)
+    //{
+    // wheelVelocity = anticlkDistance / time;
+    //}
+    //else
+    //{
+    //  wheelVelocity = clkDistance/ time;
+    //}
+    double wheelVelocity = (presentPoint - previousPoint) / time;
     return wheelVelocity;
 
 }
 
-double wrapEncoderTicks(const int& encoderValue)
+double normaliseEncoderValues(const int& encoderValue)
 {
 
    int EncoderTicks;
-   if(encoderValue > 0)
-   {
-    EncoderTicks = encoderValue % encoderTicksPerRevolution;
-   }
-   else
-   {
-    EncoderTicks = abs(encoderValue) % encoderTicksPerRevolution;
-    EncoderTicks = - EncoderTicks;
-   }
-   double jointState = EncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2;
-   return jointState;
+   //double EncoderRevCount;
+   //double normalisedRotCount;
+   //if(encoderValue > 0)
+   //{
+   // EncoderTicks = encoderValue % encoderTicksPerRevolution;
+   // EncoderRevCount = floor(encoderValue / double(encoderTicksPerRevolution)) * rigid2d::PI * 2;
+   //}
+   //else
+   //{
+   // EncoderTicks = abs(encoderValue) % encoderTicksPerRevolution;
+   // EncoderTicks = - EncoderTicks;
+   // EncoderRevCount = floor(abs(encoderValue) / double(encoderTicksPerRevolution)) * rigid2d::PI * 2
+   //}
+   //double jointState = EncoderTicks / double(encoderTicksPerRevolution) * rigid2d::PI * 2;
+   double normalisedRotCount = double(encoderValue) / double(encoderTicksPerRevolution) *
+                               rigid2d::PI*2;
+   return normalisedRotCount;
 
 
 }
@@ -200,7 +207,7 @@ void sensorDataCallback(const nuturtlebot::SensorData turtlebotSensor)
     //ROS_INFO_STREAM("****************************************");
     //ROS_INFO_STREAM("left Wheel Positions before"<<leftEncoderTicks);
     //ROS_INFO_STREAM("right Wheel Positions before"<<rightEncoderTicks);
-    jointPositions = {wrapEncoderTicks(leftEncoderTicks), wrapEncoderTicks(rightEncoderTicks)};
+    jointPositions = {normaliseEncoderValues(leftEncoderTicks), normaliseEncoderValues(rightEncoderTicks)};
     //ROS_INFO_STREAM("right wheel Positions after"<<jointPositions[0]);
     //ROS_INFO_STREAM("right wheel Positions after"<<jointPositions[1]);
 

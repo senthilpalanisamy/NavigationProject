@@ -91,10 +91,13 @@ namespace FakeEncoder
     double rightMovement = velocities.right * totalTime;
     jointPosition = {previousLeftPosition + leftMovement,
                     previousRightPosition + rightMovement};
+    jointVelocities = {(jointPosition[0] - previousLeftPosition) / totalTime,
+                       (jointPosition[1] - previousRightPosition) / totalTime};
+
     previousLeftPosition = jointPosition[0];
     previousRightPosition = jointPosition[1];
-    previousLeftPosition =  wrapAngle0to2Pi(previousLeftPosition);
-    previousRightPosition = wrapAngle0to2Pi(previousRightPosition);
+    //previousLeftPosition =  wrapAngle0to2Pi(previousLeftPosition);
+    //previousRightPosition = wrapAngle0to2Pi(previousRightPosition);
     previousTwistMsg = bodyTwistMsg;
     }
 
