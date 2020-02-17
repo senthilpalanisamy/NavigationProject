@@ -145,6 +145,7 @@ include_directories(
 add_executable(${PROJECT_NAME}_turtle_interface_node src/turtle_interface.cpp)
 add_executable(${PROJECT_NAME}_rotation src/rotation.cpp)
 add_executable(${PROJECT_NAME}_translation src/translation.cpp)
+add_executable(${PROJECT_NAME}_waypoint src/turtle_waypoint.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -166,6 +167,10 @@ target_link_libraries(${PROJECT_NAME}_rotation
 )
 
 target_link_libraries(${PROJECT_NAME}_translation
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_waypoint
   ${catkin_LIBRARIES}
 )
 
@@ -220,6 +225,9 @@ install(TARGETS ${PROJECT_NAME}_rotation
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(TARGETS ${PROJECT_NAME}_translation
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(TARGETS ${PROJECT_NAME}_waypoint
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 #############
 ## Testing ##

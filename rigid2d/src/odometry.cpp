@@ -125,7 +125,7 @@ odometry::odometry::odometry(int argc, char** argv)
    previousRightPosition = 0.0;
    rigid2d::Transform2D identityTransform(0);
    diffcar = rigid2d::DiffDrive(identityTransform, wheelBase, wheelRadius); 
-   setTurtlePose = n.advertiseService("/set_pose", &odometry::setTurtlePoseCallback,
+   setTurtlePose = n.advertiseService("set_pose", &odometry::setTurtlePoseCallback,
                                      this);
   bIsFirstRun = true; 
 }
@@ -139,8 +139,8 @@ bool odometry::setTurtlePoseCallback(rigid2d::SetPose::Request& request,
    rigid2d::Transform2D newPose(newPosition, request.desiredPose.theta);
    rigid2d::DiffDrive diffcarNewPose(newPose, wheelBase, wheelRadius);
    diffcar = diffcarNewPose;
-  //ROS_INFO_STREAM("Inside service\n");
-  return true;
+   ROS_INFO_STREAM("Inside service\n");
+   return true;
 }
 
 
