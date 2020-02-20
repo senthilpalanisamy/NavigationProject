@@ -22,7 +22,6 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <ros/console.h>
-#include <rigid2d/SetPose.h> 
 #include <math.h>
 
 bool almost_equal(double d1, double d2, double epsilon=1.0e-12)

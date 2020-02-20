@@ -7,7 +7,7 @@
 #include "rigid2d/rigid2d.hpp"
 #include <sensor_msgs/JointState.h>
 #include <std_srvs/Empty.h>
-#include <rigid2d/SetPose.h> 
+#include "rigid2d/SetPose.h"
 
 
 using namespace std;
