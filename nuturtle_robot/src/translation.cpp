@@ -1,3 +1,20 @@
+/// \file
+/// \brief This file implements a node that publishes cmd_vel for making the turtlebot
+/// translate
+///
+/// PARAMETERS:
+/// ~frac_vel(double) : Fraction of the maximum velocity to use
+///  max_rot_vel_robot(double) : Maximum rotation velocity of the robot
+///
+/// PUBLISHES:
+///  cmd_vel (geometry_msgs/Twist) : A topic for publishing the body twist velocities
+///                                  for rotating in place.
+/// SERVICES:
+/// set_pose (rigid2d/SetPose) : The pose of the robot can be set to any required pose.
+/// start   (nuturtle_robot/StartRotation) : A boolean indicting if the node should 
+///                                          start publishing cmd velocities. This is 
+///                                          service is used for initiating the whole
+///                                          process
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <nuturtle_robot/StartTranslation.h>
@@ -20,7 +37,10 @@ class Translation
   RotationStates state;
   bool startService;
   ros::Time currentTime, lastTime;
-  //double callbackTime;
+
+  /// \brief A parameterised constructor for initialising the node. This constructor initialises
+  /// all necessary parameters for running the node.
+  /// \param argc- Number of command line arguments argv-All command line arguments
   public:
   Translation(int argc, char** argv)
   {
@@ -37,7 +57,6 @@ class Translation
     ros::param::get("max_trans_vel", maxTransVelRot);
     ROS_INFO_STREAM("fractional_velocity:  "<<fracVel);
     isForward = true;
-    //callbackTime = callTime;
     totalElapsedTime = 0.0;
     stepCount = 0;
     transVelocity = fracVel * maxTransVelRot;
@@ -54,11 +73,16 @@ class Translation
     callbackTime = translationPeriod / 200.0;
   }
 
+ ///  \brief A getter function for returning the calculated callback time
  double returnCallbackTime()
  {
    return callbackTime;
  }
 
+
+  /// \brief Callback function for setpose service
+  /// \param request - Pose of the robot desired
+  /// \param response - A boolean indicating if the service was executed successfully.
   bool startCallback(nuturtle_robot::StartTranslation::Request& request,
                      nuturtle_robot::StartTranslation::Response& response)
   {
@@ -79,6 +103,10 @@ class Translation
     return true;
 
   }
+
+  /// A timer callback, which publishes cmd velocities for making the robot rotate in
+  /// place
+  /// \param event - A ros timer event which contains timing debugging information
 
   void cmdVelPublishCallback(const ros::TimerEvent& event)
   {
@@ -165,7 +193,7 @@ class Translation
 };
 
 
-
+/// \brief The main function
 int main(int argc, char** argv)
 {
   Translation turtleTranslate(argc, argv);

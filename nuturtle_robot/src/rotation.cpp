@@ -1,3 +1,21 @@
+/// \file
+/// \brief This file implements a node that publishes cmd_vel for making the turtlebot
+/// rotate in place.
+///
+/// PARAMETERS:
+/// ~frac_vel(double) : Fraction of the maximum velocity to use
+///  max_rot_vel_robot(double) : Maximum rotation velocity of the robot
+///
+/// PUBLISHES:
+///  cmd_vel (geometry_msgs/Twist) : A topic for publishing the body twist velocities
+///                                  for rotating in place.
+/// SERVICES:
+/// set_pose (rigid2d/SetPose) : The pose of the robot can be set to any required pose.
+/// start   (nuturtle_robot/StartRotation) : A boolean indicting if the node should 
+///                                          start publishing cmd velocities. This is 
+///                                          service is used for initiating the whole
+///                                          process
+
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <nuturtle_robot/StartRotation.h>
@@ -5,7 +23,6 @@
 #include "rigid2d/rigid2d.hpp"
 #include "rigid2d/SetPose.h"
 
-//constexpr double callTime=0.1;
 
 class RotateInPlace
 {
@@ -20,15 +37,16 @@ class RotateInPlace
   RotationStates state;
   bool startService;
   ros::Time currentTime, lastTime;
-  //double callbackTime;
   public:
+  /// \brief A parameterised constructor for initialising the node. This constructor initialises
+  /// all necessary parameters for running the node.
+  /// \param argc- Number of command line arguments argv-All command line arguments
   RotateInPlace(int argc, char** argv)
   {
 
     ros::init(argc, argv, "rotate_in_place");
     ros::NodeHandle n;
     ros::Rate loop_rate(100);
-
     startRotation = n.advertiseService("/start", &RotateInPlace::startCallback,
                                      this);
     cmdVelPUblisher = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
@@ -37,7 +55,6 @@ class RotateInPlace
     ros::param::get("max_rot_vel_robot", maxRotVelRobot);
     ROS_INFO_STREAM("fractional_velocity:  "<<fracVel);
     isClockwise = true;
-    //callbackTime = callTime;
     totalElapsedTime = 0.0;
     rotationCount = 0;
     rotationVelocity = fracVel * maxRotVelRobot;
@@ -48,12 +65,15 @@ class RotateInPlace
     startService = false;
     callbackTime = rotationPeriod / 200.0;
   }
-
+ ///  \brief A getter function for returning the calculated callback time
  double returnCallbackTime()
  {
    return callbackTime;
  }
 
+  /// \brief Callback function for setpose service
+  /// \param request - Pose of the robot desired
+  /// \param response - A boolean indicating if the service was executed successfully.
   bool startCallback(nuturtle_robot::StartRotation::Request& request,
                      nuturtle_robot::StartRotation::Response& response)
   {
@@ -75,18 +95,12 @@ class RotateInPlace
 
   }
 
+  /// A timer callback, which publishes cmd velocities for making the robot rotate in
+  /// place
+  /// \param event - A ros timer event which contains timing debugging information
   void cmdVelPublishCallback(const ros::TimerEvent& event)
   {
 
-    //double totalTime =  callbackCount * callbackTime;
-    // double totalTime += 
-    
-
-
-    ROS_INFO_STREAM("total time"<< totalTime<<"rotationPeriod"<<rotationPeriod);
-    ROS_INFO_STREAM("call back count"<< callbackCount);
-    ROS_INFO_STREAM("state:"<<state);
-    ROS_INFO_STREAM(startService);
     currentTime = ros::Time::now();
 
     if(not startService)
@@ -116,7 +130,6 @@ class RotateInPlace
 
     else if(state == ROTATE && (totalTime >= rotationPeriod))
     {
-      //callbackCount = 0;
       totalTime = 0;
       rotationCount += 1;
       state = WAIT;
@@ -124,15 +137,10 @@ class RotateInPlace
 
     else if(state == WAIT && (totalTime >= rotationPeriod / 20))
     {
-      //callbackCount = 0;
       totalTime = 0;
 
       state = ROTATE;
     }
-
-    ROS_INFO_STREAM("total time"<< totalTime<<"rotationPeriod"<<rotationPeriod);
-    ROS_INFO_STREAM("call back count"<< callbackCount);
-    ROS_INFO_STREAM(state);
 
     geometry_msgs::Twist rotationTwist;
     rotationTwist.linear.x = 0;
@@ -160,7 +168,7 @@ class RotateInPlace
 };
 
 
-
+/// \brief The main function
 int main(int argc, char** argv)
 {
   RotateInPlace turtleRotate(argc, argv);
