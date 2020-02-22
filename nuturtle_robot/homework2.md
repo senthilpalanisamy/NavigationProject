@@ -9,7 +9,8 @@
 | FWD         |1	    |2.84    |	0	   |2	      |0	     |0.221 |	
 | BWD         |1	    |2.84    |	0    |	-2    |0	     |0.05  |	
 | FWD         |0.3    |	0.852  |	0	   |2	      |0	     |0.02  |	
-| BWD         |0.3    | 0.852  |	0	   |-2	    |0	     |-0.03 |	
+| BWD         |0.3    | 0.852  |	0	   |-2	    |0	     |-0.03 |
+
 
 Yes, using odometers improves the pose estimates as opposed to using a feedforward model.
 Some of the factors that odometers account for, that feedforward models don't account for are
