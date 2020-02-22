@@ -40,6 +40,7 @@ Yes, moving slower does improve the odometry.
 ![Image of rqtgraph](./nuturtle_robot/images/waypoint.png)
 
 ## Video output ##
-[Link to robot movement video](https://drive.google.com/file/d/1dQf6k4GPgqtU_Pj9pjqNymq3Rk_mwsXA/view?usp=sharing)
-[Link to rviz video](https://drive.google.com/file/d/1dQf6k4GPgqtU_Pj9pjqNymq3Rk_mwsXA/view?usp=sharing)
+[Link to robot movement video](https://drive.google.com/file/d/1tdclhgm0oAQdkXZ2cW8-ztL2jB8QwroT/view?usp=sharing)
+
+\\[Link to rviz video](https://drive.google.com/file/d/1dQf6k4GPgqtU_Pj9pjqNymq3Rk_mwsXA/view?usp=sharing)
 
