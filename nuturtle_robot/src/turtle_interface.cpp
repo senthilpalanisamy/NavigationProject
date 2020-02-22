@@ -194,7 +194,6 @@ class turtleInterface
   double normaliseEncoderValues(const int& encoderValue)
   {
 
-     int EncoderTicks;
      double normalisedRotCount = double(encoderValue) / double(encoderTicksPerRevolution) *
                                  rigid2d::PI*2;
      return normalisedRotCount;

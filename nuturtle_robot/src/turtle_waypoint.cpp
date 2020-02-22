@@ -58,7 +58,7 @@ class WaypointTurtle
   ros::ServiceServer startTrajectory, stopTrajectory;
   double current_x, current_y, goal_angle, current_angle;
   rigid2d::Vector2D current_waypoint;
-  int wayPointIndex;
+  size_t wayPointIndex;
   std::vector<rigid2d::Vector2D> trajPoints;
   double linearp, angularp;
   ros::Time previous_time;

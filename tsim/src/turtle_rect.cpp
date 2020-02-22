@@ -74,8 +74,6 @@ Circular_Linked_List* Rect_Navigation::create_waypoints_list()
     Circular_Linked_List* head = new Circular_Linked_List(NULL, x, y);
     //Circular_Linked_List* first_waypoint = new Circular_Linked_List(NULL, x, y);
     first_waypoint = new Circular_Linked_List(head, x+width, y);
-    Circular_Linked_List* element3 = new Circular_Linked_List(first_waypoint, x+width, y+height);
-    Circular_Linked_List* element4 = new Circular_Linked_List(element3, x, y+height);
     return first_waypoint;
     }
 

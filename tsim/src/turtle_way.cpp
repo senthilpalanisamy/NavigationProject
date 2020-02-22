@@ -75,7 +75,7 @@ Circular_Linked_List* Rect_Navigation::create_waypoints_list()
     Circular_Linked_List* head = new Circular_Linked_List(NULL, wayPointX[0], wayPointY[0]);
     first_waypoint = new Circular_Linked_List(head, wayPointX[1], wayPointY[1]);
     auto previous_element = first_waypoint;
-    for(int i=2; i<wayPointX.size(); i++)
+    for(size_t i=2; i<wayPointX.size(); i++)
     {
     Circular_Linked_List* element = new Circular_Linked_List(previous_element, wayPointX[i], wayPointY[i]);
     previous_element = element;

@@ -222,10 +222,6 @@ class TurtleInterface {
  {
 
     TurtleInterface turtleInterface;
-    double wheelRadius = turtleInterface.wheelRadius;
-    double maxWheelCommand = turtleInterface.maxWheelCommand;
-    double maxMotorVelocity = turtleInterface.maxMotorVelocity;
-    double wheelBase = turtleInterface.wheelBase;
     double encoderTicksPerRevolution = turtleInterface.encoderTicksPerRevolution;
 
 
