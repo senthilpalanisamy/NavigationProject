@@ -9,10 +9,9 @@
 #include <thread>
 #include <chrono>
 #include <cmath>
-//#include <turtle_interface.cpp>
 
-// TODO: add other includes as needed
-//
+/// \file
+/// Test cases for ros tesing all nodes in turtle interface file
 
 constexpr float PI = 3.141592653589793238;
 
