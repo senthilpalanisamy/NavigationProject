@@ -14,6 +14,7 @@
 
 
 
+## Why is odometry superior than feed forward estimation?##
 
 Yes, using odometers improves the pose estimates as opposed to using a feedforward model.
 Some of the factors that odometers account for, that feedforward models don't account for are
