@@ -1,4 +1,11 @@
 ## Experimental results ##
+
+| Command | Description |
+| --- | --- |
+| `git status` | List all *new or modified* files |
+| `git diff` | Show file differences that **haven't been** staged |
+
+
 | EXPERIMENT | FV     | AV     | ET    | EX     | EY     | OT   | 
 | :___:      | :___:  | :___:  | :___: |:___:   | :___:  | :___:| 
 | CCW         | 1     | 2.84   |  0    |    0   |   0    | 1.53 | 
