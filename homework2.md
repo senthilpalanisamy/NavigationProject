@@ -12,6 +12,9 @@
 | FWD         |0.3    |	0.852  |	0	   |2	      |0	     |0.02  |	2.004 |	0	   |0      |2.004  |	0	   |0.04   |	1.98 |	0.1  |	0.004|0.002	 |-0.01  |
 | BWD         |0.3    | 0.852  |	0	   |-2	    |0	     |-0.03 |	-2.029|	0.03 |	0	   |-2.015 |	0	   |0	     |-2     |	0.08 |	0	   |0	     |-0.008 |
 
+## Waypoint following results ##
+FV = 0.3	linear velocity = 0.426, angular velocity = 0.381, total distance = 4.87 m, x error=0.1, y error=0.05							
+
 
 
 ## Why is odometry superior than feed forward estimation?##
@@ -28,5 +31,15 @@ Some of the factors that odometers account for, that feedforward models don't ac
    an assumption- we are assuming the robot and the surrounding world to behave exactly as 
    we assumed it to be. But odometry relies on more relaxed assumption: That all wheel
    movements actually resulted in corresponding robot movement, which accounts for more
-   
    stochastic effects than does our feedforward model.
+
+## Moving Slower does improve the odometry ##
+Yes, moving slower does improve the odometry.
+
+## Screenshot of turtle following waypoints ##
+![Image of rqtgraph](./nuturtle_robot/images/waypoint.png)
+
+## Video output ##
+[Link to robot movement video](https://drive.google.com/file/d/1dQf6k4GPgqtU_Pj9pjqNymq3Rk_mwsXA/view?usp=sharing)
+[Link to rviz video](https://drive.google.com/file/d/1dQf6k4GPgqtU_Pj9pjqNymq3Rk_mwsXA/view?usp=sharing)
+
