@@ -2,21 +2,17 @@
 Author: Senthil Palanisamy
 # Tasks Submitted
 (List the tasks that you worked on and completed here)
-C.005
-C.006
-C.007
-C.008
-C.009
-C.010
-E.000
-E.001
-E.002
-E.003
-E.004
-E.005
-B.005
-B.006
-
+A.005
+E.006
+F.001
+F.002
+F.003
+F.004
+F.005
+F.006
+F.007
+F.008
+F.009
 
 
 # Tasks Completed
@@ -35,5 +31,20 @@ C.001
 C.002
 C.003
 C.004
+C.005
+C.006
+C.007
+C.008
+C.009
+C.010
+E.000
+E.001
+E.002
+E.003
+E.004
+E.005
+B.005
+B.006
+
 
 
