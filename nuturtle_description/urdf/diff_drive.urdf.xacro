@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="differential_drive_robot">
 
   <xacro:property name="robot_specs" value="${load_yaml('$(find nuturtle_description)/config/diff_params.yaml')}"/>
+  <xacro:include filename="$(find nuturtle_description)/urdf/inertia_tensor.macro.xacro"/>
   <material name="blue">
     <color rgba="0 0 1 0.5"/>
   </material>
@@ -18,6 +19,14 @@
     <color rgba="0 0 0 0.0"/>
   </material>
 
+  <link name="dummy">
+  </link>
+
+  <joint name="dummy_joint" type="fixed">
+  <parent link="dummy"/>
+  <child link="base_link"/>
+  </joint>
+
 
 
 
@@ -29,13 +38,28 @@
       <origin xyz="${robot_specs['chasis_length']/2} 0 0" rpy="0 0 0"/>
       <material name="red"/>
     </visual>
+    <inertial>
+      <origin xyz="-${robot_specs['chasis_length']/2}  0 0" rpy="0 0 0"/>
+      <mass value="${robot_specs['turtle_bot_weight'] - 2 * robot_specs['wheel_weight']}"/>
+      <xacro:box_inertia m="${robot_specs['turtle_bot_weight'] - 2 * robot_specs['wheel_weight']}"
+        x="${robot_specs['chasis_length']}" y="${robot_specs['wheel_base'] - 2 * robot_specs['wheel_width']}"
+        z="${robot_specs['chasis_thickness']}"/>
+    </inertial>
+
+    <collision>
+      <geometry>
+        <box size="${robot_specs['chasis_length']} ${robot_specs['wheel_base'] - 2 * robot_specs['wheel_width']} ${robot_specs['chasis_thickness']}"/>
+      </geometry>
+      <origin xyz="${robot_specs['chasis_length']/2} 0 0" rpy="0 0 0"/>
+    </collision>
+
   </link>
 
 
    <joint name="left_wheel_axle" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
-    <origin xyz="0  ${(robot_specs['wheel_base'] - 2 * robot_specs['wheel_width'])/2} 0"/>
+    <origin xyz="0  ${(robot_specs['wheel_base'] - 2 * robot_specs['wheel_width'])/2} ${(-robot_specs['chasis_thickness']/2.0+robot_specs['wheel_axle_offset'])}"/>
     <axis xyz="0 1 0"/>
    </joint>
 
@@ -47,14 +71,39 @@
       <origin xyz="0 ${robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
       <material name="black"/>
     </visual>
+
+    <inertial>
+      <origin xyz="0 ${robot_specs['wheel_width']/2}  0" rpy="0 ${-pi/2} 0"/>
+      <mass value="${robot_specs['wheel_weight']}"/>
+      <xacro:cylinder_inertia m="${robot_specs['wheel_weight']}"
+        r="${robot_specs['wheel_radius']}" h="${robot_specs['wheel_width']}"/>
+    </inertial>
+
+    <collision>
+      <geometry>
+        <cylinder length="${robot_specs['wheel_width']}" radius="${robot_specs['wheel_radius']}"/>
+      </geometry>
+      <origin xyz="0 ${robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
+    </collision>
+
   </link>
+
+
+   <joint name="scan_link_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_scan"/>
+    <origin xyz="0 0 ${robot_specs['chasis_thickness']/2}"/>
+   </joint>
+   <link name="base_scan">
+   </link>
+
 
 
 
    <joint name="right_wheel_axle" type="continuous">
     <parent link="base_link"/>
     <child link="right_wheel"/>
-    <origin xyz="0  ${-(robot_specs['wheel_base'] - 2 * robot_specs['wheel_width'])/2} 0"/>
+    <origin xyz="0  ${-(robot_specs['wheel_base'] - 2 * robot_specs['wheel_width'])/2} ${(-robot_specs['chasis_thickness']/2.0+robot_specs['wheel_axle_offset'])}"/>
     <axis xyz="0 1 0"/>
    </joint>
 
@@ -66,6 +115,20 @@
       <origin xyz="0 ${-robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
       <material name="black"/>
     </visual>
+
+    <inertial>
+      <origin xyz="0 ${-robot_specs['wheel_width']/2}  0" rpy="0 ${-pi/2} 0"/>
+      <mass value="${robot_specs['wheel_weight']}"/>
+      <xacro:cylinder_inertia m="${robot_specs['wheel_weight']}"
+        r="${robot_specs['wheel_radius']}" h="${robot_specs['wheel_width']}"/>
+    </inertial>
+
+    <collision>
+      <geometry>
+        <cylinder length="${robot_specs['wheel_width']}" radius="${robot_specs['wheel_radius']}"/>
+      </geometry>
+      <origin xyz="0 ${-robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
+    </collision>
   </link>
 
 
@@ -85,6 +148,13 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <material name="black"/>
     </visual>
+
+    <collision>
+      <geometry>
+        <sphere radius="${robot_specs['wheel_radius']/4}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
   </link>
 
 
