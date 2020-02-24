@@ -19,13 +19,13 @@
     <color rgba="0 0 0 0.0"/>
   </material>
 
-  <link name="dummy">
+  <!-- link name="dummy">
   </link>
 
   <joint name="dummy_joint" type="fixed">
   <parent link="dummy"/>
   <child link="base_link"/>
-  </joint>
+  </joint -->
 
 
 
@@ -39,11 +39,14 @@
       <material name="red"/>
     </visual>
     <inertial>
-      <origin xyz="-${robot_specs['chasis_length']/2}  0 0" rpy="0 0 0"/>
+      <origin xyz="${robot_specs['chasis_length']/2}  0 0" rpy="0 0 0"/>
       <mass value="${robot_specs['turtle_bot_weight'] - 2 * robot_specs['wheel_weight']}"/>
       <xacro:box_inertia m="${robot_specs['turtle_bot_weight'] - 2 * robot_specs['wheel_weight']}"
         x="${robot_specs['chasis_length']}" y="${robot_specs['wheel_base'] - 2 * robot_specs['wheel_width']}"
         z="${robot_specs['chasis_thickness']}"/>
+      <!-- inertia  ixx="100000.0" ixy = "0" ixz = "0"
+                  iyy="100000.0" iyz = "0"
+                  izz="100000.0"/ -->
     </inertial>
 
     <collision>
@@ -77,6 +80,9 @@
       <mass value="${robot_specs['wheel_weight']}"/>
       <xacro:cylinder_inertia m="${robot_specs['wheel_weight']}"
         r="${robot_specs['wheel_radius']}" h="${robot_specs['wheel_width']}"/>
+      <!--inertia  ixx="1.0" ixy = "0" ixz = "0"
+                  iyy="1.0" iyz = "0"
+                  izz="1.0" /-->
     </inertial>
 
     <collision>
@@ -121,6 +127,12 @@
       <mass value="${robot_specs['wheel_weight']}"/>
       <xacro:cylinder_inertia m="${robot_specs['wheel_weight']}"
         r="${robot_specs['wheel_radius']}" h="${robot_specs['wheel_width']}"/>
+
+      <!-- inertia  ixx="1.0" ixy = "0" ixz = "0"
+                  iyy="1.0" iyz = "0"
+                  izz="1.0" / -->
+
+
     </inertial>
 
     <collision>
@@ -155,6 +167,14 @@
       </geometry>
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
+
+    <inertial>
+      <mass value="0"/>
+      <inertia  ixx="0.0" ixy = "0" ixz = "0"
+                  iyy="0.0" iyz = "0"
+                  izz="0.0" />
+    </inertial>
+
   </link>
 
 
