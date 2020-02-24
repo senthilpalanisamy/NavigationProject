@@ -1,0 +1,25 @@
+<launch>
+  <arg name="world_name" default="empty_world" doc="The world in which the turltebot should be launched"/>
+  <arg name="is_jsp_needed" default="True" doc="determines whether joint state publisher should be launched"/>
+ 
+  <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
+  <param name="robot_description" command="xacro '$(find nuturtle_gazebo)/urdf/diff_drive.urdf.xacro'"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+  
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="worlds/$(arg world_name).world"/> 
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="recording" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+ <!-- node name='spawn_model' pkg="gazebo_ros" type="spawn_model" args=" -urdf -param robot_description -model ddrive -b"/ -->
+
+  <!-- node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(arg is_jsp_needed)" / -->
+
+  <arg name="rviz_path" default="$(find nuturtle_description)/config/diff_drive.rviz" doc="path to load the rviz configuration file from" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_path)" required="True"/>
+
+</launch>
