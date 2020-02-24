@@ -19,13 +19,13 @@
     <color rgba="0 0 0 0.0"/>
   </material>
 
-  <!-- link name="dummy">
+  <link name="dummy">
   </link>
 
   <joint name="dummy_joint" type="fixed">
   <parent link="dummy"/>
   <child link="base_link"/>
-  </joint -->
+  </joint>
 
 
 
@@ -76,7 +76,7 @@
     </visual>
 
     <inertial>
-      <origin xyz="0 ${robot_specs['wheel_width']/2}  0" rpy="0 ${-pi/2} 0"/>
+      <origin xyz="0 ${robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
       <mass value="${robot_specs['wheel_weight']}"/>
       <xacro:cylinder_inertia m="${robot_specs['wheel_weight']}"
         r="${robot_specs['wheel_radius']}" h="${robot_specs['wheel_width']}"/>
@@ -123,7 +123,8 @@
     </visual>
 
     <inertial>
-      <origin xyz="0 ${-robot_specs['wheel_width']/2}  0" rpy="0 ${-pi/2} 0"/>
+      <origin xyz="0 ${-robot_specs['wheel_width']/2} 0" rpy="${-pi/2.0} 0 0"/>
+      <material name="black"/>
       <mass value="${robot_specs['wheel_weight']}"/>
       <xacro:cylinder_inertia m="${robot_specs['wheel_weight']}"
         r="${robot_specs['wheel_radius']}" h="${robot_specs['wheel_width']}"/>
