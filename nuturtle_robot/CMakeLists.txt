@@ -247,8 +247,20 @@ install(TARGETS ${PROJECT_NAME}_waypoint
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 if(CATKIN_ENABLE_TESTING)
-  add_rostest_gtest(turtle_interface_test
-    test/turtle_interface.test
-    test/turtle_interface_test.cpp)
-  target_link_libraries(turtle_interface_test ${catkin_LIBRARIES})
+  add_rostest_gtest(turtle_interface_test1
+    test/turtle_interface1.test
+    test/turtle_interface_test1.cpp)
+  target_link_libraries(turtle_interface_test1 ${catkin_LIBRARIES})
+  add_rostest_gtest(turtle_interface_test2
+    test/turtle_interface2.test
+    test/turtle_interface_test2.cpp)
+  target_link_libraries(turtle_interface_test2 ${catkin_LIBRARIES})
+  add_rostest_gtest(turtle_interface_test3
+    test/turtle_interface3.test
+    test/turtle_interface_test3.cpp)
+  target_link_libraries(turtle_interface_test3 ${catkin_LIBRARIES})
+  add_rostest_gtest(turtle_interface_test4
+    test/turtle_interface4.test
+    test/turtle_interface_test4.cpp)
+  target_link_libraries(turtle_interface_test4 ${catkin_LIBRARIES})
 endif()
