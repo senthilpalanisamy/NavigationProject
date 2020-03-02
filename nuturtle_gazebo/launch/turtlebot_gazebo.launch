@@ -3,7 +3,7 @@
   <arg name="is_jsp_needed" default="True" doc="determines whether joint state publisher should be launched"/>
  
   <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
-  <param name="robot_description" command="xacro '$(find nuturtle_gazebo)/urdf/diff_drive.urdf.xacro'"/>
+  <param name="robot_description" command="xacro '$(find nuturtle_gazebo)/urdf/diff_drive.gazebo.xacro'"/>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -15,7 +15,7 @@
     <arg name="debug" value="false"/>
   </include>
 
- <!-- node name='spawn_model' pkg="gazebo_ros" type="spawn_model" args=" -urdf -param robot_description -model ddrive -b"/ -->
+ <node name='spawn_model' pkg="gazebo_ros" type="spawn_model" args=" -urdf -param robot_description -model ddrive -b"/>
 
   <!-- node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(arg is_jsp_needed)" / -->
 
