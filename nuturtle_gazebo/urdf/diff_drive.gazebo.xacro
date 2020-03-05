@@ -48,6 +48,9 @@
 <left_wheel_joint>left_joint_axle</left_wheel_joint>
 <right_wheel_joint>right_joint_axle</right_wheel_joint>
 <sensor_frequency>50</sensor_frequency>
+<encoder_ticks_per_rev>4096</encoder_ticks_per_rev>
+<wheel_cmd_topic>wheel_cmd</wheel_cmd_topic>
+<sensor_topic>sensor_data</sensor_topic>
 </plugin>
 </gazebo>
 
