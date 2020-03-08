@@ -1,3 +1,4 @@
+
 <launch>
   <arg name="world_name" default="empty_world" doc="The world in which the turltebot should be launched"/>
   <arg name="is_jsp_needed" default="True" doc="determines whether joint state publisher should be launched"/>

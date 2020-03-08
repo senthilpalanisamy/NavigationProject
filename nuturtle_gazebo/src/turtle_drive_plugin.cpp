@@ -25,6 +25,7 @@ namespace gazebo
     ros::Subscriber wheelCmdSubscriber;
     ros::Timer timer;
     string sensorTopic, wheelCmdTopic;
+    nuturtlebot::SensorData wheelData;
     int maxWheelCmd;
     public: 
     
@@ -60,9 +61,12 @@ namespace gazebo
       auto rightJointPosition = model->GetJoint(rightJoint)->Position(0);
       int leftEncoder = (int) floor(leftJointPosition / (2 * rigid2d::PI) *  encoderTicksPerRev);
       int rightEncoder = (int) floor(rightJointPosition / (2 * rigid2d::PI) * encoderTicksPerRev);
-
+      wheelData.left_encoder = leftEncoder;
+      wheelData.right_encoder = rightEncoder;
+      wheelData.stamp = ros::Time::now();
       std::cerr<<"\nright encoder position"<<leftJointPosition<<"  "<<leftEncoder;
       std::cerr<<"\nright encoder position"<<rightJointPosition<<"  "<<rightEncoder;
+      sensorMessagePublisher.publish(wheelData);
 
     }
 
@@ -184,7 +188,7 @@ namespace gazebo
          std::cerr<<"sensor topic is"<<sensorTopic<<"\n";
          }
 
-         wheelCmdToVelRatio = (double) maxWheelCmd / maxMotorRotVel;
+         wheelCmdToVelRatio = maxMotorRotVel / (double) maxWheelCmd;
 
 
         std::cerr<<"load function";
