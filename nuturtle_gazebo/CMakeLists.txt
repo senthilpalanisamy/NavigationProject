@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.5.4 FATAL_ERROR)
 project(nuturtle_gazebo)
 
 
-find_package(catkin REQUIRED COMPONENTS roscpp gazebo_ros nuturtlebot std_msgs)
+find_package(catkin REQUIRED COMPONENTS rigid2d roscpp gazebo_ros nuturtlebot std_msgs)
 find_package(gazebo REQUIRED)
 
 
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuturtle_robot
-  CATKIN_DEPENDS roscpp gazebo_ros nuturtlebot std_msgs
+  CATKIN_DEPENDS rigid2d roscpp gazebo_ros nuturtlebot std_msgs
 #  DEPENDS system_lib
 )
 

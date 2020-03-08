@@ -1,12 +1,14 @@
 #ifndef _TURTLEDRIVE_PLUGIN_HH_
 #define _TURTLEDRIVE_PLUGIN_HH_
 
-#include<iostream>
+#include <iostream>
+#include <cmath>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <ros/ros.h>
 #include "nuturtlebot/WheelCommands.h" 
 #include "nuturtlebot/SensorData.h" 
+#include "rigid2d/rigid2d.hpp"
 
 using std::cout;
 using std::string;
@@ -21,6 +23,7 @@ namespace gazebo
     int encoderTicksPerRev;
     ros::Publisher sensorMessagePublisher;
     ros::Subscriber wheelCmdSubscriber;
+    ros::Timer timer;
     string sensorTopic, wheelCmdTopic;
     int maxWheelCmd;
     public: 
@@ -38,8 +41,8 @@ namespace gazebo
       double leftVelocity = leftWheelCmd * wheelCmdToVelRatio;
       double rightVelocity = rightWheelCmd * wheelCmdToVelRatio;
 
-      std::cerr<<"executing call back\n leftvelocity:"<<leftVelocity<<"\nrightvelocity"<<rightVelocity;
-      std::cerr<<"left wheel:"<<leftJoint<<"   right wheel:"<<rightJoint;
+      //std::cerr<<"executing call back\n leftvelocity:"<<leftVelocity<<"\nrightvelocity"<<rightVelocity;
+      //std::cerr<<"left wheel:"<<leftJoint<<"   right wheel:"<<rightJoint;
 
       model->GetJoint(leftJoint)->SetParam("fmax", 0, 100.0);
       model->GetJoint(rightJoint)->SetParam("fmax", 0, 100.0);
@@ -47,6 +50,19 @@ namespace gazebo
       model->GetJoint(leftJoint)->SetParam("vel", 0, leftVelocity);
       model->GetJoint(rightJoint)->SetParam("vel", 0, rightVelocity);
 
+
+    }
+
+    void publishEncoderData(const ros::TimerEvent& event)
+    {
+
+      auto leftJointPosition = model->GetJoint(leftJoint)->Position(0);
+      auto rightJointPosition = model->GetJoint(rightJoint)->Position(0);
+      int leftEncoder = (int) floor(leftJointPosition / (2 * rigid2d::PI) *  encoderTicksPerRev);
+      int rightEncoder = (int) floor(rightJointPosition / (2 * rigid2d::PI) * encoderTicksPerRev);
+
+      std::cerr<<"\nright encoder position"<<leftJointPosition<<"  "<<leftEncoder;
+      std::cerr<<"\nright encoder position"<<rightJointPosition<<"  "<<rightEncoder;
 
     }
 
@@ -168,7 +184,7 @@ namespace gazebo
          std::cerr<<"sensor topic is"<<sensorTopic<<"\n";
          }
 
-         wheelCmdToVelRatio = (double) maxWheelCmd / maxMotorRotVel * wheelRadius;
+         wheelCmdToVelRatio = (double) maxWheelCmd / maxMotorRotVel;
 
 
         std::cerr<<"load function";
@@ -176,6 +192,9 @@ namespace gazebo
 
        sensorMessagePublisher = n.advertise<nuturtlebot::SensorData>(sensorTopic, 1000, true);
        wheelCmdSubscriber = n.subscribe(wheelCmdTopic, 10000, &TurtleDrivePlugin::wheelCmdCallback, this);
+
+      timer = n.createTimer(ros::Duration(1.0 / (double) sensorFrequency),
+                                          &TurtleDrivePlugin::publishEncoderData, this);
       }
   };
   GZ_REGISTER_MODEL_PLUGIN(TurtleDrivePlugin);
