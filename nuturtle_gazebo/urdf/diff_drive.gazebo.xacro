@@ -45,8 +45,8 @@
 
 <gazebo>
 <plugin name="differential_drive_controller" filename="libturtle_drive_plugin.so">
-<left_wheel_joint>left_joint_axle</left_wheel_joint>
-<right_wheel_joint>right_joint_axle</right_wheel_joint>
+<left_wheel_joint>left_wheel_axle</left_wheel_joint>
+<right_wheel_joint>right_wheel_axle</right_wheel_joint>
 <sensor_frequency>50</sensor_frequency>
 <encoder_ticks_per_rev>4096</encoder_ticks_per_rev>
 <wheel_cmd_topic>wheel_cmd</wheel_cmd_topic>

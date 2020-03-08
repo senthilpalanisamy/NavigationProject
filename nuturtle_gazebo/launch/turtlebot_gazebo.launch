@@ -17,7 +17,7 @@
 
  <node name='spawn_model' pkg="gazebo_ros" type="spawn_model" args=" -urdf -param robot_description -model ddrive -b"/>
 
-  <!-- node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(arg is_jsp_needed)" / -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(arg is_jsp_needed)"/>
 
   <arg name="rviz_path" default="$(find nuturtle_description)/config/diff_drive.rviz" doc="path to load the rviz configuration file from" />
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_path)" required="True"/>

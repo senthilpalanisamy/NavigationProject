@@ -39,6 +39,10 @@ namespace gazebo
       double rightVelocity = rightWheelCmd * wheelCmdToVelRatio;
 
       std::cerr<<"executing call back\n leftvelocity:"<<leftVelocity<<"\nrightvelocity"<<rightVelocity;
+      std::cerr<<"left wheel:"<<leftJoint<<"   right wheel:"<<rightJoint;
+
+      model->GetJoint(leftJoint)->SetParam("fmax", 0, 100.0);
+      model->GetJoint(rightJoint)->SetParam("fmax", 0, 100.0);
 
       model->GetJoint(leftJoint)->SetParam("vel", 0, leftVelocity);
       model->GetJoint(rightJoint)->SetParam("vel", 0, rightVelocity);
