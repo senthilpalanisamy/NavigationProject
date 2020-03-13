@@ -4,6 +4,8 @@ project(nuturtle_gazebo)
 
 find_package(catkin REQUIRED COMPONENTS rigid2d roscpp gazebo_ros nuturtlebot std_msgs)
 find_package(gazebo REQUIRED)
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
 
 
 catkin_package(
@@ -15,6 +17,8 @@ catkin_package(
 
 # include_directories(${GAZEBO_INCLUDE_DIRS})
 add_library(turtle_drive_plugin SHARED src/turtle_drive_plugin.cpp)
+
+add_executable(${PROJECT_NAME}_landmarks src/landmarks.cpp)
 #link_directories(${GAZEBO_LIBRARY_DIRS})
 
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
@@ -22,7 +26,11 @@ add_library(turtle_drive_plugin SHARED src/turtle_drive_plugin.cpp)
 
 target_link_libraries(turtle_drive_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 target_include_directories(turtle_drive_plugin PUBLIC ${GAZEBO_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME}_landmarks
+  ${catkin_LIBRARIES} Eigen3::Eigen
+)
 include_directories(${catkin_INCLUDE_DIRS})
+
 
 add_dependencies(turtle_drive_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
