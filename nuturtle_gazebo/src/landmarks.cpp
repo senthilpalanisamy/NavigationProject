@@ -1,267 +1,37 @@
+#include "nuturtle_gazebo/circle_detection.hpp"
 #include "sensor_msgs/LaserScan.h"
+
 #include <ros/ros.h>
 #include <ros/console.h>
-#include <vector>
-#include <Eigen/Dense>
-#include <Eigen/SVD>
-#include <Eigen/Cholesky>
-//#include <Eigen/Core>
-#include <cmath>
 
 
-using std::cout;
-using std::vector;
-using Eigen::Matrix;
-using Eigen::Dynamic;
-using Eigen::BDCSVD;
-using Eigen::ComputeFullV;
-using Eigen::ComputeFullU;
+ class LandmarkDetection
+ {
+   ros::Subscriber laserscanSubscriber;
+   public:
+   LandmarkDetection(int argc, char** argv)
+   {
+     ros::init(argc, argv, "landmark_detection");
+     ros::NodeHandle n;
+     ros::Rate loop_rate(100);
+     laserscanSubscriber = n.subscribe("/scan", 1000, &LandmarkDetection::laserCallback,
+                                     this);
+   }
 
-using Eigen::ComputeThinV;
-using Eigen::ComputeThinU;
-
-//using Eigen::seq;
-using Eigen::Vector4d;
-using Eigen::Vector3d;
-//using Eigen:MatrixXd;
-//using Eigen::SelfAdjointSolver;
-
-typedef Matrix<double, Dynamic, 4> Matrix4dn;
-typedef Matrix<double, 4, 4> Matrix4d;
-
-
-
-struct Point2d
-{
-  Point2d(double x1, double y1)
-  {
-    x = x1;
-    y = y1;
-  }
-  double x, y;
-};
-
-Vector3d fitCircle(vector<Point2d> circlePoints)
-{
-
-  Matrix4dn circleMatrix;
-  Matrix4d H, Hinv;
-  circleMatrix.resize(circlePoints.size(), 4);
-  Vector4d equCoeff;
-  size_t i;
-  double sum_x=0, sum_y=0, sum_z=0;
-  int pointsCount = circlePoints.size();
-
-  for(auto point: circlePoints)
-  {
-    sum_x += point.x;
-    sum_y += point.y;
-  }
-  double mean_x = sum_x / (double) circlePoints.size();
-  double mean_y = sum_y / (double) circlePoints.size();
-
-  for (auto& point:circlePoints)
-  {
-    point.x = point.x - mean_x;
-    point.y = point.y - mean_y;
-  }
-
-  std::cout << "Here is the matrix m:\n" << circlePoints[0].x <<circlePoints[0].y << std::endl;
-
-
-  for(i=0; i < circlePoints.size(); i++)
-  {
-    circleMatrix(i, 0) = pow(circlePoints[i].x, 2) + pow(circlePoints[i].y, 2);
-    circleMatrix(i, 1) = circlePoints[i].x;
-    circleMatrix(i, 2) = circlePoints[i].y;
-    circleMatrix(i, 3) = 1.0;
-    sum_z += circleMatrix(i, 0);
-  }
-
-  double mean_z = sum_z / (double) pointsCount;
-
-  auto M = circleMatrix.transpose() * circleMatrix / pointsCount;
-
-  // Initialise H matrix
-  H(0,0) = 8 * mean_z;
-  H(0,1) = 0;
-  H(0,2) = 0;
-  H(0,3) = 2;
-  H(1,0) = 0;
-  H(1,1) = 1;
-  H(1,2) = 0;
-  H(1,3) = 0;
-  H(2,0) = 0;
-  H(2,1) = 0;
-  H(2,2) = 1;
-  H(2,3) = 0;
-  H(3,0) = 2;
-  H(3,1) = 0;
-  H(3,2) = 0;
-  H(3,3) = 0;
-
-
-  // Initialise H inverse matrix
-  Hinv(0,0) = 0;
-  Hinv(0,1) = 0;
-  Hinv(0,2) = 0;
-  Hinv(0,3) = 0.5;
-  Hinv(1,0) = 0;
-  Hinv(1,1) = 1;
-  Hinv(1,2) = 0;
-  Hinv(1,3) = 0;
-  Hinv(2,0) = 0;
-  Hinv(2,1) = 0;
-  Hinv(2,2) = 1;
-  Hinv(2,3) = 0;
-  Hinv(3,0) = 0.5;
-  Hinv(3,1) = 0;
-  Hinv(3,2) = 0;
-  Hinv(3,3) = -2 * mean_z;
-
-  BDCSVD<Matrix4dn> svdCircle( circleMatrix, ComputeFullV | ComputeFullU  );
-  auto u = svdCircle.computeU(); 
-  auto v = svdCircle.computeV();
-  auto sigmaValues = svdCircle.singularValues();
-  auto V = svdCircle.matrixV();
-  //auto sigmaMatrix = svdCircle.singularValues().asDiagonal();
-
-  if(sigmaValues[3] > 1e-12)
-  {
-
-    auto sigmaMatrix = sigmaValues.asDiagonal();
-    auto Y = V * sigmaMatrix * V.transpose();
-    std::cout<< "Y cols" << Y.cols() <<" Y rows"<<Y.rows();
-    std::cout<< "H cols" << Hinv.cols() <<" H rows" << Hinv.rows();
-
-    std::cout << "Here is the matrix m:\n" << Y << std::endl;
-    auto Q = Y * Hinv * Y;
-    Eigen::SelfAdjointEigenSolver<Matrix4dn> eig(Q);
-
-    auto eigVecQ = eig.eigenvectors();
-    auto eigValues = eig.eigenvalues();
-
-    double minEigValue = std::numeric_limits<double>::infinity();
-    int minEigIndex;
-
-    for(int i=0; i< eigValues.size(); i++)
-    {
-      if(eigValues[i] < minEigValue && eigValues[i] > 0)
-      {
-        minEigValue = eigValues[i];
-        minEigIndex = i;
-      }
-    }
-
-    Vector4d smallEigVec = {eigVecQ(0,minEigIndex), eigVecQ(1,minEigIndex), eigVecQ(2,minEigIndex), eigVecQ(3,minEigIndex)};
-
-    std::cout << "Here is the matrix m:\n" << eigVecQ << std::endl;
-    std::cout << "Here is the matrix m:\n" << smallEigVec << std::endl;
-    std::cout << "Q eigen values" << eigValues;
-
-    equCoeff = Y.colPivHouseholderQr().solve(smallEigVec);
-  }
-  else
-  {
-
-    equCoeff = {V(0,3), V(1,3), V(2,3), V(3,3)};
-  }
-
-  double a = -equCoeff[1] / equCoeff[0] / 2.0 + mean_x;
-  double b = -equCoeff[2] / equCoeff[0] / 2.0 + mean_y;
-  double r2 = (pow(equCoeff[1], 2) + pow(equCoeff[2], 2) - 4 * equCoeff[0] * equCoeff[3]) / (4.0 * pow(equCoeff[0], 2));
-  double r = sqrt(r2);
-  Vector3d circleCoeff = {a, b, r};
-
-
-
-
- std::cout << "Here is the matrix m:\n" << circleMatrix << std::endl;
- std::cout << "Here is the matrix m:\n" << M << std::endl;
- std::cout<< "Sigma values\n"<<sigmaValues << std::endl;
- std::cout<< "Circle coefficients" << circleCoeff;
- std::cout<< "x center" << mean_x;
- std::cout<< "y center" << mean_y;
- return circleCoeff;
-
-
-}
-
-double calculateError(const vector<Point2d>& observedPoints, Vector3d circleCoeff)
-{
-  double totalError=0;
-  double error = 0;
-
-  for(auto point:observedPoints)
-  {
-    error = pow(point.x - circleCoeff[0], 2) + pow(point.y - circleCoeff[1], 2) - pow(circleCoeff[2], 2);
-    error = pow(error, 2);
-    totalError += error;
-  }
-  totalError = totalError / (double) observedPoints.size();
-  totalError = sqrt(totalError);
-  return totalError;
-
-}
-
-class LandmarkDetection
-{
-  ros::Subscriber laserscanSubscriber;
-  public:
-  LandmarkDetection(int argc, char** argv)
-  {
-    ros::init(argc, argv, "landmark_detection");
-    ros::NodeHandle n;
-    ros::Rate loop_rate(100);
-    laserscanSubscriber = n.subscribe("/scan", 1000, &LandmarkDetection::laserCallback,
-                                    this);
-  }
-
-  void laserCallback(const sensor_msgs::LaserScan& laserMessage)
-  {
-    cout<<"received";
-
-  }
+   void laserCallback(const sensor_msgs::LaserScan& laserMessage)
+   {
+     cout<<"received";
+   }
 
 
 };
 
 
-int main()
+ /// \brief The main function
+int main(int argc, char** argv)
 {
-  vector<Point2d> observedPoints1;
-  observedPoints1.push_back(Point2d(1,7));
-  observedPoints1.push_back(Point2d(2,6));
-  observedPoints1.push_back(Point2d(5,8));
-  observedPoints1.push_back(Point2d(7,7));
-  observedPoints1.push_back(Point2d(9,5));
-  observedPoints1.push_back(Point2d(3,7));
-
-  auto circleCoeff = fitCircle(observedPoints1);
-  auto fittingError = calculateError(observedPoints1, circleCoeff);
-
-  cout<<fittingError;
-
-  vector<Point2d> observedPoints2;
-  observedPoints2.push_back(Point2d(-1, 0));
-  observedPoints2.push_back(Point2d(-0.3, -0.06));
-  observedPoints2.push_back(Point2d(0.3, 0.1));
-  observedPoints2.push_back(Point2d(1, 0));
-
-  circleCoeff = fitCircle(observedPoints2);
-  fittingError = calculateError(observedPoints2, circleCoeff);
-  cout<<fittingError;
-
-
+  LandmarkDetection detectLandmarks(argc, argv);
+  ros::spin();
+  return 0;
 }
 
-
-
-
-// /// \brief The main function
-// int main(int argc, char** argv)
-// {
-//   LandmarkDetection detectLandmarks(argc, argv);
-//   ros::spin();
-//   return 0;
-// }
