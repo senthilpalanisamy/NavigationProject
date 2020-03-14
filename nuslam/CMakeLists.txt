@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(nuslam)
+set(ROS_BUILD_TYPE Debug)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,13 +10,15 @@ project(nuslam)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
+  message_generation
+  message_runtime
   nuturtlebot
   rigid2d
   roscpp
   std_msgs
 )
 
-find_package(gazebo REQUIRED)
+find_package (gazebo REQUIRED)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 ## System dependencies are found with CMake's conventions
@@ -52,11 +55,11 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
+add_message_files(
+  FILES
 #   Message1.msg
-#   Message2.msg
-# )
+  TurtleMap.msg 
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -74,10 +77,10 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 include_directories(
   include
@@ -117,11 +120,12 @@ include_directories(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuslam
-  CATKIN_DEPENDS gazebo_ros nuturtlebot rigid2d roscpp std_msgs
+  CATKIN_DEPENDS gazebo_ros message_generation message_runtime nuturtlebot rigid2d roscpp std_msgs
 #  DEPENDS system_lib
 )
 
 add_library(circle_detection src/circle_detection.cpp)
+add_executable(${PROJECT_NAME}_landmarks src/landmarks.cpp)
 
 ###########
 ## Build ##
@@ -138,6 +142,12 @@ include_directories(
 target_link_libraries(circle_detection
   ${catkin_LIBRARIES}
   Eigen3::Eigen
+)
+
+target_link_libraries(${PROJECT_NAME}_landmarks
+  ${catkin_LIBRARIES}
+  Eigen3::Eigen
+  circle_detection
 )
 
 ## Declare a C++ library
@@ -197,6 +207,15 @@ target_link_libraries(circle_detection
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
 # )
+
+install(TARGETS ${PROJECT_NAME}_landmarks
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(TARGETS circle_detection 
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/

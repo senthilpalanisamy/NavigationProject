@@ -5,6 +5,7 @@
 #include <Eigen/SVD>
 #include <Eigen/Cholesky>
 #include <cmath>
+#include "rigid2d/rigid2d.hpp"
 
 
 using std::cout;
@@ -14,10 +15,9 @@ using Eigen::BDCSVD;
 using Eigen::ComputeFullV;
 using Eigen::ComputeFullU;
 
-using Eigen::ComputeThinV;
-using Eigen::ComputeThinU;
 
 using Eigen::Vector4d;
+using rigid2d::Vector2D;
 
 typedef Matrix<double, Dynamic, 4> Matrix4dn;
 typedef Matrix<double, 4, 4> Matrix4d;
@@ -32,7 +32,7 @@ Point2d::Point2d(double x1, double y1)
   y = y1;
 }
 
-Vector3d fitCircle(vector<Point2d> circlePoints)
+Vector3d fitCircle(vector<Vector2D> circlePoints)
 {
 
   Matrix4dn circleMatrix;
@@ -116,7 +116,8 @@ Vector3d fitCircle(vector<Point2d> circlePoints)
   auto sigmaValues = svdCircle.singularValues();
   auto V = svdCircle.matrixV();
 
-  if(sigmaValues[3] > 1e-12)
+
+  if(sigmaValues.size() ==4 && sigmaValues[3] > 1e-12)
   {
 
     auto sigmaMatrix = sigmaValues.asDiagonal();
@@ -177,7 +178,7 @@ Vector3d fitCircle(vector<Point2d> circlePoints)
 
 }
 
-double calculateError(const vector<Point2d>& observedPoints, Vector3d circleCoeff)
+double calculateError(const vector<Vector2D>& observedPoints, Vector3d circleCoeff)
 {
   double totalError=0;
   double error = 0;

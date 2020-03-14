@@ -1,6 +1,5 @@
-
 <launch>
-  <arg name="world_name" default="empty_world" doc="The world in which the turltebot should be launched"/>
+  <arg name="world_name" default="$(find nuturtlebot)/worlds/block.world" doc="The world in which the turltebot should be launched"/>
   <arg name="is_jsp_needed" default="True" doc="determines whether joint state publisher should be launched"/>
  
   <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml" />
@@ -8,7 +7,8 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="worlds/$(arg world_name).world"/> 
+    <arg name="world_name" value="$(arg world_name)"/> 
+
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
