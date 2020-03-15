@@ -126,6 +126,7 @@ catkin_package(
 
 add_library(circle_detection src/circle_detection.cpp)
 add_executable(${PROJECT_NAME}_landmarks src/landmarks.cpp)
+add_executable(${PROJECT_NAME}_draw_map src/draw_map.cpp)
 
 ###########
 ## Build ##
@@ -148,6 +149,10 @@ target_link_libraries(${PROJECT_NAME}_landmarks
   ${catkin_LIBRARIES}
   Eigen3::Eigen
   circle_detection
+)
+
+target_link_libraries(${PROJECT_NAME}_draw_map
+  ${catkin_LIBRARIES}
 )
 
 ## Declare a C++ library
