@@ -83,8 +83,8 @@ double clockwiseDistance(double x, double y)
      laserscanSubscriber = n.subscribe("/scan", 1000, &LandmarkDetection::laserCallback,
                                      this);
      landmarkPublisher = n.advertise<nuslam::TurtleMap>("/landmarks", 1000);
-     maxRadius = 0.08;
-     minRadius = 0.01;
+     maxRadius = 0.06;
+     minRadius = 0.02;
 
    }
 
@@ -116,7 +116,7 @@ double clockwiseDistance(double x, double y)
      //
      vector<vector<Vector2D>> clusteredPoints;
      size_t clusterIndex;
-     double distanceThreshold = 0.01;
+     double distanceThreshold = 0.03;
 
      for(auto pointr: detectedPoints)
      {
@@ -167,129 +167,129 @@ double clockwiseDistance(double x, double y)
      }
 
 
-     for (auto idx = indicesTodelete.rbegin(); idx != indicesTodelete.rend(); ++idx)
-     {
+      for (auto idx = indicesTodelete.rbegin(); idx != indicesTodelete.rend(); ++idx)
+      {
 
-        clusteredPoints.erase(clusteredPoints.begin() + *idx);
+         clusteredPoints.erase(clusteredPoints.begin() + *idx);
 
-     }
+      }
 
-     // for(auto index: indicesTodelete)
-     // {
-     //   clusteredPoints.erase(clusteredPoints.begin() + index);
-     // }
+      // for(auto index: indicesTodelete)
+      // {
+      //   clusteredPoints.erase(clusteredPoints.begin() + index);
+      // }
 
-     cout<<"finished";
-     cout<<"cluster size"<<clusteredPoints.size();
-
-
-     vector<CircleParameters> allCircleParams;
-     indicesTodelete.clear();
-     size_t clusterIdx;
+      cout<<"finished";
+      cout<<"cluster size"<<clusteredPoints.size();
 
 
+      vector<CircleParameters> allCircleParams;
+      indicesTodelete.clear();
+      size_t clusterIdx;
 
 
 
-     for(auto cluster: clusteredPoints)
-     {
-       auto circleParams = fitCircle(cluster);
-       CircleParameters circle;
-       circle.centerX= (double) circleParams[0];
-       circle.centerX= (double) circleParams[1];
-       circle.radius= (double) circleParams[2];
-       allCircleParams.push_back(circle);
-       // mapMessage.centerX.push_back((double) circleParams[0]);
-       // mapMessage.centerY.push_back((double) circleParams[1]);
-       // mapMessage.radius.push_back((double) circleParams[2]);
-     }
+
+
+      for(auto cluster: clusteredPoints)
+      {
+        auto circleParams = fitCircle(cluster);
+        CircleParameters circle;
+        circle.centerX= (double) circleParams[0];
+        circle.centerY= (double) circleParams[1];
+        circle.radius= (double) circleParams[2];
+        allCircleParams.push_back(circle);
+        // mapMessage.centerX.push_back((double) circleParams[0]);
+        // mapMessage.centerY.push_back((double) circleParams[1]);
+        // mapMessage.radius.push_back((double) circleParams[2]);
+      }
 
 
 
-     // Circle classification to remove false positives
+     // // Circle classification to remove false positives
 
 
 
-     //for(auto cluster: clusteredPoints)
-     for(clusterIdx=0; clusterIdx < clusteredPoints.size(); clusterIdx++)
-     {
-       auto cluster = clusteredPoints[clusterIdx];
-       double mean = 0;
-       double std = 0;
-       vector<double> angles;
-       vector<double> Pangles;
-       vector<size_t> endpointIndex;
+      //for(auto cluster: clusteredPoints)
+      for(clusterIdx=0; clusterIdx < clusteredPoints.size(); clusterIdx++)
+      {
+        auto cluster = clusteredPoints[clusterIdx];
+        double mean = 0;
+        double std = 0;
+        vector<double> angles;
+        vector<double> Pangles;
+        vector<size_t> endpointIndex;
 
-       for(i=0; i<cluster.size(); i++)
-       {
-         double angle = atan2(cluster[i].x - allCircleParams[clusterIdx].centerX,
-                               cluster[i].y - allCircleParams[clusterIdx].centerY);
-         angles.push_back(unwarpAngles(angle));
-       }
-
-       double P1Angle = angles[0];
-       size_t P1Index = 0;
-       double P2Angle = angles[0];
-       size_t P2Index = 0;
-
-       for(i=1; i<angles.size(); i++)
-       {
-         double clkDistance = clockwiseDistance(P1Angle, angles[i]);
-         double anticlkDistance = anticlockwiseDistance(P2Angle, angles[i]);
-         if(clockwiseDistance(P2Angle, angles[i]) < clockwiseDistance(P2Angle, P1Angle))
-           continue;
-         if(clkDistance < anticlkDistance)
-          {
-           P1Angle = angles[i];
-           P1Index = i;
-          }
-         else
-         {
-           P2Angle = angles[i];
-           P2Index = i;
-         }
-
-       }
-       // auto P1Index = std::min_element(angles.begin(),angles.end()) - angles.begin();
-       auto P1 = cluster[P1Index];
-       // auto P2Index = std::max_element(angles.begin(),angles.end()) - angles.begin();
-       auto P2 = cluster[P2Index];
-       endpointIndex.push_back(P1Index);
-       endpointIndex.push_back(P2Index);
-
-       // for cosine law
-       double c = distance(P1, P2);
-       //cluster.erase(remove(cluster.begin(), cluster.end(), endpointIndex), cluster.end());
-       std::sort(endpointIndex.begin(), endpointIndex.end());
-
-        for (auto idx = endpointIndex.rbegin(); idx != endpointIndex.rend(); ++idx)
+        for(i=0; i<cluster.size(); i++)
         {
-
-           cluster.erase(cluster.begin() + *idx);
-
+          double angle = atan2(cluster[i].x - allCircleParams[clusterIdx].centerX,
+                                cluster[i].y - allCircleParams[clusterIdx].centerY);
+          angles.push_back(unwarpAngles(angle));
         }
 
-       for(auto P: cluster)
-       {
-         double b = distance(P1, P);
-         double a = distance(P2, P);
-         double P1_P_P2Angle = acos((pow(a, 2) + pow(b, 2) - pow(c, 2)) / (2 * a * b));
-         Pangles.push_back(P1_P_P2Angle);
-       }
-       mean = accumulate( Pangles.begin(), Pangles.end(), 0.0 ) / Pangles.size();
-       for(auto sampleAngle: Pangles)
-       {
-         std += pow(sampleAngle - mean, 2);
-       }
-       std = sqrt(std / Pangles.size());
-       // mean is between 90 - 135 degrees
-       if(mean<0.52 || mean>3.2 || std > 0.5)
-       {
-         indicesTodelete.push_back(clusterIdx);
-       }
+        double P1Angle = angles[0];
+        size_t P1Index = 0;
+        double P2Angle = angles[0];
+        size_t P2Index = 0;
+
+        for(i=1; i<angles.size(); i++)
+        {
+          double clkDistance = clockwiseDistance(P1Angle, angles[i]);
+          double anticlkDistance = anticlockwiseDistance(P2Angle, angles[i]);
+          if(clockwiseDistance(P2Angle, angles[i]) < clockwiseDistance(P2Angle, P1Angle))
+            continue;
+          if(clkDistance < anticlkDistance)
+           {
+            P1Angle = angles[i];
+            P1Index = i;
+           }
+          else
+          {
+            P2Angle = angles[i];
+            P2Index = i;
+          }
+
+        }
+        // auto P1Index = std::min_element(angles.begin(),angles.end()) - angles.begin();
+        auto P1 = cluster[P1Index];
+        // auto P2Index = std::max_element(angles.begin(),angles.end()) - angles.begin();
+        auto P2 = cluster[P2Index];
+        endpointIndex.push_back(P1Index);
+        endpointIndex.push_back(P2Index);
+
+        // for cosine law
+        double c = distance(P1, P2);
+        //cluster.erase(remove(cluster.begin(), cluster.end(), endpointIndex), cluster.end());
+        std::sort(endpointIndex.begin(), endpointIndex.end());
+
+         for (auto idx = endpointIndex.rbegin(); idx != endpointIndex.rend(); ++idx)
+         {
+
+            cluster.erase(cluster.begin() + *idx);
+
+         }
+
+        for(auto P: cluster)
+        {
+          double b = distance(P1, P);
+          double a = distance(P2, P);
+          double P1_P_P2Angle = acos((pow(a, 2) + pow(b, 2) - pow(c, 2)) / (2 * a * b));
+          Pangles.push_back(P1_P_P2Angle);
+        }
+        mean = accumulate( Pangles.begin(), Pangles.end(), 0.0 ) / Pangles.size();
+        for(auto sampleAngle: Pangles)
+        {
+          std += pow(sampleAngle - mean, 2);
+        }
+        std = sqrt(std / Pangles.size());
+        // mean is between 90 - 135 degrees
+        if(mean<0.52 || mean>3.2 || std > 0.5)
+        {
+          indicesTodelete.push_back(clusterIdx);
+        }
 
 
-     }
+      }
 
 
   //allCircleParams.erase(remove(allCircleParams.begin(), allCircleParams.end(), indicesTodelete), allCircleParams.end());
@@ -303,10 +303,14 @@ double clockwiseDistance(double x, double y)
   for(auto finalCircles:allCircleParams)
   {
     if(finalCircles.radius < maxRadius && finalCircles.radius > minRadius)
+    {
 
     mapMessage.centerX.push_back(finalCircles.centerX);
     mapMessage.centerY.push_back(finalCircles.centerY);
     mapMessage.radius.push_back(finalCircles.radius);
+
+    }
+
   }
 
 

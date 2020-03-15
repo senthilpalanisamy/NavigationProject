@@ -60,7 +60,7 @@ class DrawMap
      marker.color.g = 1.0f;
      marker.color.b = 0.0f;
      marker.color.a = 1.0;
-     marker.lifetime = ros::Duration(1.0);
+     marker.lifetime = ros::Duration(10.0);
 
      while (markerPub.getNumSubscribers() < 1)
      {
