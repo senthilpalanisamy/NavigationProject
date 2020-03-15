@@ -128,6 +128,7 @@ add_library(circle_detection src/circle_detection.cpp)
 add_executable(${PROJECT_NAME}_landmarks src/landmarks.cpp)
 add_executable(${PROJECT_NAME}_draw_map src/draw_map.cpp)
 add_executable(${PROJECT_NAME}_slam src/slam.cpp)
+add_executable(${PROJECT_NAME}_analysis src/analysis.cpp)
 
 ###########
 ## Build ##
@@ -156,6 +157,11 @@ target_link_libraries(${PROJECT_NAME}_draw_map
   ${catkin_LIBRARIES}
 )
 target_link_libraries(${PROJECT_NAME}_slam
+  ${catkin_LIBRARIES}
+)
+
+
+target_link_libraries(${PROJECT_NAME}_analysis
   ${catkin_LIBRARIES}
 )
 
