@@ -127,6 +127,7 @@ catkin_package(
 add_library(circle_detection src/circle_detection.cpp)
 add_executable(${PROJECT_NAME}_landmarks src/landmarks.cpp)
 add_executable(${PROJECT_NAME}_draw_map src/draw_map.cpp)
+add_executable(${PROJECT_NAME}_slam src/slam.cpp)
 
 ###########
 ## Build ##
@@ -154,6 +155,11 @@ target_link_libraries(${PROJECT_NAME}_landmarks
 target_link_libraries(${PROJECT_NAME}_draw_map
   ${catkin_LIBRARIES}
 )
+target_link_libraries(${PROJECT_NAME}_slam
+  ${catkin_LIBRARIES}
+)
+
+
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -221,6 +227,9 @@ install(TARGETS circle_detection
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
+
+install(TARGETS ${PROJECT_NAME}_slam
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
