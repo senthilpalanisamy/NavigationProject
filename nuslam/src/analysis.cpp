@@ -30,17 +30,19 @@ class Analysis
       nuslam::TurtleMap mapMessage;
       mapMessage.header.stamp = ros::Time::now();
 
-
+      size_t count=0;
       for(i=0; i< modelStateMsg.name.size(); i++)
       {
         if(modelStateMsg.name[i].find(objectName) != std::string::npos)
         {
-        mapMessage.landmarkIndex.push_back(i);
+        mapMessage.landmarkIndex.push_back(count);
         mapMessage.centerX.push_back(modelStateMsg.pose[i].position.x);
         mapMessage.centerY.push_back(modelStateMsg.pose[i].position.y);
         mapMessage.radius.push_back(0.04);
+        count += 1;
         }
       }
+      mapMessage.landmarkCount = count;
       landmarkPublisher.publish(mapMessage);
 
     }

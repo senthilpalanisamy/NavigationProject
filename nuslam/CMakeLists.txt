@@ -10,6 +10,7 @@ set(ROS_BUILD_TYPE Debug)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
+  geometry_msgs
   message_generation
   message_runtime
   nuturtlebot
@@ -59,6 +60,7 @@ add_message_files(
   FILES
 #   Message1.msg
   TurtleMap.msg 
+  FilterOutput.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -80,6 +82,7 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 include_directories(
@@ -120,7 +123,7 @@ include_directories(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuslam
-  CATKIN_DEPENDS gazebo_ros message_generation message_runtime nuturtlebot rigid2d roscpp std_msgs
+  CATKIN_DEPENDS gazebo_ros geometry_msgs message_generation message_runtime nuturtlebot rigid2d roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -158,6 +161,7 @@ target_link_libraries(${PROJECT_NAME}_draw_map
 )
 target_link_libraries(${PROJECT_NAME}_slam
   ${catkin_LIBRARIES}
+  Eigen3::Eigen
 )
 
 
