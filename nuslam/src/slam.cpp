@@ -136,7 +136,8 @@ class slam
    stateCovariance sigma, Gt, Q;
    Matrix2d R;
    Measurement Ht;
-   MeasurementVector ztBar, zt;
+   MeasurementVector ztBar, zt, difference;
+   int detectedLandmarks;
 
 
    public:
@@ -212,22 +213,34 @@ class slam
     R.setZero(2, 2);
     R(0,0) = 1e-6;
     R(1,1) = 0.00030461768;
+    detectedLandmarks = 0;
 
     // sigma = stateCovariance::Zero();
     size_t i=0, j=0;
+
+    //for(;i<sigma.rows(); i++)
+    //{
+    //  for(; j<sigma.cols(); j++)
+    //  {
+    //    if(i<3 && j<3)
+    //    {
+    //      sigma(i, j) = 0.0;
+    //    }
+    //    else
+    //    {
+    //      //sigma(i, j) = std::numeric_limits<double>::infinity();
+    //      sigma(i, j) = 1000;
+    //    }
+
+    //  }
+
+    //}
 
     for(;i<sigma.rows(); i++)
     {
       for(; j<sigma.cols(); j++)
       {
-        if(i<3 or j<3)
-        {
           sigma(i, j) = 0.0;
-        }
-        else
-        {
-          sigma(i, j) = std::numeric_limits<double>::infinity();
-        }
 
       }
 
@@ -249,6 +262,32 @@ class slam
 
   void landmarkCallback(const nuslam::TurtleMap& landmarkMessage)
   {
+
+    if(landmarkMessage.landmarkIndex.size() > detectedLandmarks)
+    {
+      size_t index;
+      for(index=0; index < landmarkMessage.landmarkIndex.size(); index++)
+      {
+        if(landmarkMessage.landmarkIndex[index] > detectedLandmarks-1)
+        {
+          size_t landmarkPosition = landmarkMessage.landmarkIndex[index];
+          state(2 + 2 * landmarkPosition +1) = landmarkMessage.centerX[index];
+          state(2 + 2 * landmarkPosition +2) = landmarkMessage.centerY[index];
+          detectedLandmarks += 1;
+
+          size_t i=0;
+          for(i=0; i <= 2 + 2 * detectedLandmarks; i++)
+          {
+            sigma(2 + 2 * landmarkPosition+1, i) = 0.1;
+            sigma(i, 2 + 2 * landmarkPosition+1) = 0.1;
+
+            sigma(2 + 2 * landmarkPosition+2, i) = 0.1;
+            sigma(i, 2 + 2 * landmarkPosition+2) = 0.1;
+          }
+        }
+
+      }
+    }
     if(not(previousLeftPosition == -1 or newLeftPosition == -1) &&
        (not(almost_equal(previousLeftPosition, newLeftPosition) && almost_equal(previousRightPosition, newRightPosition))))
     {
@@ -259,7 +298,7 @@ class slam
       auto odomTwist = diffcar.WheelVelocitiestoTwist(velocities);
       double deltaX = odomTwist.vx;
       double deltaTheta = odomTwist.wz;
-      double presentAngle = state(2);
+      double presentAngle = state(0);
 
       Gt =  stateCovariance::Identity(2 * landmarkCount + 3, 2 * landmarkCount + 3);
 
@@ -271,13 +310,14 @@ class slam
         cout<<state(1);
         state(2) = state(2) + deltaX / deltaTheta * cos(presentAngle) - deltaX / deltaTheta * cos(presentAngle + deltaTheta);
         state(0) = state(0) + deltaTheta;
+        state(0) = atan2(sin(state(0)), cos(state(0)));
         Gt(1,0) += - deltaX / deltaTheta * cos(presentAngle) + deltaX / deltaTheta * cos(presentAngle + deltaTheta);
         Gt(2,0) += -deltaX / deltaTheta * sin(presentAngle) + deltaX / deltaTheta * sin(presentAngle + deltaTheta);
         }
       else
         {
         state(1) = state(1) + deltaX * cos(presentAngle);
-        state(2) = state(2) + deltaX * sin(state(2));
+        state(2) = state(2) + deltaX * sin(presentAngle);
         Gt(1,0) += -deltaX * sin(presentAngle);
         Gt(2,0) += deltaX * cos(presentAngle);
         }
@@ -294,7 +334,8 @@ class slam
 
       size_t  landmarkIndex = landmarkMessage.landmarkIndex[measurementIndex];
       ztBar(0) = sqrt(pow(centerX - state(1), 2) + pow(centerY - state(2), 2));
-      ztBar(1) = atan2(centerY - state(1), centerX - state(2)) - state(0);
+      double angle = atan2(centerY - state(2), centerX - state(1)) - state(0);
+      ztBar(1) = atan2(sin(angle), cos(angle));
 
       double dx = centerX - state(1);
       double dy = centerY - state(2);
@@ -307,13 +348,20 @@ class slam
       Ht(0, 2) = -dy / sqrt(d);
       Ht(1, 2) = -dx / d;
       Ht(0, 2 + 2 * landmarkIndex + 1) = dx / sqrt(d);
-      Ht(1, 2 + 2 * landmarkIndex + 1) = -dx / d;
+      Ht(1, 2 + 2 * landmarkIndex + 1) = -dy / d;
       Ht(0, 2 + 2 * landmarkIndex + 2) = dy / sqrt(d);
-      Ht(0, 2 + 2 * landmarkIndex + 2) = dx / d;
+      Ht(1, 2 + 2 * landmarkIndex + 2) = dx / d;
       //auto Ht * sigma * Ht.transpose() + R
+      zt(0) = landmarkMessage.range[measurementIndex];
+      zt(1) = landmarkMessage.bearing[measurementIndex];
 
       auto K = sigma * Ht.transpose() * (Ht * sigma * Ht.transpose() + R).inverse();
-      state = state + K * (ztBar - zt);
+      difference = zt - ztBar;
+      difference(1) = atan2(sin(difference(1)), cos(difference(1)));
+      //difference(0) = 0.0;
+      //difference(1) = 0.0;
+      state = state + K * difference;
+      state(0) = atan2(sin(state(0)), cos(state(0)));
       sigma = (stateCovariance::Identity(2 * landmarkCount + 3, 2 * landmarkCount + 3) - K * Ht) * sigma;
     }
 
@@ -410,8 +458,8 @@ class slam
 
     //double leftVelocity = calculateWheelVelocities(previousLeftPosition, newLeftPosition, totalTime);
     //double rightVelocity = calculateWheelVelocities(previousRightPosition, newRightPosition, totalTime);
-    //double leftVelocity = jointMessage.velocity[0];
-    //double rightVelocity = jointMessage.velocity[1];
+    double leftVelocity = jointMessage.velocity[0];
+    double rightVelocity = jointMessage.velocity[1];
 
     //ROS_INFO_STREAM("left velocity"<<leftVelocity * totalTime);
     //ROS_INFO_STREAM("right velocity"<<rightVelocity * totalTime);
