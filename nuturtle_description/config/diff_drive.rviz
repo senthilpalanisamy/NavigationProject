@@ -13,7 +13,7 @@ Panels:
         - /TF1/Tree1
         - /LaserScan1
         - /LaserScan1/Status1
-      Splitter Ratio: 0.5
+      Splitter Ratio: 0.5176470875740051
     Tree Height: 728
   - Class: rviz/Selection
     Name: Selection
@@ -33,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -73,7 +73,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: true
           Show Trail: false
-          Value: true
         base_scan:
           Alpha: 1
           Show Axes: false
@@ -83,16 +82,17 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        dummy:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         left_wheel:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
         right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        robot_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -109,25 +109,25 @@ Visualization Manager:
       Frames:
         All Enabled: false
         base_link:
-          Value: false
+          Value: true
         base_scan:
-          Value: false
+          Value: true
         castor:
-          Value: false
-        dummy:
-          Value: false
+          Value: true
         left_wheel:
-          Value: false
+          Value: true
         right_wheel:
-          Value: false
+          Value: true
+        robot_link:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        dummy:
-          base_link:
+        base_link:
+          robot_link:
             base_scan:
               {}
             castor:
@@ -148,23 +148,23 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/LaserScan
       Color: 255; 255; 255
-      Color Transformer: ""
+      Color Transformer: Intensity
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 4096
+      Max Intensity: 0
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: LaserScan
-      Position Transformer: ""
+      Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: ""
-      Unreliable: false
+      Topic: /scan
+      Unreliable: true
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -172,7 +172,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: base_link
+    Fixed Frame: base_scan
     Frame Rate: 30
   Name: root
   Tools:
@@ -196,7 +196,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 0.5542023181915283
+      Distance: 3.1628403663635254
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -211,10 +211,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.20979735255241394
+      Pitch: 0.49979865550994873
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.513509750366211
+      Yaw: 3.300312042236328
     Saved: ~
 Window Geometry:
   Displays:

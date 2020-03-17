@@ -21,12 +21,12 @@
 <fdir1>1 0 0 </fdir1>
 <maxVel>0.1</maxVel>
 <kp>500000</kp>
-<kd>100</kd>
+<kd>10</kd>
 <!--dampingFactor>0.5</dampingFactor-->
 <material>Gazebo/Black</material>
 </gazebo>
 
-<gazebo reference="base_link">
+<gazebo reference="robot_link">
 <material>Gazebo/Red</material>
 </gazebo>
 
