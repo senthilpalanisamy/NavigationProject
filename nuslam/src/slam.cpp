@@ -205,14 +205,14 @@ class slam
     // Motion model noise covariance
     Q.setZero(2 *landmarkCount + 3, 2 * landmarkCount + 3);
     Q(0,0) = 0.00030461768 * 4;
-    Q(1,1) = 1e-4;
-    Q(2,2) = 1e-4;
+    Q(1,1) = 1e-2;
+    Q(2,2) = 1e-2;
 
 
     // Measurement noise covariance
     R.setZero(2, 2);
-    R(0,0) = 1e-6;
-    R(1,1) = 0.00030461768;
+    R(0,0) = 1e-8;
+    R(1,1) = 0.000030461768;
     detectedLandmarks = 0;
 
     // sigma = stateCovariance::Zero();
@@ -275,15 +275,19 @@ class slam
           state(2 + 2 * landmarkPosition +2) = landmarkMessage.centerY[index];
           detectedLandmarks += 1;
 
-          size_t i=0;
-          for(i=0; i <= 2 + 2 * detectedLandmarks; i++)
-          {
-            sigma(2 + 2 * landmarkPosition+1, i) = 0.1;
-            sigma(i, 2 + 2 * landmarkPosition+1) = 0.1;
+          //size_t i=0;
+          //for(i=0; i <= 2 + 2 * detectedLandmarks; i++)
+          //{
+          //  sigma(2 + 2 * landmarkPosition+1, i) = 0.1;
+          //  sigma(i, 2 + 2 * landmarkPosition+1) = 0.1;
 
-            sigma(2 + 2 * landmarkPosition+2, i) = 0.1;
-            sigma(i, 2 + 2 * landmarkPosition+2) = 0.1;
-          }
+          //  sigma(2 + 2 * landmarkPosition+2, i) = 0.1;
+          //  sigma(i, 2 + 2 * landmarkPosition+2) = 0.1;
+          //}
+          //
+            sigma(2 + 2 * landmarkPosition+1, 2 + 2 * landmarkPosition+1) = 1000;
+            sigma(2 + 2 * landmarkPosition+2, 2 + 2 * landmarkPosition+2) = 1000;
+
         }
 
       }
