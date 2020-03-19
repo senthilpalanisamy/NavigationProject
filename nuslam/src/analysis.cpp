@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <math.h>
+#include "tf/transform_datatypes.h"
 
 #include "nuslam/TurtleMap.h"
 
@@ -36,8 +37,9 @@ class Analysis
 
     void modelStateCallback(const gazebo_msgs::ModelStates& modelStateMsg)
     {
-      std::normal_distribution<> r_noise(0, 0.017);
-      std::normal_distribution<> b_noise(0, 0.01);
+      std::normal_distribution<> r_noise(0, 1e-8);
+      //std::normal_distribution<> b_noise(0, 0.00000304617 * 1e-2);
+      std::normal_distribution<> b_noise(0, 1e-8);
 
       cout<<"success";
       size_t i;
@@ -56,6 +58,20 @@ class Analysis
 
       }
 
+      tf::Quaternion quat;
+      tf::quaternionMsgToTF(modelStateMsg.pose[robotPoseIdx].orientation, quat);
+      double roll, pitch, yaw;
+      tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+      double orientation = yaw;
+      // double orientation = 0;
+
+
+
+      // auto orientation = tf.transformations.euler_from_quaternion(
+      //                    [modelStateMsg.pose.x, modelStateMsg.pose.y,
+      //                     modelStateMsg.pose.z, modelStateMsg.pose.w])
+
+
       auto robotPose = modelStateMsg.pose[robotPoseIdx].position;
       for(i=0; i< modelStateMsg.name.size(); i++)
       {
@@ -64,12 +80,14 @@ class Analysis
         mapMessage.landmarkIndex.push_back(count);
         mapMessage.centerX.push_back(modelStateMsg.pose[i].position.x);
         mapMessage.centerY.push_back(modelStateMsg.pose[i].position.y);
-        double bearing = atan2(robotPose.y - modelStateMsg.pose[i].position.y,
-                             robotPose.x - modelStateMsg.pose[i].position.x);
+        double bearing = atan2(modelStateMsg.pose[i].position.y - robotPose.y,
+                               modelStateMsg.pose[i].position.x - robotPose.x);
+        bearing = bearing - orientation;
+        bearing = atan2(sin(bearing), cos(bearing)) ;
         double range = sqrt(pow(robotPose.y - modelStateMsg.pose[i].position.y, 2)+
                             pow(robotPose.x - modelStateMsg.pose[i].position.x, 2));
         bearing += r_noise(get_random());
-        range += r_noise(get_random());
+        range += b_noise(get_random());
         mapMessage.range.push_back(range);
         mapMessage.bearing.push_back(bearing);
 
