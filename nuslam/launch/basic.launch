@@ -1,0 +1,28 @@
+<launch>
+<arg name="debug" default="false" doc="whether to compute landmark detection and data associate from laser measurements or using gazebo data as a proxy" />
+<include file="$(find nuturtle_gazebo)/launch/turtlebot_gazebo.launch">
+<arg name="is_jsp_needed" value="false"/>
+</include>
+<node name="slam" pkg="nuslam" type="nuslam_slam">
+<param name="~odom_frame_id" value="odom"/>
+<param name="~body_frame_id" value="base_link"/>
+<param name="~left_wheel_joint" value="left_wheel_axle"/>
+<param name="~right_wheel_joint" value="right_wheel_axle"/>
+</node>
+
+<node name="landmarks" pkg="nuslam" type="nuslam_landmarks" unless="$(arg debug)"/>
+
+
+<node name="analysis" pkg="nuslam" type="nuslam_analysis" if="$(arg debug)">
+<remap from="real/landmarks" to="landmarks"/>
+</node>
+
+<node name="interface" pkg="nuturtle_robot" type="nuturtle_robot_turtle_interface_node">
+<param name="left_wheel_joint" value="left_wheel_axle"/>
+<param name="right_wheel_joint" value="right_wheel_axle"/>
+</node>
+<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch">
+<arg name="model" value="burger"/>
+</include>
+<!-- node name="draw_map" pkg="nuslam" type="nuslam_draw_map" output="screen" / -->
+</launch>

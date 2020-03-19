@@ -100,7 +100,7 @@
    <joint name="scan_link_joint" type="fixed">
     <parent link="robot_link"/>
     <child link="base_scan"/>
-    <origin xyz="0 0 ${robot_specs['chasis_thickness']/2}"/>
+    <origin xyz="0 0 ${robot_specs['chasis_thickness']/2+0.01}"/>
    </joint>
    <link name="base_scan">
    </link>

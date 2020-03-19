@@ -64,8 +64,8 @@ namespace gazebo
       wheelData.left_encoder = leftEncoder;
       wheelData.right_encoder = rightEncoder;
       wheelData.stamp = ros::Time::now();
-      std::cerr<<"\nright encoder position"<<leftJointPosition<<"  "<<leftEncoder;
-      std::cerr<<"\nright encoder position"<<rightJointPosition<<"  "<<rightEncoder;
+      //std::cerr<<"\nright encoder position"<<leftJointPosition<<"  "<<leftEncoder;
+      //std::cerr<<"\nright encoder position"<<rightJointPosition<<"  "<<rightEncoder;
       sensorMessagePublisher.publish(wheelData);
 
     }
