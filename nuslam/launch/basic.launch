@@ -10,7 +10,7 @@
 <param name="~right_wheel_joint" value="right_wheel_axle"/>
 </node>
 
-<node name="landmarks" pkg="nuslam" type="nuslam_landmarks" unless="$(arg debug)"/>
+<!-- node name="landmarks" pkg="nuslam" type="nuslam_landmarks" unless="$(arg debug)"/ -->
 
 
 <node name="analysis" pkg="nuslam" type="nuslam_analysis" if="$(arg debug)">

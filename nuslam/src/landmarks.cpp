@@ -12,6 +12,9 @@
 #include "rigid2d/rigid2d.hpp"
 #include "nuslam/circle_detection.hpp"
 #include "nuslam/TurtleMap.h"
+#include "nuslam/FilterOutput.h"
+#include "geometry_msgs/Pose2D.h"
+
 
 using std::cout;
 using std::accumulate;
@@ -20,10 +23,50 @@ using rigid2d::distance;
 using rigid2d::PI;
 using Eigen::Vector3d;
 using circleDetection::fitCircle;
+using rigid2d::Transform2D;
+using rigid2d::Vector2D;
+
+enum LandmarkStates{ADD, REMOVE, UNKNOWN};
+
+
 
 struct CircleParameters
 {
-  double centerX, centerY, radius;
+  double centerX, centerY, radius, range, bearing;
+};
+
+
+struct LandmarkGuess
+{
+  CircleParameters landmark;
+  size_t hit;
+  size_t miss;
+  int maxTries=10;
+  double minDetectionRate = 0.5;
+  double calculateDetectionRate()
+  {
+    return (double) hit / (double) (hit + miss);
+  }
+
+  LandmarkStates isFinalised()
+  {
+    if(hit+miss < maxTries)
+    {
+      return UNKNOWN;
+    }
+    else
+    {
+      if(calculateDetectionRate() > minDetectionRate)
+      {
+        return ADD;
+      }
+      else
+      {
+        return REMOVE;
+      }
+    }
+  }
+
 };
 
 double unwarpAngles(double angle)
@@ -37,6 +80,91 @@ double unwarpAngles(double angle)
     return angle;
   }
 }
+
+class LandmarkGuessList
+{
+  public:
+  vector<LandmarkGuess> landmarkList;
+  double intraDistance=0.1;
+  size_t i=0;
+
+  void updateLandmarks(vector<CircleParameters> detectedLandmarks)
+  {
+
+    vector<size_t> landmarkIndices;
+
+    for(auto measurementLandmark: detectedLandmarks)
+    {
+
+      bool isLandmarkinList=false;
+      for(i=0; i <landmarkList.size();i++)
+      {
+        auto potentialLandmark = landmarkList[i];
+        double distance = sqrt(pow(potentialLandmark.landmark.centerX- measurementLandmark.centerX, 2) +
+                              (pow(potentialLandmark.landmark.centerY - measurementLandmark.centerY, 2)));
+        vector<LandmarkGuess> newLandmarksList;
+
+        if(distance < intraDistance)
+        {
+        landmarkIndices.push_back(i);
+        landmarkList[i].landmark.centerX = (landmarkList[i].hit * landmarkList[i].landmark.centerX + measurementLandmark.centerX) / (double) (landmarkList[i].hit+1);
+        landmarkList[i].hit += 1;
+        isLandmarkinList = true;
+        }
+
+      }
+      if(isLandmarkinList)
+      {
+        LandmarkGuess newLandmark;
+        newLandmark.landmark.centerX = measurementLandmark.centerX;
+        newLandmark.landmark.centerY = measurementLandmark.centerY;
+        newLandmark.landmark.radius = measurementLandmark.radius;
+      }
+
+    }
+
+    for(i=0; i<landmarkList.size(); i++)
+    {
+    auto it = std::find(landmarkIndices.begin(), landmarkIndices.end(), 0);
+    if(it == landmarkIndices.end())
+    {
+    landmarkList[i].miss += 1;
+    }
+
+    }
+  }
+
+  vector<CircleParameters> returnFinalisedLandmarks()
+  {
+  size_t i;
+  vector<CircleParameters> finalisedLandmarks;
+  vector<size_t> indicesTodelete;
+  for(i=0; i<landmarkList.size(); i++)
+  {
+    switch(landmarkList[i].isFinalised())
+    {
+     case ADD: finalisedLandmarks.push_back(landmarkList[i].landmark);
+               indicesTodelete.push_back(i);
+               break;
+     case REMOVE:indicesTodelete.push_back(i);
+                 break;
+     case UNKNOWN:break;
+    }
+  }
+
+
+  for (auto idx = indicesTodelete.rbegin(); idx != indicesTodelete.rend(); ++idx)
+  {
+
+     landmarkList.erase(landmarkList.begin() + *idx);
+
+  }
+  return finalisedLandmarks;
+  }
+
+
+
+};
 
 
 double anticlockwiseDistance(double x, double y)
@@ -69,9 +197,13 @@ double clockwiseDistance(double x, double y)
 
  class LandmarkDetection
  {
-   ros::Subscriber laserscanSubscriber;
+   ros::Subscriber laserscanSubscriber, filterOutputSubscriber;
    ros::Publisher landmarkPublisher;
    double maxRadius, minRadius;
+   geometry_msgs::Pose2D robotPose;
+   vector<double> allLandmarksX;
+   vector<double> allLandmarksY;
+   LandmarkGuessList temporaryLandmarkList;
 
 
    public:
@@ -83,9 +215,24 @@ double clockwiseDistance(double x, double y)
      laserscanSubscriber = n.subscribe("/scan", 1000, &LandmarkDetection::laserCallback,
                                      this);
      landmarkPublisher = n.advertise<nuslam::TurtleMap>("/landmarks", 1000);
+     filterOutputSubscriber = n.subscribe("/filter_output", 1000, &LandmarkDetection::filterOutputCallback, this);
      maxRadius = 0.06;
      minRadius = 0.02;
+     robotPose.x = 0;
+     robotPose.y = 0;
+     robotPose.theta = 0;
 
+   }
+
+   void filterOutputCallback(const nuslam::FilterOutput filterOutput)
+   {
+     robotPose = filterOutput.robotPose;
+     size_t i= 0;
+     for(i=0; i < filterOutput.landmarkX.size(); i++)
+     {
+       allLandmarksX[i] = filterOutput.landmarkX[i];
+       allLandmarksY[i] = filterOutput.landmarkY[i];
+     }
    }
 
 
@@ -298,7 +445,29 @@ double clockwiseDistance(double x, double y)
      allCircleParams.erase(allCircleParams.begin() + *idx);
   }
 
-  
+  Vector2D robotPosition = {robotPose.x, robotPose.y};
+
+  Transform2D Twr(robotPosition, robotPose.theta);
+
+  for(auto& finalCircles:allCircleParams)
+  {
+
+    Vector2D center = {finalCircles.centerX, finalCircles.centerY};
+    auto centerW = Twr(center);
+    finalCircles.centerX = centerW.x;
+    finalCircles.centerY = centerW.y;
+    finalCircles.range = sqrt(pow(centerW.x - robotPose.x, 2) + pow(centerW.y - robotPose.y, 2));
+    finalCircles.bearing = atan2(robotPose.y - centerW.y, robotPose.x - centerW.x);
+  }
+
+  temporaryLandmarkList.updateLandmarks(allCircleParams);
+  auto fixedLandmarks = temporaryLandmarkList.returnFinalisedLandmarks();
+
+
+
+
+
+
 
   for(auto finalCircles:allCircleParams)
   {
