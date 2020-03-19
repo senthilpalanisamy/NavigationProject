@@ -204,37 +204,21 @@ class slam
 
     // Motion model noise covariance
     Q.setZero(2 *landmarkCount + 3, 2 * landmarkCount + 3);
-    Q(0,0) = 0.00030461768 * 4;
-    Q(1,1) = 1e-2;
-    Q(2,2) = 1e-2;
+    Q(0,0) = 0.00000304617;
+    Q(1,1) = 1e-6;
+    Q(2,2) = 1e-6;
 
 
     // Measurement noise covariance
     R.setZero(2, 2);
     R(0,0) = 1e-8;
-    R(1,1) = 0.000030461768;
+    //R(1,1) = 0.00000304617 * 1e-2;
+    R(1,1) = 1e-8;
     detectedLandmarks = 0;
+
 
     // sigma = stateCovariance::Zero();
     size_t i=0, j=0;
-
-    //for(;i<sigma.rows(); i++)
-    //{
-    //  for(; j<sigma.cols(); j++)
-    //  {
-    //    if(i<3 && j<3)
-    //    {
-    //      sigma(i, j) = 0.0;
-    //    }
-    //    else
-    //    {
-    //      //sigma(i, j) = std::numeric_limits<double>::infinity();
-    //      sigma(i, j) = 1000;
-    //    }
-
-    //  }
-
-    //}
 
     for(;i<sigma.rows(); i++)
     {
@@ -285,8 +269,8 @@ class slam
           //  sigma(i, 2 + 2 * landmarkPosition+2) = 0.1;
           //}
           //
-            sigma(2 + 2 * landmarkPosition+1, 2 + 2 * landmarkPosition+1) = 1000;
-            sigma(2 + 2 * landmarkPosition+2, 2 + 2 * landmarkPosition+2) = 1000;
+            sigma(2 + 2 * landmarkPosition+1, 2 + 2 * landmarkPosition+1) = 0.1;
+            sigma(2 + 2 * landmarkPosition+2, 2 + 2 * landmarkPosition+2) = 0.1;
 
         }
 
@@ -333,10 +317,14 @@ class slam
 
     for(;measurementIndex < landmarkMessage.centerX.size(); measurementIndex++)
     {
-      double centerX = landmarkMessage.centerX[measurementIndex];
-      double centerY = landmarkMessage.centerY[measurementIndex];
+      //double centerX = landmarkMessage.centerX[measurementIndex];
+      //double centerY = landmarkMessage.centerY[measurementIndex];
 
       size_t  landmarkIndex = landmarkMessage.landmarkIndex[measurementIndex];
+
+      double centerX = state(2 + 2 * landmarkIndex + 1);
+      double centerY = state(2 + 2 * landmarkIndex + 2);
+
       ztBar(0) = sqrt(pow(centerX - state(1), 2) + pow(centerY - state(2), 2));
       double angle = atan2(centerY - state(2), centerX - state(1)) - state(0);
       ztBar(1) = atan2(sin(angle), cos(angle));
@@ -364,6 +352,12 @@ class slam
       difference(1) = atan2(sin(difference(1)), cos(difference(1)));
       //difference(0) = 0.0;
       //difference(1) = 0.0;
+      // auto temp = K * difference;
+      // cout<<temp;
+      // cout<<"\nsigma\n"<<sigma;
+      // cout<<"\nHt\n"<<Ht;
+      // cout<<Ht(0,1)<<"\t"<<Ht(0,2)<<"\t"<<Ht(0,2 + 2 * landmarkIndex + 1)<<"\t"<<Ht(0, 2 + 2 * landmarkIndex + 2);
+      // cout<<Ht(1,0)<<"\t"<<Ht(1,2)<<"\t"<<Ht(1,2)<<Ht(1,2 + 2 * landmarkIndex + 1)<<"\t"<<Ht(1, 2 + 2 * landmarkIndex + 2);
       state = state + K * difference;
       state(0) = atan2(sin(state(0)), cos(state(0)));
       sigma = (stateCovariance::Identity(2 * landmarkCount + 3, 2 * landmarkCount + 3) - K * Ht) * sigma;
