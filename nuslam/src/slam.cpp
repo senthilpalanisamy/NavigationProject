@@ -315,7 +315,7 @@ class slam
     size_t measurementIndex =0;
     //auto sigmaMinus = sigma;
 
-    for(;measurementIndex < landmarkMessage.centerX.size(); measurementIndex++)
+    for(;measurementIndex < landmarkMessage.landmarkIndex.size(); measurementIndex++)
     {
       //double centerX = landmarkMessage.centerX[measurementIndex];
       //double centerY = landmarkMessage.centerY[measurementIndex];

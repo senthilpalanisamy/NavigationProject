@@ -39,8 +39,8 @@ struct CircleParameters
 struct LandmarkGuess
 {
   CircleParameters landmark;
-  size_t hit;
-  size_t miss;
+  size_t hit=0;
+  size_t miss=0;
   int maxTries=10;
   double minDetectionRate = 0.5;
   double calculateDetectionRate()
@@ -85,7 +85,8 @@ class LandmarkGuessList
 {
   public:
   vector<LandmarkGuess> landmarkList;
-  double intraDistance=0.1;
+  double intraDistance=0.2;
+  double newLandmarkDist = 0.27;
   size_t i=0;
 
   void updateLandmarks(vector<CircleParameters> detectedLandmarks)
@@ -97,6 +98,7 @@ class LandmarkGuessList
     {
 
       bool isLandmarkinList=false;
+      double minDistance = std::numeric_limits<double>::infinity();
       for(i=0; i <landmarkList.size();i++)
       {
         auto potentialLandmark = landmarkList[i];
@@ -111,21 +113,28 @@ class LandmarkGuessList
         landmarkList[i].hit += 1;
         isLandmarkinList = true;
         }
+        else if(distance < minDistance)
+        {
+          minDistance = distance;
+        }
 
       }
-      if(isLandmarkinList)
+      if(not isLandmarkinList && minDistance > newLandmarkDist)
       {
         LandmarkGuess newLandmark;
         newLandmark.landmark.centerX = measurementLandmark.centerX;
         newLandmark.landmark.centerY = measurementLandmark.centerY;
         newLandmark.landmark.radius = measurementLandmark.radius;
+        landmarkList.push_back(newLandmark);
+        landmarkList[landmarkList.size()-1].hit += 1;
+        landmarkIndices.push_back(landmarkList.size()-1);
       }
 
     }
 
     for(i=0; i<landmarkList.size(); i++)
     {
-    auto it = std::find(landmarkIndices.begin(), landmarkIndices.end(), 0);
+    auto it = std::find(landmarkIndices.begin(), landmarkIndices.end(), i);
     if(it == landmarkIndices.end())
     {
     landmarkList[i].miss += 1;
@@ -199,10 +208,12 @@ double clockwiseDistance(double x, double y)
  {
    ros::Subscriber laserscanSubscriber, filterOutputSubscriber;
    ros::Publisher landmarkPublisher;
-   double maxRadius, minRadius;
+   double maxRadius, minRadius, maxAssociationDistance;
    geometry_msgs::Pose2D robotPose;
    vector<double> allLandmarksX;
    vector<double> allLandmarksY;
+   vector<CircleParameters> newMeasurements;
+   vector<size_t> newMeasurementIndex;
    LandmarkGuessList temporaryLandmarkList;
 
 
@@ -221,6 +232,7 @@ double clockwiseDistance(double x, double y)
      robotPose.x = 0;
      robotPose.y = 0;
      robotPose.theta = 0;
+     maxAssociationDistance = 0.2;
 
    }
 
@@ -445,6 +457,30 @@ double clockwiseDistance(double x, double y)
      allCircleParams.erase(allCircleParams.begin() + *idx);
   }
 
+  // filter circles based on radius
+  indicesTodelete.clear();
+  for(i=0; i < allCircleParams.size(); i++)
+  {
+    if(allCircleParams[i].radius > maxRadius)
+    {
+      indicesTodelete.push_back(i);
+
+    }
+
+    if(allCircleParams[i].radius < minRadius)
+    {
+      indicesTodelete.push_back(i);
+    }
+  }
+
+
+  for (auto idx = indicesTodelete.rbegin(); idx != indicesTodelete.rend(); ++idx)
+  {
+     allCircleParams.erase(allCircleParams.begin() + *idx);
+  }
+
+
+
   Vector2D robotPosition = {robotPose.x, robotPose.y};
 
   Transform2D Twr(robotPosition, robotPose.theta);
@@ -460,27 +496,76 @@ double clockwiseDistance(double x, double y)
     finalCircles.bearing = atan2(robotPose.y - centerW.y, robotPose.x - centerW.x);
   }
 
-  temporaryLandmarkList.updateLandmarks(allCircleParams);
-  auto fixedLandmarks = temporaryLandmarkList.returnFinalisedLandmarks();
+  indicesTodelete.clear();
+  newMeasurements.clear();
+  newMeasurementIndex.clear();
 
-
-
-
-
-
-
-  for(auto finalCircles:allCircleParams)
+  size_t k=0;
+  for(; k< allCircleParams.size(); k++)
   {
-    if(finalCircles.radius < maxRadius && finalCircles.radius > minRadius)
+    auto finalCircles = allCircleParams[k];
+    size_t idx=0;
+    for(;idx < allLandmarksX.size(); idx++)
     {
-
-    mapMessage.centerX.push_back(finalCircles.centerX);
-    mapMessage.centerY.push_back(finalCircles.centerY);
-    mapMessage.radius.push_back(finalCircles.radius);
+      double distance = sqrt(pow(allLandmarksX[idx] - finalCircles.centerX, 2) + pow(allLandmarksY[idx] -finalCircles.centerY, 2));
+      if(distance < maxAssociationDistance)
+      {
+        newMeasurements.push_back(finalCircles);
+        newMeasurementIndex.push_back(idx);
+        indicesTodelete.push_back(k);
+        break;
+      }
 
     }
 
   }
+
+
+  for (auto idx = indicesTodelete.rbegin(); idx != indicesTodelete.rend(); ++idx)
+  {
+     allCircleParams.erase(allCircleParams.begin() + *idx);
+  }
+
+
+
+
+
+  temporaryLandmarkList.updateLandmarks(allCircleParams);
+  auto fixedLandmarks = temporaryLandmarkList.returnFinalisedLandmarks();
+  for(auto landmark:fixedLandmarks)
+  {
+    allLandmarksX.push_back(landmark.centerX);
+    allLandmarksY.push_back(landmark.centerY);
+  }
+
+
+
+
+
+
+
+  //for(auto finalCircles:)
+  //size_t i;
+  //
+  mapMessage.header.stamp = ros::Time::now();
+  for(i=0; i < newMeasurements.size(); i++)
+  {
+    auto finalCircles = newMeasurements[i];
+    size_t idx = newMeasurementIndex[i];
+    //mapMessage.centerX.push_back(finalCircles.centerX);
+    //mapMessage.centerY.push_back(finalCircles.centerY);
+    mapMessage.radius.push_back(finalCircles.radius);
+    mapMessage.range.push_back(finalCircles.range);
+    mapMessage.bearing.push_back(finalCircles.bearing);
+    mapMessage.landmarkIndex.push_back(idx);
+  }
+
+  for(i=0; i< allLandmarksX.size(); i++)
+  {
+    mapMessage.centerX.push_back(allLandmarksX[i]);
+    mapMessage.centerY.push_back(allLandmarksY[i]);
+  }
+  mapMessage.landmarkCount = allLandmarksX.size();
 
 
 
