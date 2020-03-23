@@ -24,32 +24,34 @@ class DrawMap
      ros::init(argc, argv, "draw_map");
 
       ros::NodeHandle n;
-     ros::Rate loop_rate(100);
-     landmarkSubscriber = n.subscribe("/landmarks", 1000, &DrawMap::landmarkCallback,
-                                      this);
+     ros::Rate loop_rate(20);
+
+
+     landmarkSubscriber = n.subscribe("/landmarks", 1000, &DrawMap::landmarkCallback, this);
+
     markerPub = n.advertise<visualization_msgs::Marker>("visualization_marker", 100,true);
    }
 
    void landmarkCallback(const nuslam::TurtleMap& mapMessage)
    {
 
-    tf2_ros::TransformListener tfListener(tfBuffer);
+    //tf2_ros::TransformListener tfListener(tfBuffer);
 
-    geometry_msgs::TransformStamped transformStamped;
-    Transform2D mapBaseTf;
-    try
-      {
-      //transformStamped = tfBuffer.lookupTransform("base_link", "base_scan", mapMessage.header.stamp);
-      transformStamped = tfBuffer.lookupTransform("base_link", "base_scan", ros::Time::now());
-      }
-    catch (tf2::TransformException &ex) 
-      {
-      ROS_WARN("Could NOT transform map to landmark: %s", ex.what());
-      }
+    //geometry_msgs::TransformStamped transformStamped;
+    //Transform2D mapBaseTf;
+    //try
+    //  {
+    //  //transformStamped = tfBuffer.lookupTransform("base_link", "base_scan", mapMessage.header.stamp);
+    //  transformStamped = tfBuffer.lookupTransform("base_link", "base_scan", mapMessage.header.stamp);
+    //  }
+    //catch (tf2::TransformException &ex) 
+    //  {
+    //  ROS_WARN("Could NOT transform map to landmark: %s", ex.what());
+    //  }
 
 
 
-    marker.header.frame_id = "/base_link";
+    marker.header.frame_id = "/map";
     marker.header.stamp = mapMessage.header.stamp;
     marker.type = visualization_msgs::Marker::CYLINDER;
     marker.action = visualization_msgs::Marker::ADD;
@@ -74,8 +76,10 @@ class DrawMap
      marker.ns = "basic_shapes";
      marker.id = i;
 
-     marker.scale.x = mapMessage.radius[i];
-     marker.scale.y = mapMessage.radius[i];
+     //marker.scale.x = mapMessage.radius[i];
+     //marker.scale.y = mapMessage.radius[i];
+     marker.scale.x = 0.04;
+     marker.scale.y = 0.04;
      marker.pose.position.x = mapMessage.centerX[i];
      marker.pose.position.y = mapMessage.centerY[i];
      marker.pose.position.z = 0;
@@ -85,7 +89,7 @@ class DrawMap
      marker.pose.orientation.w = 1.0;
      markerPub.publish(marker);
     }
-  
+
 
 
    }

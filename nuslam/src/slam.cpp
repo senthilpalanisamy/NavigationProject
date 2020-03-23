@@ -45,7 +45,7 @@ using rigid2d::Vector2D;
 using std::cout;
 using rigid2d::Transform2D;
 
-constexpr size_t landmarkCount = 20;
+constexpr size_t landmarkCount = 50;
 
 
 
@@ -247,34 +247,21 @@ class slam
   void landmarkCallback(const nuslam::TurtleMap& landmarkMessage)
   {
 
-    if(landmarkMessage.landmarkIndex.size() > detectedLandmarks)
+    if(landmarkMessage.landmarkCount > detectedLandmarks)
     {
       size_t index;
-      for(index=0; index < landmarkMessage.landmarkIndex.size(); index++)
+      for(index=detectedLandmarks; index < landmarkMessage.landmarkCount; index++)
       {
-        if(landmarkMessage.landmarkIndex[index] > detectedLandmarks-1)
-        {
-          size_t landmarkPosition = landmarkMessage.landmarkIndex[index];
+          size_t landmarkPosition = index;
           state(2 + 2 * landmarkPosition +1) = landmarkMessage.centerX[index];
           state(2 + 2 * landmarkPosition +2) = landmarkMessage.centerY[index];
-          detectedLandmarks += 1;
 
-          //size_t i=0;
-          //for(i=0; i <= 2 + 2 * detectedLandmarks; i++)
-          //{
-          //  sigma(2 + 2 * landmarkPosition+1, i) = 0.1;
-          //  sigma(i, 2 + 2 * landmarkPosition+1) = 0.1;
+          sigma(2 + 2 * landmarkPosition+1, 2 + 2 * landmarkPosition+1) = 0.1;
+          sigma(2 + 2 * landmarkPosition+2, 2 + 2 * landmarkPosition+2) = 0.1;
 
-          //  sigma(2 + 2 * landmarkPosition+2, i) = 0.1;
-          //  sigma(i, 2 + 2 * landmarkPosition+2) = 0.1;
-          //}
-          //
-            sigma(2 + 2 * landmarkPosition+1, 2 + 2 * landmarkPosition+1) = 0.1;
-            sigma(2 + 2 * landmarkPosition+2, 2 + 2 * landmarkPosition+2) = 0.1;
-
-        }
 
       }
+      detectedLandmarks = landmarkMessage.landmarkCount;
     }
     if(not(previousLeftPosition == -1 or newLeftPosition == -1) &&
        (not(almost_equal(previousLeftPosition, newLeftPosition) && almost_equal(previousRightPosition, newRightPosition))))

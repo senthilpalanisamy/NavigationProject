@@ -2,6 +2,9 @@
   <arg name="robot" default="0" doc="used to identify the remote machine address. 0 if its the local host
     A number X other than zero indicates TurtlebotX as the remote host"/>
 
+  <arg name="is_laser_needed" default="true" doc="should laser scan be loaded" />
+
+
   <group if="$(eval arg('robot') ==0)">
   <machine name="turtlebot" address="localhost"/>
   </group>
@@ -21,7 +24,7 @@
   </group>
   </group>
 
-  <node machine="turtlebot" name="laser_scan" pkg="hls_lfcd_lds_driver" type="hlds_laser_publisher">
+  <node machine="turtlebot" name="laser_scan" pkg="hls_lfcd_lds_driver" type="hlds_laser_publisher" if="$(arg is_laser_needed)">
   <param name="port" value="/dev/port"/>
   <param name="frame_id" value="base_scan"/> 
   </node>

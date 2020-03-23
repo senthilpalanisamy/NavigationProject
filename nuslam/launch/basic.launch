@@ -24,5 +24,5 @@
 <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch">
 <arg name="model" value="burger"/>
 </include>
-<!-- node name="draw_map" pkg="nuslam" type="nuslam_draw_map" output="screen" / -->
+<node name="draw_map" pkg="nuslam" type="nuslam_draw_map" output="screen" />
 </launch>

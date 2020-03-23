@@ -139,8 +139,8 @@ class WaypointTurtle
   stopTrajectory = n.advertiseService("/stop", &WaypointTurtle::stopWaypointFollowing,
                                      this);
 
-  setPoseClient = n.serviceClient<rigid2d::SetPose>("/set_pose");
-  setPoseFake = n.serviceClient<rigid2d::SetPose>("/fake/set_pose");
+  setPoseClient = n.serviceClient<rigid2d::SetPose>("set_pose");
+  //setPoseFake = n.serviceClient<rigid2d::SetPose>("/fake/set_pose");
   odometrySubscriber = n.subscribe("/nav_msgs/odometry", 1000, &WaypointTurtle::odometryCallback,
                                     this);
   rotVel = fracVel * maxRotVelRobot; 
@@ -296,7 +296,7 @@ class WaypointTurtle
 
   ROS_INFO_STREAM("Calling Service");
   ros::service::waitForService("/set_pose", -1);
-  ros::service::waitForService("fake/set_pose", -1);
+  //ros::service::waitForService("fake/set_pose", -1);
   if(setPoseClient.exists())
   {
 
@@ -308,16 +308,16 @@ class WaypointTurtle
     setPoseClient.call(initialPose);
   }
 
-  if(setPoseFake.exists())
-  {
+  // if(setPoseFake.exists())
+  // {
 
-    ROS_INFO_STREAM("Entered service client");
-    rigid2d::SetPose initialPose;
-    initialPose.request.desiredPose.x = current_x;
-    initialPose.request.desiredPose.y = current_y;
-    initialPose.request.desiredPose.theta = current_angle;
-    setPoseFake.call(initialPose);
-  }
+  //   ROS_INFO_STREAM("Entered service client");
+  //   rigid2d::SetPose initialPose;
+  //   initialPose.request.desiredPose.x = current_x;
+  //   initialPose.request.desiredPose.y = current_y;
+  //   initialPose.request.desiredPose.theta = current_angle;
+  //   setPoseFake.call(initialPose);
+  // }
   state = WAIT;
 
 

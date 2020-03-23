@@ -227,12 +227,12 @@ double clockwiseDistance(double x, double y)
                                      this);
      landmarkPublisher = n.advertise<nuslam::TurtleMap>("/landmarks", 1000);
      filterOutputSubscriber = n.subscribe("/filter_output", 1000, &LandmarkDetection::filterOutputCallback, this);
-     maxRadius = 0.06;
-     minRadius = 0.02;
+     maxRadius = 0.05;
+     minRadius = 0.03;
      robotPose.x = 0;
      robotPose.y = 0;
      robotPose.theta = 0;
-     maxAssociationDistance = 0.2;
+     maxAssociationDistance = 0.1;
 
    }
 
@@ -493,7 +493,8 @@ double clockwiseDistance(double x, double y)
     finalCircles.centerX = centerW.x;
     finalCircles.centerY = centerW.y;
     finalCircles.range = sqrt(pow(centerW.x - robotPose.x, 2) + pow(centerW.y - robotPose.y, 2));
-    finalCircles.bearing = atan2(robotPose.y - centerW.y, robotPose.x - centerW.x);
+    //finalCircles.bearing = atan2(robotPose.y - centerW.y, robotPose.x - centerW.x);
+    finalCircles.bearing = atan2(centerW.y - robotPose.y, centerW.x - robotPose.x);
   }
 
   indicesTodelete.clear();

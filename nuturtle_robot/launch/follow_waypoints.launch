@@ -1,10 +1,12 @@
 <launch>
 
  <arg name="rviz_path" default="$(find nuturtle_robot)/config/waypoint.rviz" doc="path to load the rviz configuration file from" />
+ <arg name="is_laser_needed" default="true" doc="should laser scan be loaded" />
 
  <arg name="robot" default="1" doc="The turtle bot number to run"/>
  <include file="$(find nuturtle_robot)/launch/basic_remote.launch">
  <arg name="robot" value="$(arg robot)"/>
+ <arg name="is_laser_needed" value="$(arg is_laser_needed)"/>
  </include> 
 
 
@@ -37,10 +39,10 @@
 
 <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-<node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake">
+<!-- node machine="turtlebot" pkg="rigid2d" type="rigid2d_odometry_node"  name="fake_odometry" ns="fake">
 <param name="odom_frame_id" value="odom"/>
 <param name="body_frame_id" value="base_link"/>
-</node>
+</node -->
 
 
 <node machine="turtlebot" pkg="rigid2d" type="rigid2d_fake_encoders" name="fake_encoders">

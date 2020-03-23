@@ -71,7 +71,10 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
+        base_scan:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         castor:
           Alpha: 1
           Show Axes: false
@@ -83,6 +86,11 @@ Visualization Manager:
           Show Trail: false
           Value: true
         right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        robot_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -98,20 +106,10 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        base_link:
-          Value: true
-        castor:
-          Value: false
-        fake_base_link:
-          Value: false
         fake_odom:
-          Value: false
-        left_wheel:
           Value: false
         odom:
           Value: true
-        right_wheel:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -119,16 +117,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         odom:
-          base_link:
-            castor:
-              {}
-            left_wheel:
-              {}
-            right_wheel:
-              {}
           fake_odom:
-            fake_base_link:
-              {}
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz/Marker
@@ -136,7 +126,7 @@ Visualization Manager:
       Marker Topic: visualization_marker
       Name: Marker
       Namespaces:
-        basic_shapes: true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
