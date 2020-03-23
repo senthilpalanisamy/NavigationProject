@@ -1,3 +1,14 @@
+/// \file
+/// \brief This file implements an analysis node that provides ground truth for landmarks
+///
+/// SUBSCRIBES:
+/// gazebo/model_states (gazebo_msgs/ModelStates) - States of all gazebo world elements 
+///                                                 are obtained through this message
+/// PUBLISHES:
+/// real/landmarks (nuslam/TurtleMap) - State of all landmark Ground Truth and Fake measurements
+///                                     are published through this message
+
+
 #include <gazebo_msgs/ModelStates.h>
 #include <ros/ros.h>
 #include <ros/console.h>
@@ -7,6 +18,8 @@
 #include "nuslam/TurtleMap.h"
 
 #include<random>
+
+ /// \brief Generates a random number according to a normal distribution
  std::mt19937 & get_random()
  {
      // static variables inside a function are created once and persist for the remainder of the program
@@ -25,6 +38,9 @@ class Analysis
   public:
     ros::Subscriber modelStateSub;
     ros::Publisher landmarkPublisher;
+    /// \brief constructor for the initializing the class
+    /// \param argc - command line argument indicating the number of arguments
+    /// \param argv - command line arguments
     Analysis(int argc, char** argv)
     {
 
@@ -34,6 +50,10 @@ class Analysis
       modelStateSub = n.subscribe("gazebo/model_states", 1000, &Analysis::modelStateCallback, this);
       landmarkPublisher = n.advertise<nuslam::TurtleMap>("/real/landmarks", 1000);
     }
+
+    /// \brief Callback function for model state message. This function processes model state
+    ///        and publishes ground truth and fake measurement data.
+    /// \param modelStateMsg - A message containing model states from Gazebo
 
     void modelStateCallback(const gazebo_msgs::ModelStates& modelStateMsg)
     {
@@ -63,13 +83,6 @@ class Analysis
       double roll, pitch, yaw;
       tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
       double orientation = yaw;
-      // double orientation = 0;
-
-
-
-      // auto orientation = tf.transformations.euler_from_quaternion(
-      //                    [modelStateMsg.pose.x, modelStateMsg.pose.y,
-      //                     modelStateMsg.pose.z, modelStateMsg.pose.w])
 
 
       auto robotPose = modelStateMsg.pose[robotPoseIdx].position;
@@ -104,6 +117,7 @@ class Analysis
 
 
 
+/// \brief The main function.
 int main(int argc, char** argv)
 {
   Analysis analysis(argc, argv);

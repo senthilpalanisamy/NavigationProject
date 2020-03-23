@@ -1,6 +1,6 @@
 /// \file
-/// \brief This file contains all functions definitions for the updating the odometry of 
-/// a differential drive robot based on the wheel velocities received.
+/// \brief  This file implements all the slam functionality of the turtlebot
+///
 /// PARAMETERS:
 ///  ~odom_frame_id (string)    - Name of the odometry frame
 ///  ~body_frame_id (string)    - Name of the baselink of the robot
@@ -9,13 +9,20 @@
 ///  wheel_base       (double)  - wheel to wheel distance
 ///  wheel_radius     (double)  - wheel radius
 /// PUBLISHES:
-///   /nav_msgs/odometry (nav_msgs/odometry) - The odometry of the robot is published in 
+///   /nav_msgs/odometry (nav_msgs/odometry) - The odometry of the robot is published in
 ///                                            this topic. It published every time a message
 ///                                            is received from joint_states
+///  /filter_output (nuslam/FilterOutput) - Output state estimate of the robot pose and landmark
+///                                      estimates are published in this topic.
 /// SUBSCRIBES:
 ///  joint_states (sensor_msgs/JointState)  - A topic where the position, velocity, torque
 ///                                           and all other states of the robot joints is 
 ///                                           published
+///  /landmarks (nuslam/TurtleMap) - A topic where detected landmarks with their data association
+///                                  are published.
+/// SERVICE:
+/// set_pose (rigid2d/SetPose) - A service for setting the initial pose of the robot
+
 #include <tf/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -57,13 +64,20 @@ typedef Matrix<double, 2, 1> MeasurementVector;
 
 
 
-
+/// \brief Checks if two given float values are almost equal
+/// \param d1 - first number
+/// \param d2 - second number
+/// \epsilon - maximum difference allowed
+/// \returns A boolean indicating where the two numbers are equal or not
 bool almost_equal(double d1, double d2, double epsilon=1.0e-6)
 {
    return(abs(d1-d2) < epsilon? true: false);
 }
 
-
+/// \brief Calculates the clockwise Distance distance between two angles
+/// \param x - angle 1
+/// \param y - angle 2
+/// \returns anticlockwise distance between two angles
 double clockwiseDistance(double x, double y)
 {
   if(y >= x)
@@ -78,6 +92,10 @@ double clockwiseDistance(double x, double y)
 }
 
 
+/// \brief Calculates the anticlockwise Distance distance between two angles
+/// \param x - angle 1
+/// \param y - angle 2
+/// \returns anticlockwise distance between two angles
 double anticlockwiseDistance(double x, double y)
 {
   if(y <= x)
@@ -88,29 +106,6 @@ double anticlockwiseDistance(double x, double y)
   {
     return y - 2 * rigid2d::PI -x;
   }
-
-}
-
-
-
-double calculateWheelVelocities(double previousPoint, double presentPoint, double time)
-{
-
-    double clkDistance = clockwiseDistance(previousPoint, presentPoint);
-    double anticlkDistance = anticlockwiseDistance(previousPoint, presentPoint);
-
-    // ROS_INFO_STREAM("clockwise_distance"<<clkDistance);
-    // ROS_INFO_STREAM("anticlockwise_distance"<<anticlkDistance);
-    double wheelVelocity;
-    if(abs(anticlkDistance) < clkDistance)
-    {
-     wheelVelocity = anticlkDistance / time;
-    }
-    else
-    {
-      wheelVelocity = clkDistance/ time;
-    }
-    return wheelVelocity;
 
 }
 
@@ -141,6 +136,9 @@ class slam
 
 
    public:
+   /// \constructor
+   /// \param argc - A command line argument indicating the number of arguments
+   /// \param argv  - A command line argument containing the arguments
   slam(int argc, char** argv)
   {
 
@@ -199,7 +197,6 @@ class slam
 
 
     // initialise state and covariance
-    //state  = state::Zero();
     state.setZero(2 * landmarkCount + 3);
 
     // Motion model noise covariance
@@ -212,12 +209,10 @@ class slam
     // Measurement noise covariance
     R.setZero(2, 2);
     R(0,0) = 1e-8;
-    //R(1,1) = 0.00000304617 * 1e-2;
     R(1,1) = 1e-8;
     detectedLandmarks = 0;
 
 
-    // sigma = stateCovariance::Zero();
     size_t i=0, j=0;
 
     for(;i<sigma.rows(); i++)
@@ -231,6 +226,12 @@ class slam
     }
   }
 
+  /// \brief A service call back function for setting the initial pose of the robot
+  /// \param request - This contains the input data to the service. This contains the pose
+  ///                  of the robot that is desired
+  /// \param repsonse - An empty response
+  /// \returns A boolean inidicating if the service failed or passed
+
   bool setTurtlePoseCallback(rigid2d::SetPose::Request& request,
                                        rigid2d::SetPose::Response& response)
   {
@@ -243,6 +244,10 @@ class slam
      ROS_INFO_STREAM("Inside service\n");
      return true;
   }
+
+  /// \brief A landmark callback. This is the main slam update function. For every measured
+  ///        received, a slam update is made
+  /// \param landmarkMessage - A message containing new measurements
 
   void landmarkCallback(const nuslam::TurtleMap& landmarkMessage)
   {
@@ -300,12 +305,9 @@ class slam
       sigma = Gt * sigma * Gt.transpose() + Q;
      }
     size_t measurementIndex =0;
-    //auto sigmaMinus = sigma;
 
     for(;measurementIndex < landmarkMessage.landmarkIndex.size(); measurementIndex++)
     {
-      //double centerX = landmarkMessage.centerX[measurementIndex];
-      //double centerY = landmarkMessage.centerY[measurementIndex];
 
       size_t  landmarkIndex = landmarkMessage.landmarkIndex[measurementIndex];
 
@@ -330,21 +332,12 @@ class slam
       Ht(1, 2 + 2 * landmarkIndex + 1) = -dy / d;
       Ht(0, 2 + 2 * landmarkIndex + 2) = dy / sqrt(d);
       Ht(1, 2 + 2 * landmarkIndex + 2) = dx / d;
-      //auto Ht * sigma * Ht.transpose() + R
       zt(0) = landmarkMessage.range[measurementIndex];
       zt(1) = landmarkMessage.bearing[measurementIndex];
 
       auto K = sigma * Ht.transpose() * (Ht * sigma * Ht.transpose() + R).inverse();
       difference = zt - ztBar;
       difference(1) = atan2(sin(difference(1)), cos(difference(1)));
-      //difference(0) = 0.0;
-      //difference(1) = 0.0;
-      // auto temp = K * difference;
-      // cout<<temp;
-      // cout<<"\nsigma\n"<<sigma;
-      // cout<<"\nHt\n"<<Ht;
-      // cout<<Ht(0,1)<<"\t"<<Ht(0,2)<<"\t"<<Ht(0,2 + 2 * landmarkIndex + 1)<<"\t"<<Ht(0, 2 + 2 * landmarkIndex + 2);
-      // cout<<Ht(1,0)<<"\t"<<Ht(1,2)<<"\t"<<Ht(1,2)<<Ht(1,2 + 2 * landmarkIndex + 1)<<"\t"<<Ht(1, 2 + 2 * landmarkIndex + 2);
       state = state + K * difference;
       state(0) = atan2(sin(state(0)), cos(state(0)));
       sigma = (stateCovariance::Identity(2 * landmarkCount + 3, 2 * landmarkCount + 3) - K * Ht) * sigma;
@@ -366,6 +359,11 @@ class slam
     newRightPosition = previousRightPosition;
   }
 
+  /// \brief A function that publishes the filter output estimations
+  /// \param state - Current filter state which includes Robot pose and landmark locations
+  /// \param messageTime - Ros time stamp at which the message is publishes
+  /// \param landmarkCount - Number of landmarks detected
+
   void publishFilterOutput(const stateVector& state, const ros::Time& messageTime, const int& landmarkCount)
   {
     nuslam::FilterOutput filterOuput;
@@ -384,6 +382,10 @@ class slam
     filterOpPublisher.publish(filterOuput);
 
   }
+
+  /// \brief This function publishes the map to odom frame transform
+  /// \param Tmo - The transformation between map and odom frame
+  /// \param messageTime - Ros time stamp at which the measurement was received.
 
   void publishMapOdomTransform(const Transform2D& Tmo, const ros::Time& messageTime)
   {
@@ -408,7 +410,8 @@ class slam
     br.sendTransform(transformStamped);
   }
 
-
+  /// \brief Joint states callback function. This is the function where odometry is calculated
+  /// \param jointMessage - A message containing the joint states of the robot
   void jointStatesCallback(const sensor_msgs::JointState jointMessage)
   {
 
@@ -416,8 +419,6 @@ class slam
     currentTime = jointMessage.header.stamp;
     newLeftPosition = jointMessage.position[0];
     newRightPosition = jointMessage.position[1];
-    //ROS_INFO_STREAM("left position"<<leftDistance);
-    //ROS_INFO_STREAM("right position"<<rightDistance);
 
 
     auto carPose = diffcar.returnPose();
@@ -435,36 +436,17 @@ class slam
     {
     ros::Duration time_duration = currentTime - lastTime;
     double totalTime = time_duration.toSec();
-    //ROS_INFO_STREAM("previousLeftPosition"<<previousLeftPosition);
-    //ROS_INFO_STREAM("previousRightPosition"<<previousRightPosition);
-    //ROS_INFO_STREAM("newLeftPosition"<<newLeftPosition);
-    //ROS_INFO_STREAM("newRightPosition"<<newRightPosition);
-    //ROS_INFO_STREAM("time_duration"<<time_duration);
-
-    //double leftVelocity = calculateWheelVelocities(previousLeftPosition, newLeftPosition, totalTime);
-    //double rightVelocity = calculateWheelVelocities(previousRightPosition, newRightPosition, totalTime);
     double leftVelocity = jointMessage.velocity[0];
     double rightVelocity = jointMessage.velocity[1];
 
-    //ROS_INFO_STREAM("left velocity"<<leftVelocity * totalTime);
-    //ROS_INFO_STREAM("right velocity"<<rightVelocity * totalTime);
     rigid2d::WheelVelocities velocities = {leftVelocity, rightVelocity};
     bodyTwist = diffcar.WheelVelocitiestoTwist(velocities);
-    //ROS_INFO_STREAM("Body Twist z x y"<<bodyTwist.wz<<" "<<bodyTwist.vx<<" "<<bodyTwist.vy);
-    //ROS_INFO_STREAM("time taken:"<<totalTime);
 
     carPose = diffcar.returnPose();
 
-    //ROS_INFO_STREAM("before car pose x"<<carPose.x);
-    //ROS_INFO_STREAM("before car pose y"<<carPose.y);
-    //ROS_INFO_STREAM("before car pose theta"<<carPose.theta);
 
     diffcar.UpdateOdometry(leftVelocity * totalTime, rightVelocity * totalTime);
     carPose = diffcar.returnPose();
-
-    //ROS_INFO_STREAM("after car pose x"<<carPose.x);
-    //ROS_INFO_STREAM("after car pose y"<<carPose.y);
-    //ROS_INFO_STREAM("after car pose theta"<<carPose.theta);
 
     }
   
@@ -519,8 +501,6 @@ class slam
   
     ROS_INFO_STREAM("\n Finished");
     ROS_INFO_STREAM("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    //previousLeftPosition = jointMessage.position[0];
-    //previousRightPosition = jointMessage.position[1];
     newLeftPosition = jointMessage.position[0];
     newRightPosition = jointMessage.position[1];
   
@@ -529,6 +509,9 @@ class slam
 
 };
 
+/// \brief The main function
+/// \param argc - Command line argument indicating the number of arguments
+/// \param argv - Command line argument containing the arguments
 int main(int argc, char** argv)
 {
 

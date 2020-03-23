@@ -1,3 +1,14 @@
+/// \file
+/// \brief  This file implements a class which is used for visualizing the detected landmarks
+///
+/// SUBSCRIBES:
+/// landmarks (nuslam/TurtleMap) - A topic where detected landmarks are published
+///
+/// PUBLISHES:
+/// visualization_marker (visualization_msgs/Marker) - Markers for visualizing the detected
+///                                                    landmarks are published in this topic.
+
+
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <tf2_ros/transform_listener.h>
@@ -19,6 +30,9 @@ class DrawMap
   visualization_msgs::Marker marker;
 
   public:
+  /// \brief constructor
+  /// \param argc - command line argument indicating the number of arguments
+  /// \param argv - command line argument containing all arguments
   DrawMap(int argc, char** argv)
    {
      ros::init(argc, argv, "draw_map");
@@ -32,22 +46,12 @@ class DrawMap
     markerPub = n.advertise<visualization_msgs::Marker>("visualization_marker", 100,true);
    }
 
+  /// \brief callback function for landmark message. This function processes the landmark
+  ///        messages and publishes markers to visualize each landmark
+  /// \param mapMessage - A message containing all detected landmarks.
+
    void landmarkCallback(const nuslam::TurtleMap& mapMessage)
    {
-
-    //tf2_ros::TransformListener tfListener(tfBuffer);
-
-    //geometry_msgs::TransformStamped transformStamped;
-    //Transform2D mapBaseTf;
-    //try
-    //  {
-    //  //transformStamped = tfBuffer.lookupTransform("base_link", "base_scan", mapMessage.header.stamp);
-    //  transformStamped = tfBuffer.lookupTransform("base_link", "base_scan", mapMessage.header.stamp);
-    //  }
-    //catch (tf2::TransformException &ex) 
-    //  {
-    //  ROS_WARN("Could NOT transform map to landmark: %s", ex.what());
-    //  }
 
 
 
@@ -76,8 +80,6 @@ class DrawMap
      marker.ns = "basic_shapes";
      marker.id = i;
 
-     //marker.scale.x = mapMessage.radius[i];
-     //marker.scale.y = mapMessage.radius[i];
      marker.scale.x = 0.04;
      marker.scale.y = 0.04;
      marker.pose.position.x = mapMessage.centerX[i];

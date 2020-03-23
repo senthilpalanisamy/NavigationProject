@@ -1,3 +1,14 @@
+/// \file
+/// \brief This file implements the landmark detection code and data association 
+///
+/// SUBSCRIBES:
+/// scan (sensor_msgs/LaserScan) - Topic where laser scan messages are published
+/// filter_output (nuslam/FilterOutput) - Output from the EKF filter about the robot state and
+///                                       landmark are published in this topic
+/// PUBLISHES:
+/// landmarks (nuslam/TurtleMap) - Detected landmarks, whose data association is known is published
+///                                in this topic
+
 #include <vector>
 #include <iostream>
 #include <functional>
@@ -29,7 +40,7 @@ using rigid2d::Vector2D;
 enum LandmarkStates{ADD, REMOVE, UNKNOWN};
 
 
-
+/// \brief A struct for circle parameters
 struct CircleParameters
 {
   double centerX, centerY, radius, range, bearing;
@@ -43,11 +54,15 @@ struct LandmarkGuess
   size_t miss=0;
   int maxTries=10;
   double minDetectionRate = 0.5;
+  /// \brief Returns the ratio of the measurements that the landmark was visible in
   double calculateDetectionRate()
   {
     return (double) hit / (double) (hit + miss);
   }
 
+  /// \brief Returns if a landmark is reliable enough to be added to a filter state
+  /// \returns An enum indicating if the landmark can be added, removed or the state is 
+  ///          yet to be known
   LandmarkStates isFinalised()
   {
     if(hit+miss < maxTries)
@@ -69,6 +84,10 @@ struct LandmarkGuess
 
 };
 
+/// \brief unwarps angle so that the range is between 0 to 2 PI instead of -PI to PI
+/// \param angle - angle to be unwarped
+/// \returns unwarped angle
+
 double unwarpAngles(double angle)
 {
   if(angle < 0)
@@ -81,6 +100,9 @@ double unwarpAngles(double angle)
   }
 }
 
+
+/// \brief A class for maintaining all landmarks that have been detected but are yet to 
+///        be added to the filter states.
 class LandmarkGuessList
 {
   public:
@@ -88,6 +110,9 @@ class LandmarkGuessList
   double intraDistance=0.2;
   double newLandmarkDist = 0.27;
   size_t i=0;
+
+  /// \brief A function for updating landmark list with new landmarks that were detected
+  /// \param detectedLandmarks - List of landmarks that have been detected in this new measurement
 
   void updateLandmarks(vector<CircleParameters> detectedLandmarks)
   {
@@ -142,6 +167,10 @@ class LandmarkGuessList
 
     }
   }
+  /// \brief Returns the landmarks which can be added to the filter states since they 
+  ///        have been reliably detected across multiple measurements
+  /// \returns Landmarks that can be added to the new filter states. Old unreliable landmarks
+  ///          are also removed.
 
   vector<CircleParameters> returnFinalisedLandmarks()
   {
@@ -175,7 +204,10 @@ class LandmarkGuessList
 
 };
 
-
+/// \brief Calculates the anticlockwise Distance distance between two angles
+/// \param x - angle 1
+/// \param y - angle 2
+/// \returns anticlockwise distance between two angles
 double anticlockwiseDistance(double x, double y)
 {
   if(y >= x)
@@ -189,6 +221,10 @@ double anticlockwiseDistance(double x, double y)
 
 }
 
+/// \brief Calculates the clockwise Distance distance between two angles
+/// \param x - angle 1
+/// \param y - angle 2
+/// \returns anticlockwise distance between two angles
 
 double clockwiseDistance(double x, double y)
 {
@@ -218,6 +254,9 @@ double clockwiseDistance(double x, double y)
 
 
    public:
+   /// \brief constructor
+   /// \param argc - command line argument indicating number of arguments
+   /// \param argv - command line argument indicating the arguments
    LandmarkDetection(int argc, char** argv)
    {
      ros::init(argc, argv, "landmark_detection");
@@ -236,6 +275,10 @@ double clockwiseDistance(double x, double y)
 
    }
 
+   /// \brief A callback function for filter_output topic. This function loads the new 
+   ///        state of the finalised landmarks from the topic.
+   /// \param filterOutput - A message containing filter output state.
+
    void filterOutputCallback(const nuslam::FilterOutput filterOutput)
    {
      robotPose = filterOutput.robotPose;
@@ -247,7 +290,9 @@ double clockwiseDistance(double x, double y)
      }
    }
 
-
+   /// \brief A lasercallback function. This function processes the laser message, detects
+   ///        new landmarks, associated measurements corresponding to existing landmarks
+   ///        and publishes the measurements.
 
    void laserCallback(const sensor_msgs::LaserScan& laserMessage)
    {
@@ -333,11 +378,6 @@ double clockwiseDistance(double x, double y)
 
       }
 
-      // for(auto index: indicesTodelete)
-      // {
-      //   clusteredPoints.erase(clusteredPoints.begin() + index);
-      // }
-
       cout<<"finished";
       cout<<"cluster size"<<clusteredPoints.size();
 
@@ -358,18 +398,10 @@ double clockwiseDistance(double x, double y)
         circle.centerY= (double) circleParams[1];
         circle.radius= (double) circleParams[2];
         allCircleParams.push_back(circle);
-        // mapMessage.centerX.push_back((double) circleParams[0]);
-        // mapMessage.centerY.push_back((double) circleParams[1]);
-        // mapMessage.radius.push_back((double) circleParams[2]);
       }
 
 
 
-     // // Circle classification to remove false positives
-
-
-
-      //for(auto cluster: clusteredPoints)
       for(clusterIdx=0; clusterIdx < clusteredPoints.size(); clusterIdx++)
       {
         auto cluster = clusteredPoints[clusterIdx];
@@ -409,16 +441,13 @@ double clockwiseDistance(double x, double y)
           }
 
         }
-        // auto P1Index = std::min_element(angles.begin(),angles.end()) - angles.begin();
         auto P1 = cluster[P1Index];
-        // auto P2Index = std::max_element(angles.begin(),angles.end()) - angles.begin();
         auto P2 = cluster[P2Index];
         endpointIndex.push_back(P1Index);
         endpointIndex.push_back(P2Index);
 
         // for cosine law
         double c = distance(P1, P2);
-        //cluster.erase(remove(cluster.begin(), cluster.end(), endpointIndex), cluster.end());
         std::sort(endpointIndex.begin(), endpointIndex.end());
 
          for (auto idx = endpointIndex.rbegin(); idx != endpointIndex.rend(); ++idx)
@@ -451,13 +480,11 @@ double clockwiseDistance(double x, double y)
       }
 
 
-  //allCircleParams.erase(remove(allCircleParams.begin(), allCircleParams.end(), indicesTodelete), allCircleParams.end());
   for (auto idx = indicesTodelete.rbegin(); idx != indicesTodelete.rend(); ++idx)
   {
      allCircleParams.erase(allCircleParams.begin() + *idx);
   }
 
-  // filter circles based on radius
   indicesTodelete.clear();
   for(i=0; i < allCircleParams.size(); i++)
   {
@@ -493,7 +520,6 @@ double clockwiseDistance(double x, double y)
     finalCircles.centerX = centerW.x;
     finalCircles.centerY = centerW.y;
     finalCircles.range = sqrt(pow(centerW.x - robotPose.x, 2) + pow(centerW.y - robotPose.y, 2));
-    //finalCircles.bearing = atan2(robotPose.y - centerW.y, robotPose.x - centerW.x);
     finalCircles.bearing = atan2(centerW.y - robotPose.y, centerW.x - robotPose.x);
   }
 
@@ -539,22 +565,11 @@ double clockwiseDistance(double x, double y)
     allLandmarksY.push_back(landmark.centerY);
   }
 
-
-
-
-
-
-
-  //for(auto finalCircles:)
-  //size_t i;
-  //
   mapMessage.header.stamp = ros::Time::now();
   for(i=0; i < newMeasurements.size(); i++)
   {
     auto finalCircles = newMeasurements[i];
     size_t idx = newMeasurementIndex[i];
-    //mapMessage.centerX.push_back(finalCircles.centerX);
-    //mapMessage.centerY.push_back(finalCircles.centerY);
     mapMessage.radius.push_back(finalCircles.radius);
     mapMessage.range.push_back(finalCircles.range);
     mapMessage.bearing.push_back(finalCircles.bearing);
@@ -567,12 +582,6 @@ double clockwiseDistance(double x, double y)
     mapMessage.centerY.push_back(allLandmarksY[i]);
   }
   mapMessage.landmarkCount = allLandmarksX.size();
-
-
-
-  // mapMessage.centerX = centerX;
-  // mapMessage.centerY = centerY;
-  // mapMessage.radius = radius;
   landmarkPublisher.publish(mapMessage);
 
 

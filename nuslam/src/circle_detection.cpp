@@ -1,3 +1,8 @@
+/// \file
+/// \brief A file for detecting circle using a regression algorithm. This file is a library file
+///
+
+
 #include "sensor_msgs/LaserScan.h"
 #include "nuslam/circle_detection.hpp"
 #include <ros/ros.h>
@@ -26,12 +31,19 @@ typedef Matrix<double, 4, 4> Matrix4d;
 
 namespace circleDetection
 {
+
+/// \brief A constructor for Poin2d data type
+/// \param x1 - x co-ordinate
+/// \param y1 - y co-ordinate
 Point2d::Point2d(double x1, double y1)
 {
+
   x = x1;
   y = y1;
 }
 
+/// \brief A function that fits circle to the list of points given
+/// \param CirclePoints -  A list containing points for which a circle needs to be fit.
 Vector3d fitCircle(vector<Vector2D> circlePoints)
 {
 
@@ -177,6 +189,11 @@ Vector3d fitCircle(vector<Vector2D> circlePoints)
 
 
 }
+
+/// \brief A function that calculates the least squares error for the estimated circle
+///        fitting parameters
+/// \param observedPoints - All the points for which a circular fit needs to be done
+/// \param circleCoeff - Circle parameters estimated
 
 double calculateError(const vector<Vector2D>& observedPoints, Vector3d circleCoeff)
 {

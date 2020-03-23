@@ -1,5 +1,29 @@
 #ifndef _TURTLEDRIVE_PLUGIN_HH_
 #define _TURTLEDRIVE_PLUGIN_HH_
+/// \file
+/// \brief This file implements a plugin that publishes sensor data message and moves the
+//   the turtlebot robot in gazebo simulation
+///
+/// PARAMETERS:
+/// left_wheel_joint  (string):   Name of the left wheel joint
+/// right_wheel_joint (string): Name of the right wheel joint
+/// sensor_frequency  (double): Rate which sensor data needs to be published
+/// sensor_topic      (string): Topic to publish the sensor data to
+/// encoder_ticks_per_rev (int): Number of encoder ticks per revolution
+/// max_motor_vel     (double): Maximum motor velocity in meters per second
+/// max_motor_power   (double): Maximum power of the motor
+/// max_wheel_command (int): Maximum wheel command for rotating wheels
+/// wheel_radius      (double): Radius of the wheel
+/// wheel_cmd_topic   (string): Topic to publish the wheel commands
+///
+/// PUBLISHES:
+/// sensor_topic - (nuturtlebot/SensorData) - Sensor data about wheel encoders are published
+///                                           in this topic. All the other sensor data are left blank.
+/// SUBSCRIBES:
+/// wheel_cmd_topic - (nuturtlebot/WheelCommands) - Topic from the wheel commands to move the turtlebot
+///                                                 in gazebo simulation are published
+
+
 
 #include <iostream>
 #include <cmath>
@@ -27,13 +51,17 @@ namespace gazebo
     string sensorTopic, wheelCmdTopic;
     nuturtlebot::SensorData wheelData;
     int maxWheelCmd;
-    public: 
-    
+    public:
+    /// \brief - A constructor for initializing the turtledriveplugin
+
     TurtleDrivePlugin (): ModelPlugin ()
       {
         std::cerr<<"Initialised";
         printf("Initialised\n");
       }
+
+    /// \brief - Callback function for wheel commands topic
+    /// \param wheelCmdMessage - A Message containing the wheel commands
 
     void wheelCmdCallback(const nuturtlebot::WheelCommands& wheelCmdMessage)
     {
@@ -42,8 +70,6 @@ namespace gazebo
       double leftVelocity = leftWheelCmd * wheelCmdToVelRatio;
       double rightVelocity = rightWheelCmd * wheelCmdToVelRatio;
 
-      //std::cerr<<"executing call back\n leftvelocity:"<<leftVelocity<<"\nrightvelocity"<<rightVelocity;
-      //std::cerr<<"left wheel:"<<leftJoint<<"   right wheel:"<<rightJoint;
 
       model->GetJoint(leftJoint)->SetParam("fmax", 0, 100.0);
       model->GetJoint(rightJoint)->SetParam("fmax", 0, 100.0);
@@ -53,6 +79,9 @@ namespace gazebo
 
 
     }
+
+    /// \brief - A timer callback function for publishing encoder data
+    /// \param event - Timer callback event
 
     void publishEncoderData(const ros::TimerEvent& event)
     {
@@ -64,12 +93,13 @@ namespace gazebo
       wheelData.left_encoder = leftEncoder;
       wheelData.right_encoder = rightEncoder;
       wheelData.stamp = ros::Time::now();
-      //std::cerr<<"\nright encoder position"<<leftJointPosition<<"  "<<leftEncoder;
-      //std::cerr<<"\nright encoder position"<<rightJointPosition<<"  "<<rightEncoder;
       sensorMessagePublisher.publish(wheelData);
 
     }
 
+    /// \brief - Intialisation function for the plugin
+    /// \param _model - The model for which the plugin is written
+    /// \param _sdf -  The robot decription sdf file
     virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       {
 
