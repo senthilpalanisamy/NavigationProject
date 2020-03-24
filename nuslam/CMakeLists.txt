@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(nuslam)
 set(ROS_BUILD_TYPE Debug)
 
+add_compile_options(-Wall -Wextra -Wno-psabi)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
@@ -132,6 +137,9 @@ add_executable(${PROJECT_NAME}_landmarks src/landmarks.cpp)
 add_executable(${PROJECT_NAME}_draw_map src/draw_map.cpp)
 add_executable(${PROJECT_NAME}_slam src/slam.cpp)
 add_executable(${PROJECT_NAME}_analysis src/analysis.cpp)
+
+
+add_dependencies(${PROJECT_NAME}_analysis  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ###########
 ## Build ##

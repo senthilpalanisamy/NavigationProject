@@ -52,7 +52,7 @@ struct LandmarkGuess
   CircleParameters landmark;
   size_t hit=0;
   size_t miss=0;
-  int maxTries=10;
+  size_t maxTries=10;
   double minDetectionRate = 0.5;
   /// \brief Returns the ratio of the measurements that the landmark was visible in
   double calculateDetectionRate()

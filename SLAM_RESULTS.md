@@ -5,9 +5,9 @@ Pose error odometry
 3. theta - 2.14
 
 Pose error SLAM (controlled setting - known data association)
-1. x - 0.2
-2. y - -0.13
-3. theta - -0.24
+1. x - 0.01
+2. y - -0.02
+3. theta - -0.03
 
 rviz results for slam under controlled settings
 ![slam](./images/controlled_slam.png)

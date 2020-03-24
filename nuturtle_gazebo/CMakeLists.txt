@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.5.4 FATAL_ERROR)
 project(nuturtle_gazebo)
 
+add_compile_options(-Wall -Wextra -Wno-psabi)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
 
 find_package(catkin REQUIRED COMPONENTS rigid2d roscpp gazebo_ros nuturtlebot std_msgs)
 find_package(gazebo REQUIRED)

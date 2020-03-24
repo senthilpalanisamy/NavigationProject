@@ -213,7 +213,7 @@ class slam
     detectedLandmarks = 0;
 
 
-    size_t i=0, j=0;
+    int i=0, j=0;
 
     for(;i<sigma.rows(); i++)
     {
@@ -255,7 +255,7 @@ class slam
 
     if(landmarkMessage.landmarkCount > detectedLandmarks)
     {
-      size_t index;
+      int index;
       for(index=detectedLandmarks; index < landmarkMessage.landmarkCount; index++)
       {
           size_t landmarkPosition = index;
@@ -375,7 +375,7 @@ class slam
     filterOuput.robotPose.x = state(1);
     filterOuput.robotPose.y = state(2);
     filterOuput.robotPose.theta = state(0);
-    size_t i;
+    int i;
     for(i=0; i< landmarkCount; i++)
     {
     filterOuput.landmarkX.push_back(state(2+2*i+1));

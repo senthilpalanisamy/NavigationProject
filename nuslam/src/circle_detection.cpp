@@ -123,8 +123,6 @@ Vector3d fitCircle(vector<Vector2D> circlePoints)
   Hinv(3,3) = -2 * mean_z;
 
   BDCSVD<Matrix4dn> svdCircle( circleMatrix, ComputeFullV | ComputeFullU  );
-  auto u = svdCircle.computeU(); 
-  auto v = svdCircle.computeV();
   auto sigmaValues = svdCircle.singularValues();
   auto V = svdCircle.matrixV();
 
