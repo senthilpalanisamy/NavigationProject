@@ -15,6 +15,12 @@ L.002
 L.003 (Results are not desirable. Algorithm gives near garbage results for unknown data association
 known data association works fine)
 
+# Known issues
+Due to the additions -Wextra -Wno-psabi flags, some standard function definitions
+like service call, timer call back throw errors due to unused arguments. This can be
+fixed by avoiding the Wextra flag. But I chose to keep it within CMakelists since it gave out
+other useful warnings
+
 # Tasks Completed
 A.000
 A.001
