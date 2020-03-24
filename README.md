@@ -12,7 +12,8 @@ S.000
 S.001
 L.001
 L.002
-L.003 (Results are not desirable. Algorithm gives near garbage results)
+L.003 (Results are not desirable. Algorithm gives near garbage results for unknown data association
+known data association works fine)
 
 # Tasks Completed
 A.000
