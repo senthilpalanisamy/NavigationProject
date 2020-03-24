@@ -107,8 +107,8 @@ class LandmarkGuessList
 {
   public:
   vector<LandmarkGuess> landmarkList;
-  double intraDistance=0.2;
-  double newLandmarkDist = 0.27;
+  double intraDistance=0.1;
+  double newLandmarkDist = 0.5;
   size_t i=0;
 
   /// \brief A function for updating landmark list with new landmarks that were detected

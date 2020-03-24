@@ -148,7 +148,7 @@ class slam
      tf::TransformBroadcaster odom_broadcaster;
      currentTime = ros::Time::now();
      lastTime = ros::Time::now();
-     ros::Rate r(100);
+     ros::Rate r(50);
      ros::param::get("/wheel_base", wheelBase);
      ros::param::get("/wheel_radius", wheelRadius);
      nameSpace = ros::this_node::getNamespace();
@@ -251,6 +251,7 @@ class slam
 
   void landmarkCallback(const nuslam::TurtleMap& landmarkMessage)
   {
+    auto startTime = ros::Time::now();
 
     if(landmarkMessage.landmarkCount > detectedLandmarks)
     {
@@ -303,7 +304,7 @@ class slam
         }
 
       sigma = Gt * sigma * Gt.transpose() + Q;
-     }
+     
     size_t measurementIndex =0;
 
     for(;measurementIndex < landmarkMessage.landmarkIndex.size(); measurementIndex++)
@@ -342,6 +343,7 @@ class slam
       state(0) = atan2(sin(state(0)), cos(state(0)));
       sigma = (stateCovariance::Identity(2 * landmarkCount + 3, 2 * landmarkCount + 3) - K * Ht) * sigma;
     }
+    }
 
     Vector2D translation(state(1), state(2));
 
@@ -357,6 +359,8 @@ class slam
 
     newLeftPosition = previousLeftPosition;
     newRightPosition = previousRightPosition;
+    auto endTime = ros::Time::now();
+    ROS_INFO_STREAM("Time for a slam update"<<endTime - startTime);
   }
 
   /// \brief A function that publishes the filter output estimations

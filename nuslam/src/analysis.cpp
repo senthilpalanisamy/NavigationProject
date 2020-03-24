@@ -38,6 +38,7 @@ class Analysis
   public:
     ros::Subscriber modelStateSub;
     ros::Publisher landmarkPublisher;
+    double maxRange;
     /// \brief constructor for the initializing the class
     /// \param argc - command line argument indicating the number of arguments
     /// \param argv - command line arguments
@@ -46,9 +47,11 @@ class Analysis
 
       ros::init(argc, argv, "analysis");
       ros::NodeHandle n;
+      ros::Rate r(1);
 
       modelStateSub = n.subscribe("gazebo/model_states", 1000, &Analysis::modelStateCallback, this);
       landmarkPublisher = n.advertise<nuslam::TurtleMap>("/real/landmarks", 1000);
+      maxRange = 10.0;
     }
 
     /// \brief Callback function for model state message. This function processes model state
@@ -90,9 +93,6 @@ class Analysis
       {
         if(modelStateMsg.name[i].find(objectName) != std::string::npos)
         {
-        mapMessage.landmarkIndex.push_back(count);
-        mapMessage.centerX.push_back(modelStateMsg.pose[i].position.x);
-        mapMessage.centerY.push_back(modelStateMsg.pose[i].position.y);
         double bearing = atan2(modelStateMsg.pose[i].position.y - robotPose.y,
                                modelStateMsg.pose[i].position.x - robotPose.x);
         bearing = bearing - orientation;
@@ -101,10 +101,18 @@ class Analysis
                             pow(robotPose.x - modelStateMsg.pose[i].position.x, 2));
         bearing += r_noise(get_random());
         range += b_noise(get_random());
+        if(range < maxRange)
+        {
+
         mapMessage.range.push_back(range);
         mapMessage.bearing.push_back(bearing);
-
         mapMessage.radius.push_back(0.04);
+        mapMessage.landmarkIndex.push_back(count);
+        }
+
+        mapMessage.centerX.push_back(modelStateMsg.pose[i].position.x);
+        mapMessage.centerY.push_back(modelStateMsg.pose[i].position.y);
+
         count += 1;
         }
       }
